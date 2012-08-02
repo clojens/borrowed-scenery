@@ -1,0 +1,185 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/250/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android
+END
+AddIncident.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/AddIncident.java
+END
+LocationMap.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/LocationMap.java
+END
+BoskoiOverlayItem.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiOverlayItem.java
+END
+BoskoiService.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiService.java
+END
+IncidentsTab.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/IncidentsTab.java
+END
+CategoryList.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/CategoryList.java
+END
+About.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/About.java
+END
+BoskoiApplication.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiApplication.java
+END
+BoskoiReceiver.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiReceiver.java
+END
+ListIncidents.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/ListIncidents.java
+END
+Util.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/250/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/Util.java
+END
+ImageManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/ImageManager.java
+END
+SectionedAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/SectionedAdapter.java
+END
+BoskoiNewsView.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiNewsView.java
+END
+EndlessScrollListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/EndlessScrollListener.java
+END
+CameraView.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/CameraView.java
+END
+SimpleCategoryList.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/SimpleCategoryList.java
+END
+BalloonOverlayView.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BalloonOverlayView.java
+END
+BoskoiItemizedOverlay.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiItemizedOverlay.java
+END
+Eula.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/Eula.java
+END
+LargeImageView.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/LargeImageView.java
+END
+BootReceiver.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BootReceiver.java
+END
+ListIncidentTextView.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/ListIncidentTextView.java
+END
+BoskoiBlog.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/250/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiBlog.java
+END
+ListIncidentAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/ListIncidentAdapter.java
+END
+SplashScreen.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/SplashScreen.java
+END
+IncidentMap.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/IncidentMap.java
+END
+DialogPreference.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/DialogPreference.java
+END
+BoskoiBlogTabGroup.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/249/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/BoskoiBlogTabGroup.java
+END
+ListIncidentText.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/248/branches/Boskoi2.3/BoskoiAndroid/src/org/boskoi/android/ListIncidentText.java
+END
