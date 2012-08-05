@@ -40,7 +40,7 @@
 	<string name="boskoi_list">List</string>
 	<string name="boskoi_report">Report</string>
 
-    <string name="app_name">Boskoi</string>
+    <string name="app_name">Borrowed Scenery</string>
 	<string name="reports">Boskoi</string>
 	
 	<!-- Strings -->
@@ -251,4 +251,6 @@ You should note that the analytics currently can not be turned off. If you do no
 	<string name="blogShareText">Boskoi, Urban Edibles news post: </string>
 	<string name="blogShareTextInteresting">Interesting</string>
 	<string name="shareBtn">Share post</string>
+
+    <string name="google_map_api_key">0TfsDcb5kkmu-cjEBaoTvz9JVCOalpcgYEzK9sg</string>
 </resources>

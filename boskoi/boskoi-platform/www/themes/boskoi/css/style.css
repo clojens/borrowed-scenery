@@ -1,0 +1,312 @@
+/*
+Theme Name: Boskoi
+Description: The Boskoi Ushahidi Theme
+Demo: http://www.Boskoi.org
+Version: 1.0
+Author: Joey van der Bie, Vincent Vijn, Maarten van der Mark and David Kobia
+Author Email: developer@boskoi.org
+*/
+
+/* Fonts */
+@font-face {
+	font-family: Telegrafico;
+	src: local('Telegrafico'), url('../media/telegrafico.ttf') format('truetype');
+}
+
+
+/* header background */
+body#page{
+	background: #FFFFFF;
+}
+
+div#header{
+	background: url('../media/header_photo.jpg') no-repeat left bottom;
+	height:200px;
+	padding-top:20px;
+}
+
+div.language-box {
+	display: none;
+}
+
+div.language-box select {
+	color:#333333;
+}
+
+/* footer */
+div#footer{
+	background-color: rgb(49,50,49);
+	color: #FFFFFF;
+	margin-top: 20px;
+	padding: 5px;
+	line-height:18px;
+	text-align: center;
+}
+
+div#footer a img {
+	margin:0;
+	padding:0;
+	vertical-align:middle;
+}
+
+/* links */
+a, .more {
+    color: #727D3A;
+}
+
+a.more {	
+	display:block;
+}
+
+a:hover{
+    color: #727D3A;
+}
+
+table.table-list tbody tr td a {
+	color:#727D3A;
+	display:block;
+	height:28px;
+}
+
+div#footer a {
+	color: #DDDEDC;
+}
+
+/* forms */
+
+.text, .textarea, .select, .file {
+	color: #333;
+}
+
+
+/* Logo Box */
+div#logo{
+	display:inline;	
+	background: #FFFFFF url('../media/header_logo.png') no-repeat;
+	height:48px;
+	width: 295px;
+	position:absolute;
+	padding:0;
+	margin:0;
+	
+}
+
+div#logo h1, div#logo span {
+	display:none;
+}
+
+/* Main Menu */
+div#mainmenu{
+    background-color: #313231;
+	padding: 0 0 0 5px;
+	font-family:Telegrafico,Geneva,sans-serif;
+	font-size: 17px;
+	font-weight:normal;
+	margin-bottom: 20px;
+}
+
+div#mainmenu li{
+	margin-right:5px;
+}
+
+div#mainmenu a{
+    color: #fff;
+	font-size: 17px;
+	font-weight:normal;
+}
+
+div#mainmenu a:hover{
+	color: #FFF;
+    background-color: #727d3a;
+}
+
+div#mainmenu a.active{
+    color: #fff;
+    background-color: #727d3a;
+	font-weight:normal;
+}
+
+div#main{
+	padding: 0 2px 15px 2px;
+}
+
+/* Submit Button */
+div.submit-incident {
+	display: none;
+}
+
+/* Map filters */
+div.filters {
+	display: none;
+}
+
+/* Category Filter Side Bar */
+div#right {
+	width:140px;
+	float:left;
+}
+
+div.cat-filters {
+	display:none;
+}
+
+#category_switch{
+	margin-left:5px;
+	margin-top:180px;
+	width:128px;
+	position:absolute:
+}
+
+ul.category-filters{
+    background: #FFFFFF;
+    border-top-color: #FFFFFF;
+    border-bottom-color: #FFFFFF;
+	padding: 0;
+}
+
+div.additional-content {
+	background-color: #DDDEDC;
+	margin-bottom: 20px;
+	padding:8px;
+}
+
+ul.category-filters li{
+	margin-bottom:0;
+}
+
+ul.category-filters li a{
+    color: #3F3F3F;
+    border-color: #FFFFFF;
+	font-size: 10px;
+	padding:0;
+	
+}
+
+ul.category-filters li a:hover, ul.category-filters li a.active {
+    color: #FFFFFF;
+    background-color: #727d3a;
+    border-color: #FFFFFF;
+}
+
+.swatch {
+	margin: 2px;
+	height: 15px;
+	width: 15px;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-family:Telegrafico,Geneva,sans-serif;
+	font-weight:normal;
+	color: #333;
+}
+
+h2 {
+	padding:0;
+	font-size: large;
+	margin-bottom:10px;
+}
+
+/* Boskoi sidebar */
+#boskoi-sidebar {
+	float:right;
+	width:240px;
+}
+
+/* Content */
+Div. {
+	/*width: 576px;*/
+	float:left;
+	margin: 0;
+}
+
+div#mainmiddle div#content{
+	width: 576px;
+	float:left;
+}
+
+div#main .withright div#content {
+	margin:0;
+	padding:0;
+}
+
+/* Report form */
+div.report_left div.additional-content {
+	width: 80%;
+}
+
+div.report-description {
+	margin: 0 0 20px 0;
+}
+
+.big-block {
+ padding: 0;
+}
+
+div.report-description div.content, .report-description .orig-report {
+	margin: 0;
+}
+
+div.report-description h3, .report_comment, .contact, div.content-container {
+	background-color:#DDDEDC;
+	color:#333333;
+}
+
+.report-description table tr th {
+	background-color: #F9F8F5;
+}
+
+div.report-description {
+	border-color:#DDDEDC; 
+}
+
+.report_right {
+	float:right;
+}
+
+div.background div#content {
+	width: 100%;
+}
+
+.report_comment, .contact {
+	padding: 10px;
+}
+
+#report_stats th {
+	color:#333;
+}
+
+.reports-box .hover {
+	background-color:  #F9F8F5;
+}
+
+a#btn_suggest:hover {
+	text-decoration: none;
+	color: #FFF;
+	background-color:#727D3A;
+}
+
+.report_optional h3 {
+	color:#333333;
+}
+
+.report_optional , .report-find-location {
+	border-color:#DDDEDC; 
+	padding: 8px;
+}
+
+.long {
+	width:95%;
+}
+
+.more {
+	float:none;
+	text-align:right;
+}
+
+/* ### contact page ### */
+#twitter_update_list {
+	list-style-type: none;
+}
+#twitter_update_list li {
+	padding: 8px 2px;
+}

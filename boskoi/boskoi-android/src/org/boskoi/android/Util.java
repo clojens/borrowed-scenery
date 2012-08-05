@@ -420,7 +420,7 @@ public class Util{
 		String json_string = "";
 		//String message = "";
 		StringBuilder uriBuilder = new StringBuilder( ushahidiUrl );
-		uriBuilder.append("/api");
+		uriBuilder.append("
 
 		try {
 			response = BoskoiHttpClient.GetURL( uriBuilder.toString() );

@@ -116,7 +116,7 @@ public class BoskoiDatabase {
 	private DatabaseHelper mDbHelper;
 	private SQLiteDatabase mDb;
 
-	private static final String DATABASE_NAME = "ushahidi_db";
+	private static final String DATABASE_NAME = "borrowed_scenery";
 
 	private static final String INCIDENTS_TABLE = "incidents";
 	private static final String ADD_INCIDENTS_TABLE = "add_incidents";
