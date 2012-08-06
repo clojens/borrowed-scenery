@@ -469,6 +469,9 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
 	//fetch categories
 	public String[] showCategories() {
 		  Cursor cursor = BoskoiApplication.mDb.fetchAllCategories();
+
+          Log.i("XXXXXXX",""+cursor.getCount());
+
 		  
 		  String categories[] = new String[cursor.getCount()];
 	
@@ -481,6 +484,7 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
 			  
 			  do {
 				  categories[i] = cursor.getString(titleIndex);
+                  Log.i("XXXXXXX",categories[i]);
 				  categoriesTitle.put(String.valueOf(cursor.getInt(idIndex)), 
 						  cursor.getString(titleIndex));
 				  categoriesId.add(String.valueOf(cursor.getInt(idIndex)));
