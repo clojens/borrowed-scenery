@@ -41,10 +41,13 @@ function game(world) {
         t.scale(1,1.2);
         t.translate(-10,-10);
         s.spr.parent_transform=t;
-        s.spr.do_transform=true; // enable larger clipping region
+        s.spr.expand_bb=1; // enable larger clipping region
+        s.spr.do_transform=true;
 
         s.spr.mouse_down(function() {
 
+            var sx=that.avatar.logical_pos.x;
+            var sy=that.avatar.logical_pos.y;
             var px=s.logical_pos.x;
             var py=s.logical_pos.y;
             
@@ -52,8 +55,22 @@ function game(world) {
             //if (py==0) { that.player.tile.y-=2; that.update_tile() }
             //if (px==9) { that.player.tile.x+=2; that.update_tile() }
             //if (py==9) { that.player.tile.y+=2; that.update_tile() }
-            
-            that.avatar.set_logical_pos(that.world,new truffle.vec3(px,py,0));
+
+                  
+            if (sx!=px) {
+                if (sx<px) that.avatar.spr.change_bitmap('images/magician-east.png');
+                else that.avatar.spr.change_bitmap('images/magician-west.png');
+            }
+
+            that.avatar.set_logical_pos(that.world,new truffle.vec3(px,sy,0));
+            that.avatar.on_reached_dest=function() {
+                if (sy!=py) {
+                    if (sy<py) that.avatar.spr.change_bitmap('images/magician-south.png');
+                    else that.avatar.spr.change_bitmap('images/magician-north.png');
+                }
+                that.avatar.set_logical_pos(that.world,new truffle.vec3(px,py,0));
+            };
+
         });
 
         that.cubes.push(s);
@@ -71,7 +88,7 @@ function game(world) {
 
 game.prototype.connect_and_login=function(name) {
     var that=this;
-    this.server=new truffle.server('ws://localhost:8001/borrowed-scenery',
+    this.server=new truffle.server('ws://localhost:8002/borrowed-scenery',
                                    function () {
                                        that.server.call("login",["dave",0,0]);
                                    });
@@ -90,9 +107,9 @@ game.prototype.build=function() {
     this.avatar = new truffle.sprite_entity(
         that.world,
         new truffle.vec3(5,5,1),
-        'images/patabot-wheel-pear.png');
+        'images/magician-south.png');
     this.avatar.needs_update=true;
-    this.avatar.speed=0.1;
+    this.avatar.speed=0.025;
 
     // make the cubes
 }
@@ -149,6 +166,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         //e.spr.depth_offset=-100;
         e.state=entity.state;
         e.id=entity.id;
+//        e.spr.draw_bb=true;
 
         e.spr.mouse_down(function() {
             that.avatar.set_logical_pos(that.world,new truffle.vec3(e.logical_pos.x,

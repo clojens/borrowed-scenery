@@ -21,7 +21,7 @@
    somnium.congomongo.coerce
    somnium.congomongo))
 
-(mongo! :db "oak")
+(mongo! :db "oak-bs")
 
 ;-------------------------------------------------------
 ; thin interface to congomongo to allow us to try other

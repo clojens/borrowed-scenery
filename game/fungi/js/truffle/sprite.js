@@ -37,6 +37,8 @@ truffle.sprite=function(pos, tex, midbot, viz)
     this.ready_to_draw=false;
     this.colour=null;
     this.offset_colour=null;
+    this.draw_bb=false;
+    this.expand_bb=0;
 
     this.change_bitmap(tex);
     this.enable_mouse(false);
@@ -253,7 +255,7 @@ truffle.sprite.prototype.get_last_bbox=function()
     var l=this.last_pos.x-this.centre.x;
     var t=this.last_pos.y-this.centre.y;
     if (this.do_centre_middle_bottom) t=this.last_pos.y-this.height;
-    if (this.do_transform) // cater for rotate
+    if (this.expand_bb>0) // cater for rotate
     {
         var m=Math.max(this.width,this.height);
         var h=m/2;
@@ -270,7 +272,7 @@ truffle.sprite.prototype.get_bbox=function()
     var l=this.pos.x-this.centre.x;
     var t=this.pos.y-this.centre.y;
     if (this.do_centre_middle_bottom) t=this.pos.y-this.height;
-    if (this.do_transform) // cater for rotate
+    if (this.expand_bb>0) // cater for rotate
     {
         var m=Math.max(this.width,this.height);
         var h=m/2;
@@ -397,12 +399,13 @@ truffle.sprite.prototype.draw=function()
         ctx.restore();
     }
 
-// draw bbox
-/*    ctx.strokeStyle = "#00ffff";
-    var bb=this.get_bbox;
-    ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 
-    ctx.stroke();
-*/
+    if (this.draw_bb) {
+        // draw bbox
+        ctx.strokeStyle = "#00ffff";
+        var bb=this.get_bbox();
+        ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 
+        ctx.stroke();
+    }
 
     this.last_pos.x=this.pos.x;
     this.last_pos.y=this.pos.y;
