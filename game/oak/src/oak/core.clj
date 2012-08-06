@@ -54,7 +54,7 @@
 (def fatima-world
      (ref
       (make-world
-       46874
+       46875
        "data/characters/minds/language/agent/en/language-set-1"
        "data/characters/minds/Actions.xml"
        (list))))
@@ -407,7 +407,7 @@
 
 (defn start-sockets []
   (println "starting sockets")
-  (doto (WebServers/createWebServer 8001)
+  (doto (WebServers/createWebServer 8002)
     (.add "/borrowed-scenery"
           (proxy [WebSocketHandler] []
             (onOpen [c] (println "opened" c))
