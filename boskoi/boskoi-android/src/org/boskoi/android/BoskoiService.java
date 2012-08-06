@@ -60,7 +60,7 @@ public class BoskoiService extends Service {
 	public static String incidentsResponse = "";
 	public static String categoriesResponse = "";
 	public static String savePath = "";
-	public static String domain = "http://borrowed-scenery.org/ushahidi";
+	public static String domain = "http://borrowed-scenery.org/boskoi";
 	public static String firstname = "";
 	public static String lastname = "";
 	public static String email = "";
@@ -240,7 +240,7 @@ public class BoskoiService extends Service {
 				PREFS_NAME, 0);
 		savePath = "/data/data/org.boskoi.android/files/";// settings.getString("savePath","/data/data/com.boskoi.android.app/files/");
 		// domain = settings.getString("Domain", "");
-		domain = "http://borrowed-scenery.org/ushahidi";
+		domain = "http://borrowed-scenery.org/boskoi";
 		firstname = settings.getString("Firstname", "");
 		lastname = settings.getString("Lastname", "");
 		lastUpdate = settings.getString("LastUpdate", "");

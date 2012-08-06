@@ -96,7 +96,7 @@
 (defn adv-state
   "the plant state machine, advance state, based on health and season"
   [state health season layer type num-neighbours]
-  (println state num-neighbours)
+  ;(println state num-neighbours)
   (cond
    (= state "planted") "grow-a-ready"
    (= state "grow-b") "grow-b-ready"
