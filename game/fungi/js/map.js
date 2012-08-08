@@ -13,26 +13,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-function map(centre,zoom,tiles_from,tiles_to,fn) {
-    var centre_tile=this.latlon_to_tile(centre[0],centre[1],zoom);
-    // coords in local/global osm space
-    for (x = tiles_from; x<tiles_to; x++) {
-        for (y = tiles_from; y<tiles_to; y++) {     
-            this.load_map_tile_and_split(x,y,
-                                         x+centre_tile[0],
-                                         (2-y)+centre_tile[1],
-                                         zoom,fn);       
-        }
-    }
+function map(centre,zoom) {
+    this.centre=centre;
+    this.zoom=zoom;
+    this.tile_entities=[];
+    this.centre_tile=this.latlon_to_tile(centre.x,centre.y,zoom);
+    this.current_tile=new truffle.vec2(0,0);
+    this.do_create_tile=null;
+    this.do_update_tile=null;
 }
 
 map.prototype.latlon_to_tile=function(lat,lon,zoom) {
-    with(Math){
-        var m=pow(2,zoom);
-        var lat_rad=lat*PI/180;
-        return [floor((lon+180)/360*m),
-                floor((1-Math.log(tan(lat_rad) + 1/cos(lat_rad))/PI)/2*m)];
-    }
+    var m=Math.pow(2,zoom);
+    var lat_rad=lat*Math.PI/180.0;
+    return new truffle.vec2(
+        Math.floor((lon+180)/360.0*m),
+        Math.floor((1-Math.log(
+            Math.tan(lat_rad) + 
+                1/Math.cos(lat_rad))/Math.PI)/2.0*m));
 }
 
 map.prototype.tile_url=function(x,y,zoom) {
@@ -65,23 +63,76 @@ map.prototype.split_image=function(image,nx,ny) {
     return ret;
 }
 
-map.prototype.load_map_tile_and_split=function(lx,ly,x,y,z,fn) {
+map.prototype.find_tile_entity=function(x,y) {
+    for (var i=0; i<this.tile_entities; i++) {
+        if (this.tile_entities[i].x==x &&
+            this.tile_entities[i].y==y)
+            return this.tile_entities[i];
+    }
+    return false;
+}
 
+map.prototype.load_map_tile_and_split=function(lx,ly,x,y,z) {
     var that=this;
     var image=new Image();
     image.crossOrigin = "anonymous";
     image.onload = function(){
-        var sx=4; // number of splits
-        var sy=4;
-        var sub_images=that.split_image(image,sx,sy);
-        var world_offset_x=4; // map tile -> world tile
-        var world_offset_y=3;
-        var world_x=world_offset_x+ly*sx; // base world coord
-        var world_y=world_offset_y+lx*sy;
+        var splits=5; // number of splits
+        // also change game-tile-div in ushahidi.clj
+        var sub_images=that.split_image(image,splits,splits);
+        var world_x=5+ly*splits; // base world coord
+        var world_y=5+lx*splits;
         sub_images.forEach(function(sub_image){
-            fn(world_x,world_y,sub_image);
+            var entity=that.find_tile_entity(sub_image[0],sub_image[1]);
+            if (entity) do_update_tile(world_x,world_y,sub_image,entity);
+            else that.tile_entities.push(
+                {x:sub_image[0],
+                 y:sub_image[1],
+                 entity: that.do_create_tile(world_x,world_y,sub_image)});
         });            
     };
     image.src=this.tile_url(x,y,z);
+    //alert("loading "+this.tile_url(x,y,z));
 }
 
+map.prototype.game_to_map=function(tile_pos) {
+/*    // convert tile_pos to global world pos:
+    var global_game=[tile_pos.x*5,
+                     tile_pos.y*5];
+
+    // get the map tile required
+    var map_tile=[global_game[0]/5,
+                  global_game[1]/5];
+*/
+    return new truffle.vec2(
+        Math.round(this.centre_tile.x+tile_pos.x),
+        Math.round(this.centre_tile.y+tile_pos.y));
+}
+
+map.prototype.update=function(tile_pos) {
+
+//    alert(JSON.stringify());
+
+    var tile=this.game_to_map(tile_pos);
+
+    if (this.current_tile.x!=tile.x ||
+        this.current_tile.y!=tile.y) {
+        this.current_tile=tile;
+
+ /*       this.load_map_tile_and_split(0,0,
+                                     this.current_tile.x,
+                                     this.current_tile.y,
+                                     this.zoom);       
+ */       
+
+        // coords in local/global osm space
+        for (var x = -1; x<=1; x++) {
+            for (var y = -1; y<=1; y++) {
+                this.load_map_tile_and_split(x,y,
+                                             y+this.current_tile.x,
+                                             x+this.current_tile.y,
+                                             this.zoom);       
+            }
+        } 
+    } 
+}

@@ -17,6 +17,7 @@
    java.util.concurrent.Executors
    [org.webbitserver WebServer WebServers WebSocketHandler]
    [org.webbitserver.handler StaticFileHandler])
+  (:require [clj-http.client :as client])
   (:use
    [clojure.data.json :only (read-json json-str)]
    oak.fatima-world
@@ -44,8 +45,8 @@
 ; ****************************************************************
 ; Uncomment the two lines below and run once to create a new world
 ; ****************************************************************
-;(def my-game-world (ref (make-game-world 200 2)))
-;(game-world-db-build! (sym-replace2 (deref my-game-world)))
+(def my-game-world (ref (make-game-world 200 2)))
+(game-world-db-build! (sym-replace2 (deref my-game-world)))
 
 (def my-game-world (ref (make-empty-game-world)))
 ;(game-world-populate-oaks (deref my-game-world) 100 10 0 1)

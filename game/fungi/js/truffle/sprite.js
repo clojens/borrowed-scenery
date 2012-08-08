@@ -258,7 +258,7 @@ truffle.sprite.prototype.get_last_bbox=function()
     if (this.expand_bb>0) // cater for rotate
     {
         var m=Math.max(this.width,this.height);
-        var h=m/2;
+        var h=(m/2)+this.expand_bb;
         return [l-h,t-h,l+m+h,t+m+h]; 
     }
     else
@@ -275,7 +275,7 @@ truffle.sprite.prototype.get_bbox=function()
     if (this.expand_bb>0) // cater for rotate
     {
         var m=Math.max(this.width,this.height);
-        var h=m/2;
+        var h=(m/2)+this.expand_bb;
         return [l-h,t-h,l+m+h,t+m+h]; 
     }
     else
@@ -377,7 +377,7 @@ truffle.sprite.prototype.draw=function()
         ctx.drawImage(this.draw_image,0,0);
 /*        ctx.fillStyle = "#ff0000";
         ctx.beginPath();
-        ctx.arc(0, 0, 10, 0, Math.PI*2, true); 
+        ctx.arc(this.centre.x, this.centre.y, 3, 0, Math.PI*2, true); 
         ctx.closePath();
         ctx.fill();*/
     }
@@ -388,7 +388,7 @@ truffle.sprite.prototype.draw=function()
         ctx.drawImage(this.draw_image,~~(0.5+x),~~(0.5+y));
 /*        ctx.fillStyle = "#00ffff";
         ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI*2, true); 
+        ctx.arc(this.pos.x, this.pos.y, 3, 0, Math.PI*2, true); 
         ctx.closePath();
         ctx.fill();*/
     }
