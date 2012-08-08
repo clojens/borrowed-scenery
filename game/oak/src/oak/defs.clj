@@ -20,7 +20,7 @@
 (def server-tick 1)
 (def tile-size 5)
 (def season-length (* 60 5)) 
-(def plant-tick 2) 
+(def plant-tick 30) 
 (def plant-tick-var 3)
 (def min-health 10)
 (def max-health 90)

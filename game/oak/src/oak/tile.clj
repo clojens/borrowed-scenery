@@ -275,4 +275,14 @@
    ()
    (:entities tile)))
   
-  
+(defn tile-find-ushahidi
+  "search for entity using ushahidi id"
+  [tile id]
+  (reduce
+   (fn [r e]
+     (if (and (not r)
+              (= (:entity-type e) "ushahidi")
+              (= id (:ush-id e)))
+       e r))
+   false
+   (:entities tile)))

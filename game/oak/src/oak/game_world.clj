@@ -28,7 +28,9 @@
    oak.db
    oak.profile
    oak.id-gen
-   oak.avatar)
+   oak.avatar
+   oak.ushahidi-plant
+   oak.ushahidi)
   (:require
    clojure.math.numeric-tower))
 
@@ -169,14 +171,14 @@
                      (make-player 99 "Alan" -1))
       :summons {}
       :rules (load-companion-rules "rules.txt"))
-     (list (make-random-plant
-            (id-gen)
-            (make-vec2 0 0)
-            (make-vec2 2 2))
-           (make-random-plant
-            (id-gen)
-            (make-vec2 0 0)
-            (make-vec2 2 3))))))
+     (repeatedly 1000
+                 (fn []
+                   (make-random-plant
+                    (id-gen)
+                    (make-vec2 (- (rand-int 10) 5)
+                               (- (rand-int 10) 5))
+                    (make-vec2 (rand-int 5)
+                               (rand-int 5))))))))
 
 (defn game-world-find-player-id
   "get the player id from the name (should only be used when logging in)"
@@ -762,6 +764,42 @@
    time
    server-db-items))
 
+(defn game-world-ushahidi-plant-exists [game-world tile-pos ush-id]
+  (let [tile (game-world-get-tile game-world tile-pos)]
+    (if tile
+      (tile-find-ushahidi tile ush-id)
+      false)))
+  
+(defn game-world-update-ushahidi [game-world time delta]
+  (reduce
+   (fn [gw incident]
+     (let [in (:incident incident)
+           p (ushahidi-incident->pos incident)
+           ush-id (:incidentid in)]
+       (if (not (game-world-ushahidi-plant-exists gw (:tile-pos p) ush-id))
+         (do
+           (println "adding boskoi plant!" (:tile-pos p) (:pos p) (:locationlatitude in) (:locationlongitude in))
+           ;;(println in)
+           (game-world-add-entity
+            gw
+            (:tile-pos p)
+            (make-ushahidi-plant
+             ((:id-gen gw))
+             "ushahidi"
+             (:pos p)
+             (rand-nth (list "canopy" "shrub" "rhyzome")) ;; todo, add to boskoi interface
+             ush-id
+             (:incidentdate in)
+             (Float/parseFloat (:locationlatitude in))
+             (Float/parseFloat (:locationlongitude in))
+             (:fract p))
+            time
+            delta))
+         gw)))
+   game-world
+   (ushahidi-get-incidents-since 0)))
+
+
 (defn game-world-update
   "main update"
   [game-world time delta]
@@ -773,14 +811,16 @@
                     log
                     msgs))
             (game-world-cull-empty-tiles
-             (game-world-update-players
-              (game-world-summon-to-ill-plants
-               (game-world-spore
-                (game-world-update-tiles
-                 (game-world-post-logs-to-players
-                  (game-world-clear-old-summons
-                   game-world time delta)
-                  msgs) time delta) time delta) time) time)))))
+             (game-world-update-ushahidi
+              (game-world-update-players
+               (game-world-summon-to-ill-plants
+                (game-world-spore
+                 (game-world-update-tiles
+                  (game-world-post-logs-to-players
+                   (game-world-clear-old-summons
+                    game-world time delta)
+                   msgs) time delta) time delta) time) time)
+              time delta)))))
 
 (defn game-world-find-spirit
   "get the spirit from it's name"
@@ -863,3 +903,4 @@
         :owner "AncientGardener"
         :size (rand-int 500)}))))
   game-world)
+

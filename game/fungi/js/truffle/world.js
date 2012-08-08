@@ -25,12 +25,12 @@ truffle.world.prototype.clear=function() {
     this.canvas_state=new truffle.canvas_state();
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
     this.screen_scale=new truffle.vec2(1,1);
-    this.screen_centre=new truffle.vec2(-200,400);
+    this.screen_centre=new truffle.vec2(-500,400);
     this.screen_offset=new truffle.vec2(this.screen_centre.x,
                                         this.screen_centre.y);
     
     // iso rotation values
-    this.theta = -66*Math.PI/180;
+    this.theta = 66*Math.PI/180;
     this.alpha = 59*Math.PI/180;
 
     this.cos_theta = Math.cos(this.theta);
@@ -196,7 +196,7 @@ truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
 
 truffle.world.prototype.update=function(time) {
     var that=this;
-    this.sort_scene();
+//    this.sort_scene();
 
     this.scene.forEach(function(e) {
         if (e.tile_pos!=null)
@@ -217,7 +217,7 @@ truffle.world.prototype.update=function(time) {
 
     // draw the sprites
     this.sprites.sort(function(a, b) {                       
-        if (a.get_depth()<b.get_depth()) return -1;
+        if (a.get_depth()>b.get_depth()) return -1;
         else return 1;
     });
 

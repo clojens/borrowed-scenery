@@ -18,34 +18,47 @@
 function game(world) {
     this.world=world;
     this.connect_and_login("dave");
-    this.build(world);
     this.entities=[];
-    this.cubes=[];
     this.next_pull_time=0;
     this.player=null;
-
+    //centre=new truffle.vec2(51.05057,3.72729); // becomes 0,0 in world tile space
+    centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
+    zoom=17;
     var that=this;
 
-    this.map=new map([51.05057,3.72729],17,-1,2,function(world_x,world_y,sub_image) {
+    // make the avatar
+    this.avatar = new truffle.sprite_entity(
+        that.world,
+        new truffle.vec3(5,5,0),
+        'images/magician-south.png');
+    this.avatar.needs_update=true;
+    this.avatar.speed=0.025;
+
+    this.map=new map(centre,zoom);
+    this.map.do_create_tile=function(world_x,world_y,sub_image) {
         var s=new truffle.sprite_entity(
             that.world,
-            new truffle.vec3(world_x+(4-sub_image[1]),
-                             world_y+sub_image[0],0),"");
+            new truffle.vec3(world_x+sub_image[0],
+                             world_y+sub_image[1],0),"");
         
+
         s.spr.set_bitmap(sub_image[2]); 
+        s.spr.depth_offset=-1000;
         // crudely set the iso projection
         var t=new truffle.mat23();
-        t.translate(25,30);
-        t.scale(1.35,0.42*1.35);
+        t.translate(-20,60);
+        t.scale(1.65,0.42*1.65);
         t.rotate(31*Math.PI/180);
         t.scale(1,1.2);
         t.translate(-10,-10);
+        t.rotate(270*Math.PI/180);
+
         s.spr.parent_transform=t;
-        s.spr.expand_bb=1; // enable larger clipping region
+        s.spr.expand_bb=20; // enable larger clipping region
         s.spr.do_transform=true;
 
         s.spr.mouse_down(function() {
-
+            
             var sx=that.avatar.logical_pos.x;
             var sy=that.avatar.logical_pos.y;
             var px=s.logical_pos.x;
@@ -56,7 +69,6 @@ function game(world) {
             //if (px==9) { that.player.tile.x+=2; that.update_tile() }
             //if (py==9) { that.player.tile.y+=2; that.update_tile() }
 
-                  
             if (sx!=px) {
                 if (sx<px) that.avatar.spr.change_bitmap('images/magician-east.png');
                 else that.avatar.spr.change_bitmap('images/magician-west.png');
@@ -70,18 +82,13 @@ function game(world) {
                 }
                 that.avatar.set_logical_pos(that.world,new truffle.vec3(px,py,0));
             };
-
         });
-
-        that.cubes.push(s);
-    });
+        return s;        
+    }
+    
+    this.map.do_update_tile=function(world_x,world_y,sub_image,entity) {
         
-/*
-        cubes.forEach(function(cube) {
-        });
-    }); 
-*/
-
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,26 +101,13 @@ game.prototype.connect_and_login=function(name) {
                                    });
     this.server.listen("login", function(player) {
         that.player=player;
+        that.player.tile.x=-1;
+        that.player.tile.y=0;
+        //that.player.pos.x=0;
+        //that.player.pos.y=0;
         that.update_tile()
     });
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-game.prototype.build=function() {
-    var that=this;
-
-    // make the avatar
-    this.avatar = new truffle.sprite_entity(
-        that.world,
-        new truffle.vec3(5,5,1),
-        'images/magician-south.png');
-    this.avatar.needs_update=true;
-    this.avatar.speed=0.025;
-
-    // make the cubes
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -157,16 +151,18 @@ game.prototype.state_to_texture=function(state) {
 
 game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
     var that=this;
+
+//    if (tilepos.x!=this.player.tile.x ||
+//        tilepos.y!=this.player.tile.y) return;
+
     if (entity["entity-type"]=="plant") {
         var e=new truffle.sprite_entity(
             this.world,
-            new truffle.vec3(gamepos[0],gamepos[1],2),
-            //                    'images/pointy-grow-a'
+            new truffle.vec3(gamepos.x,gamepos.y,0),
             this.entity_texture(entity))
-        //e.spr.depth_offset=-100;
         e.state=entity.state;
         e.id=entity.id;
-//        e.spr.draw_bb=true;
+        //e.spr.draw_bb=true;
 
         e.spr.mouse_down(function() {
             that.avatar.set_logical_pos(that.world,new truffle.vec3(e.logical_pos.x,
@@ -180,23 +176,42 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             };
         });
 
-        e.needs_update=true;
-        e.update_freq=Math.floor(10+Math.random()*5);
+/*        e.needs_update=true;
+        e.update_freq=Math.floor(40+Math.random()*15);
         e.every_frame=function() {
             if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
                 e.state=="grow-c-ready" || e.state=="spore-ready")
                 e.spr.set_rotate((Math.random()-0.5)*0.05);
-        };
+        };*/
         
         this.entities.push(e);
+    }
+    else if (entity["entity-type"]=="ushahidi") {
+        var e=new truffle.sprite_entity(
+            this.world,
+            new truffle.vec3(gamepos.x,gamepos.y,0),
+            "images/boskoi-"+entity.layer+".png")
+        e.id=entity.id;
+//        e.spr.draw_bb=true;
+        this.entities.push(e);
+
+        var vq=this.map.latlon_to_tile(entity.lat,entity.lng,17);
+        var v=new truffle.vec2(this.map.centre_tile.x-vq.x,
+                               this.map.centre_tile.y-vq.y)
+//       alert(JSON.stringify(vq));
+//"x":66893,"y":43852
+
+
     }
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 
-game.prototype.update_tile=function(tile_x, tile_y) {
+game.prototype.update_tile=function() {
     if (!this.player) return;
+
+    this.map.update(this.player.tile);
 
     var that=this;
     this.server.call("pull",[this.player.id,
@@ -205,12 +220,15 @@ game.prototype.update_tile=function(tile_x, tile_y) {
 
 
     this.server.listen("pull", function(data) {
+        //alert(data.tiles.length);
         data.tiles.forEach(function(tile) {
             var tilepos=tile.pos;
             tile.entities.forEach(function(entity) {
-                var gamepos=that.server_to_client_coords(0,0,
-                                                         tilepos.x,tilepos.y,
-                                                         entity.pos.x,entity.pos.y);
+                var gamepos=that.server_to_client_coords(
+                    that.player.tile.x,
+                    that.player.tile.y,
+                    tilepos.x,tilepos.y,
+                    entity.pos.x,entity.pos.y);
                 
                 var existing=that.find_entity(entity.id);
                 if (existing) that.update_entity(existing,entity);
@@ -223,9 +241,8 @@ game.prototype.update_tile=function(tile_x, tile_y) {
 /////////////////////////////////////////////////////////////////////////////
 
 game.prototype.server_to_client_coords=function(wtx,wty,tx,ty,px,py) {
-    return [((tx-wtx)+1)*5+px,
-            ((ty-wty)+1)*5+py];
-    
+    return new truffle.vec2(((tx-wtx)+1)*5+px,
+                            ((ty-wty)+1)*5+py);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -234,7 +251,7 @@ game.prototype.update=function() {
     var time=(new Date).getTime();
     if (this.next_pull_time<time)
     {
-        this.update_tile(0,0);
+        this.update_tile();
         this.next_pull_time=time+1000;
     }
 }
