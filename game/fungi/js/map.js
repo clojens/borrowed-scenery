@@ -21,6 +21,8 @@ function map(centre,zoom) {
     this.current_tile=new truffle.vec2(0,0);
     this.do_create_tile=null;
     this.do_update_tile=null;
+    this.load_count=0;
+    this.loaded_count=0;
 }
 
 map.prototype.latlon_to_tile=function(lat,lon,zoom) {
@@ -64,7 +66,7 @@ map.prototype.split_image=function(image,nx,ny) {
 }
 
 map.prototype.find_tile_entity=function(x,y) {
-    for (var i=0; i<this.tile_entities; i++) {
+    for (var i=0; i<this.tile_entities.length; i++) {
         if (this.tile_entities[i].x==x &&
             this.tile_entities[i].y==y)
             return this.tile_entities[i];
@@ -74,6 +76,7 @@ map.prototype.find_tile_entity=function(x,y) {
 
 map.prototype.load_map_tile_and_split=function(lx,ly,x,y,z) {
     var that=this;
+    this.load_count++;
     var image=new Image();
     image.crossOrigin = "anonymous";
     image.onload = function(){
@@ -83,13 +86,20 @@ map.prototype.load_map_tile_and_split=function(lx,ly,x,y,z) {
         var world_x=5+ly*splits; // base world coord
         var world_y=5+lx*splits;
         sub_images.forEach(function(sub_image){
-            var entity=that.find_tile_entity(sub_image[0],sub_image[1]);
-            if (entity) do_update_tile(world_x,world_y,sub_image,entity);
+            var entity=that.find_tile_entity(world_x+sub_image[0],
+                                             world_y+sub_image[1]);
+            if (entity) {
+                that.do_update_tile(world_x,world_y,sub_image,entity.entity);
+            }
             else that.tile_entities.push(
-                {x:sub_image[0],
-                 y:sub_image[1],
+                {x:world_x+sub_image[0],
+                 y:world_y+sub_image[1],
                  entity: that.do_create_tile(world_x,world_y,sub_image)});
-        });            
+        });
+        that.loaded_count++;
+        if (that.loaded_count==that.load_count) {
+            that.on_load_end();
+        }
     };
     image.src=this.tile_url(x,y,z);
     //alert("loading "+this.tile_url(x,y,z));
@@ -109,21 +119,16 @@ map.prototype.game_to_map=function(tile_pos) {
         Math.round(this.centre_tile.y+tile_pos.y));
 }
 
-map.prototype.update=function(tile_pos) {
-
-//    alert(JSON.stringify());
-
+map.prototype.update=function(tile_pos,on_load_start,on_load_end) {
     var tile=this.game_to_map(tile_pos);
-
     if (this.current_tile.x!=tile.x ||
         this.current_tile.y!=tile.y) {
         this.current_tile=tile;
 
- /*       this.load_map_tile_and_split(0,0,
-                                     this.current_tile.x,
-                                     this.current_tile.y,
-                                     this.zoom);       
- */       
+        on_load_start();
+        this.loaded_count=0;
+        this.load_count=0;
+        this.on_load_end=on_load_end;
 
         // coords in local/global osm space
         for (var x = -1; x<=1; x++) {

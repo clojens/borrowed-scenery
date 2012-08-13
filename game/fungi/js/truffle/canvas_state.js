@@ -13,14 +13,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-truffle.canvas_state=function() 
-{
+truffle.canvas_state=function() {
     this.mouse_changed=false;
     this.mouse_down=false;
     this.mouse_x=0;
     this.mouse_y=0;
     this.canvas=document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');         
+
+    this.world_x=0;
+    this.world_y=0;
+    this.world_desired_x=0;
+    this.world_desired_y=0;
+    this.world_offset_x=-500;
+    this.world_offset_y=400;
 
     var _this=this;
 
@@ -39,32 +45,43 @@ truffle.canvas_state=function()
     });
 }
 
-truffle.canvas_state.prototype.begin_scene=function()
-{
+truffle.canvas_state.prototype.resize=function(w,h) {
+    this.world_offset_x=w/2;
+    this.world_offset_y=h/2;
+    this.canvas.width=w;
+    this.canvas.height=h;
+}
+
+truffle.canvas_state.prototype.clear_screen=function() {
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+}
+
+truffle.canvas_state.prototype.begin_scene=function() {
     //this.Ctx.clearRect(0,0,720,576);
     this.ctx.save();
     this.ctx.fillStyle = "#000000";
     this.ctx.strokeStyle = "#000000";  
+    this.ctx.translate(this.world_x+this.world_offset_x,
+                       this.world_y+this.world_offset_y);
 }
 
-truffle.canvas_state.prototype.end_scene=function()
-{
+truffle.canvas_state.prototype.end_scene=function() {
     this.ctx.restore();
+    this.update_world_pos();
 }
 
-truffle.canvas_state.prototype.clear_rects=function(bboxes)
-{
+truffle.canvas_state.prototype.clear_rects=function(bboxes) {
     this.ctx.fillStyle = "#ffffff";
     var that=this;
     bboxes.forEach(function(box) {
-        that.ctx.fillRect(~~(box[0]+0.5),~~(box[1]+0.5),
-                          ~~(0.5+(box[2]-box[0])),
-                          ~~(0.5+(box[3]-box[1])));
+        that.ctx.fillRect(~~(box[0]+1.5),~~(box[1]+1.5),
+                          ~~((box[2]-box[0])-2),
+                          ~~((box[3]-box[1])-2)); // todo find out why odd rounding needed
     });
 }
 
-truffle.canvas_state.prototype.set_clip=function(bboxes)
-{
+truffle.canvas_state.prototype.set_clip=function(bboxes) {
     this.ctx.save();
 
     // Set the clipping area
@@ -78,22 +95,105 @@ truffle.canvas_state.prototype.set_clip=function(bboxes)
     this.ctx.clip();
 }
 
-truffle.canvas_state.prototype.unclip=function()
-{
+truffle.canvas_state.prototype.unclip=function() {
     this.ctx.restore();
 }
 
-truffle.canvas_state.prototype.update=function()
-{
+truffle.canvas_state.prototype.update=function() {
     this.mouse_changed=false;
+}
+
+// todo: merge with below
+truffle.canvas_state.prototype.snap_world_to=function(x,y) {
+    var diff_x=this.world_x+x;
+    var diff_y=this.world_y+y;
+
+    if (diff_x>0) diff_x=-diff_x;
+    else diff_x=diff_x;
+    if (diff_y>0) diff_y=-diff_y;
+    else diff_y=diff_y;
+        
+    var sx=0;
+    var dx=diff_x;
+    var width=this.ctx.canvas.width-diff_x;
+    if (diff_x<0) {
+        sx=-diff_x;
+        dx=0;
+        width=this.ctx.canvas.width+diff_x;
+    }
+    
+    var sy=0;
+    var dy=diff_y;
+    var height=this.ctx.canvas.height-diff_y;
+    if (diff_y<0) {
+        sy=-diff_y;
+        dy=0;
+        height=this.ctx.canvas.height+diff_y;
+    }
+    
+    this.ctx.drawImage(this.ctx.canvas,
+                       ~~(sx),~~(sy),~~(width),~~(height),
+                       ~~(dx),~~(dy),~~(width),~~(height));
+    
+    this.world_x+=diff_x;
+    this.world_y+=diff_y;
+    this.world_desired_x=-this.world_x;
+    this.world_desired_y=-this.world_y;
+}
+
+
+truffle.canvas_state.prototype.move_world_to=function(x,y) {
+    this.world_desired_x=x;
+    this.world_desired_y=y;
+}
+
+// scroll screen
+truffle.canvas_state.prototype.update_world_pos=function() {
+    var diff_x=this.world_x+this.world_desired_x;
+    var diff_y=this.world_y+this.world_desired_y;
+
+    var speed=3;
+
+    if (Math.abs(diff_x)>speed || 
+        Math.abs(diff_y)>speed)
+    {
+        if (diff_x>0) diff_x=-speed;
+        else diff_x=speed;
+        if (diff_y>0) diff_y=-speed;
+        else diff_y=speed;
+        
+        var sx=0;
+        var dx=diff_x;
+        var width=this.ctx.canvas.width-diff_x;
+        if (diff_x<0) {
+            sx=-diff_x;
+            dx=0;
+            width=this.ctx.canvas.width+diff_x;
+        }
+        
+        var sy=0;
+        var dy=diff_y;
+        var height=this.ctx.canvas.height-diff_y;
+        if (diff_y<0) {
+            sy=-diff_y;
+            dy=0;
+            height=this.ctx.canvas.height+diff_y;
+        }
+        
+        this.ctx.drawImage(this.ctx.canvas,
+                           ~~(sx),~~(sy),~~(width),~~(height),
+                           ~~(dx),~~(dy),~~(width),~~(height));
+               
+        this.world_x+=diff_x;
+        this.world_y+=diff_y;
+    }
 }
 
 // Creates an object with x and y defined,
 // set to the mouse position relative to the state's canvas
 // If you wanna be super-correct this can be tricky,
 // we have to worry about padding and borders
-truffle.canvas_state.prototype.update_mouse = function(e) 
-{
+truffle.canvas_state.prototype.update_mouse = function(e) {
     var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
  
     // Compute the total offset
@@ -111,10 +211,13 @@ truffle.canvas_state.prototype.update_mouse = function(e)
     
     this.mouse_x = e.pageX - offsetX;
     this.mouse_y = e.pageY - offsetY;
+
+    this.mouse_x -= (this.world_x+this.world_offset_x);
+    this.mouse_y -= (this.world_y+this.world_offset_y);
+
 }
 
-truffle.canvas_state.prototype.stats=function(num)
-{
+truffle.canvas_state.prototype.stats=function(num) {
     this.ctx.fillStyle="#000000";
     this.ctx.fillRect(10,10,100,10);
 

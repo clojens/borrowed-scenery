@@ -26,9 +26,11 @@ truffle.world.prototype.clear=function() {
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
     this.screen_scale=new truffle.vec2(1,1);
     this.screen_centre=new truffle.vec2(-500,400);
-    this.screen_offset=new truffle.vec2(this.screen_centre.x,
-                                        this.screen_centre.y);
-    
+//    this.screen_offset=new truffle.vec2(this.screen_centre.x,
+//                                        this.screen_centre.y);
+    this.screen_offset=new truffle.vec2(0,0);
+    this.debug_text="hello world\n";
+
     // iso rotation values
     this.theta = 66*Math.PI/180;
     this.alpha = 59*Math.PI/180;
@@ -86,11 +88,7 @@ truffle.world.prototype.add=function(e) {
 
 truffle.world.prototype.remove=function(e) {
     e.destroy(this);
-    var new_scene=[];
-    for (var i=0; i<this.scene.length; i++) {
-        if (this.scene[i]!=e) new_scene.push(e);
-    }
-    this.scene=new_scene;
+    remove(this.scene,e);
 }
 
 truffle.world.prototype.get=function(type, pos) {
@@ -144,7 +142,7 @@ truffle.world.prototype.post_sort_scene=function(depth) {
 
 truffle.world.prototype.sort_scene=function() {        
     this.scene.sort(function(a, b) {                       
-        if (a.depth<b.depth) return -1;
+        if (a.get_depth()<b.get_depth()) return -1;
         else return 1;
     });
     var i=0;
@@ -162,11 +160,7 @@ truffle.world.prototype.add_sprite=function(s) {
 }
 
 truffle.world.prototype.remove_sprite=function(s){
-    var new_sprites=[];
-    this.sprites.forEach(function(sprite) {
-        if (s!=sprite) new_sprites.push(sprite);
-    });
-    this.sprites=new_sprites;
+    remove(this.sprites,s);
 }
 
 truffle.world.prototype.set_child_index=function(sprite,depth) {
@@ -194,9 +188,18 @@ truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
     return draw_list;
 }
 
+truffle.world.prototype.debug=function(txt) {
+    this.debug_text+=txt+"\n";
+
+    var canvas=document.getElementById('canvas')
+    var ctx=canvas.getContext('2d');
+
+    ctx.fillText(this.debug_text, 10, 10, 100);
+}
+
 truffle.world.prototype.update=function(time) {
     var that=this;
-//    this.sort_scene();
+    this.sort_scene();
 
     this.scene.forEach(function(e) {
         if (e.tile_pos!=null)
@@ -250,7 +253,7 @@ truffle.world.prototype.update=function(time) {
             });
         }
     });
-    
+
     this.canvas_state.begin_scene();
     
     draw_list.forEach(function(d) {
@@ -258,19 +261,44 @@ truffle.world.prototype.update=function(time) {
     });
 
     // force the order to be the same
-    this.sprites.forEach(function(s) {
+//    this.sprites.forEach(function(s) {
         draw_list.forEach(function(d) {
-            if (s.get_id()==d.spr.get_id()) {
+        //    if (s.get_id()==d.spr.get_id()) {
                 that.canvas_state.set_clip(d.bbox);
-                d.spr.draw();
+                d.spr.draw(that.canvas_state.ctx);
                 that.canvas_state.unclip();
-            }
+         //   }
         });
-    });
+  //  });
 
 //    this.canvas_state.stats(draw_list.length/this.sprites.length);
     this.canvas_state.end_scene();
     this.update_input();
+}
+
+truffle.world.prototype.redraw=function() {
+    var that=this;
+
+    this.canvas_state.clear_screen();
+
+    // sort the sprites
+    this.sprites.sort(function(a, b) {                       
+        if (a.get_depth()>b.get_depth()) return -1;
+        else return 1;
+    });
+
+    this.canvas_state.begin_scene();
+
+    this.sprites.forEach(function(s) {
+        s.draw_me=true;
+        s.draw(that.canvas_state.ctx);
+    });
+    
+    this.canvas_state.end_scene();
+}
+
+truffle.world.prototype.move_world_to=function(x,y) {
+    this.canvas_state.move_world_to(x,y);
 }
 
 truffle.world.prototype.update_input=function() {

@@ -20,6 +20,7 @@ truffle.entity=function(world,pos) {
     this.dest_pos = world.screen_transform(this.logical_pos);
     this.tile_pos = null;
     this.depth = this.pos.z;
+    this.depth_offset = 0;
     this.speed = 0;
     this.move_time = 0;
     this.update_freq = 0;
@@ -46,6 +47,14 @@ truffle.entity.prototype.set_logical_pos=function(world, pos) {
     this.dest_pos = world.screen_transform(this.logical_pos);
 }
 
+truffle.entity.prototype.set_instant_logical_pos=function(world, pos) {
+    this.move_time = 2;
+    this.logical_pos = pos;
+    this.dest_pos = world.screen_transform(this.logical_pos);
+    this.pos= world.screen_transform(this.logical_pos);
+    this.last_pos = world.screen_transform(this.logical_pos);
+}
+
 truffle.entity.prototype.update=function(frame, world) {
     if (!this.override_pos)
     {
@@ -68,7 +77,7 @@ truffle.entity.prototype.update=function(frame, world) {
             /*if (this.pos.z<this.dest_pos.z) { 
                 this.depth=this.dest_pos.z;
             }*/
-            this.depth = this.pos.z+1000;
+            this.depth = this.pos.z;
         }
     }
     if (this.every_frame) this.every_frame();
@@ -90,4 +99,8 @@ truffle.entity.prototype.on_sort_scene=function(world, order) {
 truffle.entity.prototype.hide=function(s) {
     this.hidden=s;
     if (this.get_root()) this.get_root().hide(s);
+}
+
+truffle.entity.prototype.get_depth=function() {
+    return this.depth+this.depth_offset;
 }

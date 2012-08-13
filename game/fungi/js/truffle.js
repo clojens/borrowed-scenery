@@ -30,14 +30,21 @@ truffle.main.init=function(game_create,game_update) {
 }
 
 truffle.main.loop=function(timestamp) {
-/*    var canvas=document.getElementById('canvas')
+    var canvas=document.getElementById('canvas')
     var ctx=canvas.getContext('2d');
-    ctx.fillStyle = "#00ff00";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-*/
+
     update_fn();
     truffle.main.world.update(truffle.main.time);
     truffle.main.time++;
+
+    if (ctx.canvas.width!=window.innerWidth ||
+        ctx.canvas.height!=window.innerHeight) {
+        truffle.main.world.canvas_state.resize(
+            window.innerWidth,
+            window.innerHeight);
+        truffle.main.world.redraw();
+    }
+
     requestAnimationFrame(truffle.main.loop);
 }
 

@@ -21,6 +21,9 @@ function game(world) {
     this.entities=[];
     this.next_pull_time=0;
     this.player=null;
+    this.tile_change=false;
+    this.loading_spr=null;
+
     //centre=new truffle.vec2(51.05057,3.72729); // becomes 0,0 in world tile space
     centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
     zoom=17;
@@ -34,16 +37,20 @@ function game(world) {
     this.avatar.needs_update=true;
     this.avatar.speed=0.025;
 
+    var camera_pos=world.screen_transform(new truffle.vec3(5,5,1));
+    world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
+
     this.map=new map(centre,zoom);
     this.map.do_create_tile=function(world_x,world_y,sub_image) {
         var s=new truffle.sprite_entity(
             that.world,
             new truffle.vec3(world_x+sub_image[0],
-                             world_y+sub_image[1],0),"");
+                             world_y+sub_image[1],0),
+            "images/empty_map.png");
         
 
         s.spr.set_bitmap(sub_image[2]); 
-        s.spr.depth_offset=-1000;
+        s.depth_offset=100;
         // crudely set the iso projection
         var t=new truffle.mat23();
         t.translate(-20,60);
@@ -63,17 +70,21 @@ function game(world) {
             var sy=that.avatar.logical_pos.y;
             var px=s.logical_pos.x;
             var py=s.logical_pos.y;
-            
-            //if (px==0) { that.player.tile.x-=2; that.update_tile() }
-            //if (py==0) { that.player.tile.y-=2; that.update_tile() }
+            var tcx=0;
+            var tcy=0;
+
             //if (px==9) { that.player.tile.x+=2; that.update_tile() }
             //if (py==9) { that.player.tile.y+=2; that.update_tile() }
 
+            var cam=world.screen_transform(new truffle.vec3(px,py,0));
+            world.move_world_to(cam.x,cam.y);
+            
             if (sx!=px) {
                 if (sx<px) that.avatar.spr.change_bitmap('images/magician-east.png');
                 else that.avatar.spr.change_bitmap('images/magician-west.png');
             }
-
+            
+            that.avatar.speed=0.025;
             that.avatar.set_logical_pos(that.world,new truffle.vec3(px,sy,0));
             that.avatar.on_reached_dest=function() {
                 if (sy!=py) {
@@ -81,13 +92,44 @@ function game(world) {
                     else that.avatar.spr.change_bitmap('images/magician-north.png');
                 }
                 that.avatar.set_logical_pos(that.world,new truffle.vec3(px,py,0));
+                
+                that.avatar.on_reached_dest=function() {
+                    world.redraw();
+                    
+                    if (px>12) { 
+                        that.player.tile.x+=1;
+                        that.tile_change=true;
+                        tcx=-5;
+                    }
+                    if (px<2) { 
+                        that.player.tile.x-=1;
+                        that.tile_change=true;
+                        tcx=5;
+                    }  
+                    if (py>12) { 
+                        that.player.tile.y+=1;
+                        that.tile_change=true;
+                        tcy=-5;
+                    }  
+                    if (py<2) { 
+                        that.player.tile.y-=1;
+                        that.tile_change=true;
+                        tcy=5;
+                    }  
+
+                    if (that.tile_change) {
+                        that.avatar.speed=0;
+                        that.avatar.set_logical_pos(that.world,new truffle.vec3(px+tcx,py+tcy,0));
+                    }
+                    
+                };
             };
         });
         return s;        
     }
     
     this.map.do_update_tile=function(world_x,world_y,sub_image,entity) {
-        
+        entity.spr.set_bitmap(sub_image[2],true); 
     }
 }
 
@@ -103,8 +145,6 @@ game.prototype.connect_and_login=function(name) {
         that.player=player;
         that.player.tile.x=-1;
         that.player.tile.y=0;
-        //that.player.pos.x=0;
-        //that.player.pos.y=0;
         that.update_tile()
     });
 }
@@ -127,14 +167,18 @@ game.prototype.clear_entities=function() {
 }
 
 game.prototype.update_entity=function(entity,from_server) {
-    if (from_server.state!=entity.state)
-    {
-        entity.state=from_server.state;
-        entity.spr.change_bitmap(this.entity_texture(from_server));
+    if (from_server["entity-type"]=="plant") {
+        if (from_server.state!=entity.state) {
+            entity.state=from_server.state;
+            entity.spr.change_bitmap(this.entity_texture(from_server));
+        }
     }
 }
 
 game.prototype.entity_texture=function(entity) {
+    if (entity.type=="knobbly")
+    return "images/knobbly-"+this.state_to_texture(entity.state)+".png";
+    else
     return "images/pointy-"+this.state_to_texture(entity.state)+".png";
 }
 
@@ -187,6 +231,9 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         this.entities.push(e);
     }
     else if (entity["entity-type"]=="ushahidi") {
+
+        log("making boskoi plant at "+gamepos.x+" "+gamepos.y);
+
         var e=new truffle.sprite_entity(
             this.world,
             new truffle.vec3(gamepos.x,gamepos.y,0),
@@ -205,19 +252,37 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
     }
 }
 
+game.prototype.shift_entities=function(x,y) {
+    
+
+}
 
 //////////////////////////////////////////////////////////////////////////
 
 game.prototype.update_tile=function() {
+    var that=this;
     if (!this.player) return;
 
-    this.map.update(this.player.tile);
+    this.map.update(this.player.tile,function() {
+        //that.loading_spr=new truffle.sprite(
+        //    new truffle.vec2(100,100),
+       //     "images/bbot-east.png");
+       // that.world.add_sprite(that.loading_spr);
+        //that.world.redraw();
+    }, function() {
+        //that.world.remove_sprite(that.loading_spr);
+        //that.loading_spr=null;
+        //that.world.redraw();
+    });
 
-    var that=this;
+    if (this.tile_change) {
+        this.clear_entities();
+        this.tile_change=false;
+    }
+
     this.server.call("pull",[this.player.id,
                              this.player.tile.x,
                              this.player.tile.y,0]);
-
 
     this.server.listen("pull", function(data) {
         //alert(data.tiles.length);

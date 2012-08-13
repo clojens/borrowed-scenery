@@ -19,35 +19,39 @@ truffle.vec2=function(x,y) {
 }
 
 truffle.vec2.prototype.add=function(other) {
-	return new vec2(x+other.x,y+other.y);
+	return new truffle.vec2(this.x+other.x,this.y+other.y);
 }
 
 truffle.vec2.prototype.sub=function(other) {
-	return new vec2(x-other.x,y-other.y);
+	return new truffle.vec2(this.x-other.x,this.y-other.y);
 }
 
 truffle.vec2.prototype.div=function(v) {
-	return new vec2(x/v,y/v);
+	return new truffle.vec2(this.x/v,this.y/v);
 }
 
 truffle.vec2.prototype.mul=function(v) {
-	return new vec2(x*v,y*v);
+	return new truffle.vec2(this.x*v,this.y*v);
 }
 
 truffle.vec2.prototype.mag=function() {
-	return Math.sqrt(x*x+y*y);
+	return Math.sqrt(this.x*this.x+this.y*this.y);
 }
-	
+
+truffle.vec2.prototype.normalise=function() {
+    return this.div(this.mag());
+}
+
 truffle.vec2.prototype.lerp=function(other,t) {
-	return new vec2(x*(1-t) + other.x*t,
-					y*(1-t) + other.y*t);
+	return new truffle.vec2(this.x*(1-t) + other.x*t,
+					        this.y*(1-t) + other.y*t);
 }
 
 truffle.vec2.prototype.eq=function(other) {
-	return x==other.x && y==other.y;
+	return this.x==other.x && this.y==other.y;
 }
 
 truffle.vec2.prototype.as_str=function() {
-    return str(x)+", "+str(y);
+    return str(this.x)+", "+str(this.y);
 }
 
