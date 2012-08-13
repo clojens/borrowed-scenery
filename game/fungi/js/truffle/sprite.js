@@ -13,8 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-truffle.sprite=function(pos, tex, midbot, viz) 
-{	
+truffle.sprite=function(pos, tex, midbot, viz) {	
     truffle.drawable.call(this);
     if (midbot==null) midbot=false;
     if (viz==null) viz=true;
@@ -24,7 +23,6 @@ truffle.sprite=function(pos, tex, midbot, viz)
     this.pos=pos;
     this.angle=0;
     this.depth=-1;
-    this.depth_offset=0;
     this.scale = new truffle.vec2(1,1);
     this.draw_me=true;
     this.transform = new truffle.mat23();
@@ -54,126 +52,107 @@ truffle.sprite=function(pos, tex, midbot, viz)
     this.do_transform=false;
 }
 
-truffle.sprite.prototype.get_id=function()
-{
+truffle.sprite.prototype.get_id=function() {
     return this.id;
 }
 
-truffle.sprite.prototype.set_id=function(s)
-{
+truffle.sprite.prototype.set_id=function(s) {
     this.id=s;
 }
 
-truffle.sprite.prototype.hide=function(s)
-{
+truffle.sprite.prototype.hide=function(s) {
     this.draw_me=true;
     this.hidden=s;
 }
 
 truffle.sprite.prototype.get_depth=function() {
-    return this.depth+this.depth_offset;
+    return this.depth;
 }
 
-truffle.sprite.prototype.mouse_down=function(f)
-{
+truffle.sprite.prototype.mouse_down=function(f) {
     this.enable_mouse(true);
     this.mousedown_func=f;
 }
 
-truffle.sprite.prototype.mouse_up=function(f)
-{
+truffle.sprite.prototype.mouse_up=function(f) {
     this.enable_mouse(true);
     this.mouseup_func=f;
 }
 
-truffle.sprite.prototype.mouse_over=function(f)
-{
+truffle.sprite.prototype.mouse_over=function(f) {
     this.enable_mouse(true);
     this.mouseover_func=f;
 }
 
-truffle.sprite.prototype.mouse_out=function(f)
-{
+truffle.sprite.prototype.mouse_out=function(f) {
     this.enable_mouse(true);
     this.mouseout_func=f;
 }
 
-truffle.sprite.prototype.set_depth=function(s)
-{
+truffle.sprite.prototype.set_depth=function(s) {
     this.depth=s;
 }
     
-truffle.sprite.prototype.get_depth=function() 
-{
+truffle.sprite.prototype.get_depth=function() {
     return this.depth;
 }
 
-truffle.sprite.prototype.centre_middle_bottom=function(s)
-{
+truffle.sprite.prototype.centre_middle_bottom=function(s) {
     this.do_centre_middle_bottom=s;
 }
 
-truffle.sprite.prototype.set_size=function(x,y)
-{
+truffle.sprite.prototype.set_size=function(x,y) {
     this.width=x;
     this.height=y;
-    if (this.do_centre_middle_bottom)
-    {
+    if (this.do_centre_middle_bottom) {
         this.centre.x=this.width/2;
         this.centre.y=this.height;            
     }
-    else
-    {
+    else {
         this.centre.x=this.width/2;
         this.centre.y=this.height/2;
     }
 }
 
-truffle.sprite.prototype.enable_mouse=function(s)
-{
+truffle.sprite.prototype.enable_mouse=function(s) {
     this.mouse_enabled=s;
 }
 
-truffle.sprite.prototype.is_mouse_enabled=function()
-{
+truffle.sprite.prototype.is_mouse_enabled=function() {
     return this.mouse_enabled;
 }
 
-truffle.sprite.prototype.set_bitmap=function(b)
-{
+truffle.sprite.prototype.set_bitmap=function(b,recalc_bb) {
     this.image=b;
     this.ready_to_draw=true;
-    this.set_size(this.image.width,this.image.height);
+    if (recalc_bb==undefined) this.set_size(this.image.width,this.image.height);
     this.draw_me=true;
     this.draw_image=b;
 }
 
-truffle.sprite.prototype.change_bitmap=function(t)
-{
+truffle.sprite.prototype.change_bitmap=function(t) {
     if (this.image==null || 
-        t.name!=this.image.src)
-    {
+        t.name!=this.image.src) {
         this.load_from_url(t);
     }
 }
 
-truffle.sprite.prototype.load_from_url=function(url)
-{
+truffle.sprite.prototype.load_from_url=function(url) {
     var c=this;
     this.image=new Image();
-    this.image.onload = function(){
+    this.image.onload = function() {
+        //log("loaded "+c.image.src);
         c.ready_to_draw=true;
         c.set_size(c.image.width,c.image.height);
-        if (c.offset_colour!=null)
-        {
+        if (c.offset_colour!=null) {
             c.add_tint(c.offset_colour);
         }
         c.draw_image = c.image;
         c.draw_me=true;
     };
-//    this.image.onerror = function(e) {
-//        alert("could't load "+url);
-//    }
+    this.image.onerror = function(e) {
+        log("could't load "+url);
+    }
     this.image.src = url;  
 }
 
@@ -182,38 +161,31 @@ truffle.sprite.prototype.set_scale=function(s) { this.scale=s; this.do_transform
 truffle.sprite.prototype.set_rotate=function(angle) { this.angle=angle; this.do_transform=true; this.draw_me=true; }
 truffle.sprite.prototype.get_tx=function() { return this.transform; }
 
-truffle.sprite.prototype.set_colour=function(s) 
-{
+truffle.sprite.prototype.set_colour=function(s) {
     this.colour=s;
 }
 
-truffle.sprite.prototype.set_offset_colour=function(s) 
-{
+truffle.sprite.prototype.set_offset_colour=function(s) {
     this.offset_colour=s;
-    if (this.ready_to_draw)
-    {
+    if (this.ready_to_draw) {
         this.add_tint(s);
     }
 }
 
-truffle.sprite.prototype.get_colour=function() 
-{
+truffle.sprite.prototype.get_colour=function() {
     return this.colour;
 }
 
-truffle.sprite.prototype.get_offset_colour=function() 
-{
+truffle.sprite.prototype.get_offset_colour=function() {
     return this.offset_colour;
 }
 
-truffle.sprite.prototype.transformed_pos=function()
-{
+truffle.sprite.prototype.transformed_pos=function() {
     return this.transform.transform_point(0,0);
 }
 
 // tint the image pixel by pixel
-truffle.sprite.prototype.add_tint=function(col)
-{
+truffle.sprite.prototype.add_tint=function(col) {
     return;
     if (!this.ready_to_draw) return;
 
@@ -235,8 +207,7 @@ truffle.sprite.prototype.add_tint=function(col)
     var to = ctx.getImageData( 0, 0, w, h );
     var to_data = to.data;
     
-    for (var i=0, len=pixels.length; i<len; i+=4) 
-    {
+    for (var i=0, len=pixels.length; i<len; i+=4) {
         to_data[i  ] = pixels[i  ]+col.x;
         to_data[i+1] = pixels[i+1]+col.y;
         to_data[i+2] = pixels[i+2]+col.z;
@@ -250,82 +221,67 @@ truffle.sprite.prototype.add_tint=function(col)
     this.draw_image.src = canvas.toDataURL();
 }
 
-truffle.sprite.prototype.get_last_bbox=function()
-{
+truffle.sprite.prototype.get_last_bbox=function() {
     var l=this.last_pos.x-this.centre.x;
     var t=this.last_pos.y-this.centre.y;
     if (this.do_centre_middle_bottom) t=this.last_pos.y-this.height;
-    if (this.expand_bb>0) // cater for rotate
-    {
+    if (this.expand_bb>0) { // cater for rotate
         var m=Math.max(this.width,this.height);
         var h=(m/2)+this.expand_bb;
         return [l-h,t-h,l+m+h,t+m+h]; 
     }
-    else
-    {
+    else {
         return [l,t,l+this.width,t+this.height]; 
     }
 }
 
-truffle.sprite.prototype.get_bbox=function()
-{
+truffle.sprite.prototype.get_bbox=function() {
     var l=this.pos.x-this.centre.x;
     var t=this.pos.y-this.centre.y;
     if (this.do_centre_middle_bottom) t=this.pos.y-this.height;
-    if (this.expand_bb>0) // cater for rotate
-    {
+    if (this.expand_bb>0) { // cater for rotate 
         var m=Math.max(this.width,this.height);
         var h=(m/2)+this.expand_bb;
         return [l-h,t-h,l+m+h,t+m+h]; 
     }
-    else
-    {
+    else {
         return [l,t,l+this.width,t+this.height]; 
     }
 }
 
-truffle.sprite.prototype.intersect=function(ob)
-{
+truffle.sprite.prototype.intersect=function(ob) {
     var tb=this.get_bbox();
     return !(ob[0] > tb[2] || ob[2] < tb[0] ||
              ob[1] > tb[3] || ob[3] < tb[1]);
 }
 
-truffle.sprite.prototype.update_mouse=function(canvas_state)
-{
+truffle.sprite.prototype.update_mouse=function(canvas_state) {
     // assume check for mouseenabled is done already
     var x=canvas_state.mouse_x+this.centre.x;
     var y=canvas_state.mouse_y+this.centre.y;
 
     // todo - correct for transform
     if (x>this.pos.x && x<this.pos.x+this.width &&
-        y>this.pos.y && y<this.pos.y+this.height)
-    {
-        if (!this.is_mouse_over)
-        {
+        y>this.pos.y && y<this.pos.y+this.height) {
+        if (!this.is_mouse_over) {
             if (this.mouseover_func!=null) this.mouseover_func();
             this.is_mouse_over=true;
             return true;
         }
 
-        if (canvas_state.mouse_changed)
-        {
-            if (canvas_state.mouse_down)
-            {
+        if (canvas_state.mouse_changed) {
+            if (canvas_state.mouse_down) {
                 if (this.mousedown_func!=null) this.mousedown_func();
                 return true;
             }
-            else
-            {
+            else {
                 if (this.mouseup_func!=null) this.mouseup_func();
                 return true;
             }
         }
     }
-    else
-    {
-        if (this.is_mouse_over)
-        {
+    else {
+        if (this.is_mouse_over) {
             if (this.mouseout_func!=null) this.mouseout_func();
             this.is_mouse_over=false;
             return true;
@@ -335,35 +291,29 @@ truffle.sprite.prototype.update_mouse=function(canvas_state)
     return false;
 }
 
-truffle.sprite.prototype.update=function(frame, tx)
-{
+truffle.sprite.prototype.update=function(frame, tx) {
     this.draw_me=true;
     this.parent_transform=tx;
 }
 
-truffle.sprite.prototype.draw=function()
-{
-    if (!this.ready_to_draw || this.hidden) return;
-    this.draw_me=false;
-
-    var ctx=document.getElementById('canvas').getContext('2d');
+truffle.sprite.prototype.draw=function(ctx) {
+    if (!this.ready_to_draw) return;
 
     if (this.parent_transform!=null ||
-        this.do_transform)
-    {
+        this.do_transform) {
         ctx.save();
     }
 
-    if (this.do_transform)
-    {
+    //log("drawing "+this.image.src);
+
+    if (this.do_transform) {
         ctx.translate(this.pos.x,this.pos.y);
         ctx.rotate(this.angle);
         ctx.scale(this.scale.x,this.scale.y);
         ctx.translate(-this.centre.x,-this.centre.y);
     }
 
-    if (this.parent_transform!=null)
-    {
+    if (this.parent_transform!=null) {
         ctx.transform(this.parent_transform.m[0],
                       this.parent_transform.m[1],
                       this.parent_transform.m[2],
@@ -372,8 +322,7 @@ truffle.sprite.prototype.draw=function()
                       this.parent_transform.m[5]);
     }
 
-    if (this.do_transform)
-    {
+    if (this.do_transform) {
         ctx.drawImage(this.draw_image,0,0);
 /*        ctx.fillStyle = "#ff0000";
         ctx.beginPath();
@@ -381,8 +330,7 @@ truffle.sprite.prototype.draw=function()
         ctx.closePath();
         ctx.fill();*/
     }
-    else
-    {
+    else {
         var x=this.pos.x-this.centre.x;
         var y=this.pos.y-this.centre.y;        
         ctx.drawImage(this.draw_image,~~(0.5+x),~~(0.5+y));
@@ -394,8 +342,7 @@ truffle.sprite.prototype.draw=function()
     }
 
     if (this.parent_transform!=null ||
-        this.do_transform)
-    {
+        this.do_transform) {
         ctx.restore();
     }
 
@@ -409,5 +356,7 @@ truffle.sprite.prototype.draw=function()
 
     this.last_pos.x=this.pos.x;
     this.last_pos.y=this.pos.y;
+    
+    this.draw_me=false;
 }
 
