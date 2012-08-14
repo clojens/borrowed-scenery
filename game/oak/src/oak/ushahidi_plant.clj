@@ -20,7 +20,7 @@
    oak.defs
    oak.profile))
 
-(defn make-ushahidi-plant [id name pos layer ush-id date lat lng fract]
+(defn make-ushahidi-plant [id name pos layer ush-id date lat lng fract incident]
   (hash-map
    :version 1
    :entity-type "ushahidi"
@@ -35,4 +35,5 @@
    :lat lat
    :lng lng
    :fract fract
+   :incident incident
    ))

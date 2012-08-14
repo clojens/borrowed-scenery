@@ -171,7 +171,7 @@
                      (make-player 99 "Alan" -1))
       :summons {}
       :rules (load-companion-rules "rules.txt"))
-     (repeatedly 1000
+     (repeatedly 100
                  (fn []
                    (make-random-plant
                     (id-gen)
@@ -779,7 +779,7 @@
        (if (not (game-world-ushahidi-plant-exists gw (:tile-pos p) ush-id))
          (do
            (println "adding boskoi plant!" (:tile-pos p) (:pos p) (:locationlatitude in) (:locationlongitude in))
-           ;;(println in)
+           (println in)
            (game-world-add-entity
             gw
             (:tile-pos p)
@@ -792,7 +792,8 @@
              (:incidentdate in)
              (Float/parseFloat (:locationlatitude in))
              (Float/parseFloat (:locationlongitude in))
-             (:fract p))
+             (:fract p)
+             in)
             time
             delta))
          gw)))

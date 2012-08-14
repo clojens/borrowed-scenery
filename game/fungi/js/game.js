@@ -49,11 +49,12 @@ function game(world) {
             "images/empty_map.png");
         
 
+        //s.spr.draw_bb=true;
         s.spr.set_bitmap(sub_image[2]); 
         s.depth_offset=100;
         // crudely set the iso projection
         var t=new truffle.mat23();
-        t.translate(-20,60);
+        t.translate(40,0);
         t.scale(1.65,0.42*1.65);
         t.rotate(31*Math.PI/180);
         t.scale(1,1.2);
@@ -233,6 +234,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
     else if (entity["entity-type"]=="ushahidi") {
 
         log("making boskoi plant at "+gamepos.x+" "+gamepos.y);
+//        log(JSON.stringify(entity));
 
         var e=new truffle.sprite_entity(
             this.world,
@@ -240,15 +242,16 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             "images/boskoi-"+entity.layer+".png")
         e.id=entity.id;
 //        e.spr.draw_bb=true;
+
+        var t=new truffle.textbox(new truffle.vec2(-100,-200),
+                                  entity.incident.incidentdescription+" "+
+                                  entity.incident.locationname+" "+
+                                  entity.incident.incidentdate,
+                                  300,300,"15pt patafont");
+        t.text_height=25;
+        e.add_child(this.world,t);
+
         this.entities.push(e);
-
-        var vq=this.map.latlon_to_tile(entity.lat,entity.lng,17);
-        var v=new truffle.vec2(this.map.centre_tile.x-vq.x,
-                               this.map.centre_tile.y-vq.y)
-//       alert(JSON.stringify(vq));
-//"x":66893,"y":43852
-
-
     }
 }
 
