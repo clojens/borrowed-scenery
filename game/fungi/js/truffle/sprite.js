@@ -21,26 +21,26 @@ truffle.sprite=function(pos, tex, midbot, viz) {
     this.id=null;
     this.hidden=false;
     this.pos=pos;
-    this.angle=0;
     this.depth=-1;
-    this.scale = new truffle.vec2(1,1);
     this.draw_me=true;
     this.transform = new truffle.mat23();
     this.width=64;
     this.height=112;
     this.centre=new truffle.vec2(0,0);
     this.do_centre_middle_bottom=midbot;
+
     this.image=null;
     this.draw_image=null;
     this.ready_to_draw=false;
     this.colour=null;
     this.offset_colour=null;
+
     this.draw_bb=false;
     this.expand_bb=0;
 
     this.change_bitmap(tex);
-    this.enable_mouse(false);
 
+    this.enable_mouse(false);
     this.is_mouseover=false;
     this.mousedown_func=null;
     this.mouseup_func=null;
@@ -49,7 +49,8 @@ truffle.sprite=function(pos, tex, midbot, viz) {
     
     this.parent_transform=null;
     this.last_pos=new truffle.vec2(this.pos.x,this.pos.y);
-    this.do_transform=false;
+    this.set_pos(this.pos);
+    this.complex_transform=false;
 }
 
 truffle.sprite.prototype.get_id=function() {
@@ -156,9 +157,9 @@ truffle.sprite.prototype.load_from_url=function(url) {
     this.image.src = url;  
 }
 
-truffle.sprite.prototype.set_pos=function(s) { this.pos=s; this.draw_me=true; }
-truffle.sprite.prototype.set_scale=function(s) { this.scale=s; this.do_transform=true; this.draw_me=true; }
-truffle.sprite.prototype.set_rotate=function(angle) { this.angle=angle; this.do_transform=true; this.draw_me=true; }
+truffle.sprite.prototype.set_pos=function(s) { this.transform.m[4]=s.x; this.transform.m[5]=s.y; this.pos=s; this.draw_me=true; }
+truffle.sprite.prototype.set_scale=function(s) { this.transform.scale(s.x,s.y); this.complex_transform=true; this.draw_me=true; }
+truffle.sprite.prototype.set_rotate=function(angle) { this.transform.rotate(angle); this.complex_transform=true; this.draw_me=true; }
 truffle.sprite.prototype.get_tx=function() { return this.transform; }
 
 truffle.sprite.prototype.set_colour=function(s) {
@@ -299,51 +300,35 @@ truffle.sprite.prototype.update=function(frame, tx) {
 truffle.sprite.prototype.draw=function(ctx) {
     if (!this.ready_to_draw) return;
 
-    if (this.parent_transform!=null ||
-        this.do_transform) {
+    // two render paths
+    if (this.complex_transform || this.parent_transform) {
         ctx.save();
-    }
-
-    //log("drawing "+this.image.src);
-
-    if (this.do_transform) {
-        ctx.translate(this.pos.x,this.pos.y);
-        ctx.rotate(this.angle);
-        ctx.scale(this.scale.x,this.scale.y);
-        ctx.translate(-this.centre.x,-this.centre.y);
-    }
-
-    if (this.parent_transform!=null) {
-        ctx.transform(this.parent_transform.m[0],
-                      this.parent_transform.m[1],
-                      this.parent_transform.m[2],
-                      this.parent_transform.m[3],
-                      this.parent_transform.m[4],
-                      this.parent_transform.m[5]);
-    }
-
-    if (this.do_transform) {
-        ctx.drawImage(this.draw_image,0,0);
-/*        ctx.fillStyle = "#ff0000";
-        ctx.beginPath();
-        ctx.arc(this.centre.x, this.centre.y, 3, 0, Math.PI*2, true); 
-        ctx.closePath();
-        ctx.fill();*/
-    }
-    else {
-        var x=this.pos.x-this.centre.x;
-        var y=this.pos.y-this.centre.y;        
-        ctx.drawImage(this.draw_image,~~(0.5+x),~~(0.5+y));
-/*        ctx.fillStyle = "#00ffff";
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, 3, 0, Math.PI*2, true); 
-        ctx.closePath();
-        ctx.fill();*/
-    }
-
-    if (this.parent_transform!=null ||
-        this.do_transform) {
+        ctx.transform(this.transform.m[0],
+                      this.transform.m[1],
+                      this.transform.m[2],
+                      this.transform.m[3],
+                      this.transform.m[4],
+                      this.transform.m[5]);
+        
+        if (this.parent_transform!=null) {
+            ctx.transform(this.parent_transform.m[0],
+                          this.parent_transform.m[1],
+                          this.parent_transform.m[2],
+                          this.parent_transform.m[3],
+                          this.parent_transform.m[4],
+                          this.parent_transform.m[5]);
+        }
+        
+        ctx.drawImage(this.draw_image,
+                      ~~(0.5+(-this.centre.x)),
+                      ~~(0.5+(-this.centre.y)));
         ctx.restore();
+    }
+    else // simple render path
+    {
+        ctx.drawImage(this.draw_image,
+                      ~~(0.5+this.pos.x-this.centre.x),
+                      ~~(0.5+this.pos.y-this.centre.y));
     }
 
     if (this.draw_bb) {
@@ -353,7 +338,7 @@ truffle.sprite.prototype.draw=function(ctx) {
         ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 
         ctx.stroke();
     }
-
+    
     this.last_pos.x=this.pos.x;
     this.last_pos.y=this.pos.y;
     

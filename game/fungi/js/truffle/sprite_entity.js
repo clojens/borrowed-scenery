@@ -17,6 +17,8 @@ truffle.sprite_entity=function(world, pos, t, viz) {
     truffle.entity.call(this,world,pos);
 
     this.spr = new truffle.sprite(new truffle.vec2(this.pos.x,this.pos.y),t,true,viz);
+    this.children=[];
+
     //this.spr.set_depth(this.depth);
     world.add_sprite(this.spr);
     //this.hide(!viz);
@@ -25,20 +27,41 @@ truffle.sprite_entity=function(world, pos, t, viz) {
 truffle.sprite_entity.prototype=
     inherits_from(truffle.entity,truffle.sprite_entity);
 
+truffle.sprite_entity.prototype.add_child=function(world,child) {
+    world.add_sprite(child);
+    child.update(0,this.spr.transform);
+    this.children.push(child);
+}
+
+
 truffle.sprite_entity.prototype.destroy=function(world) {
     truffle.entity.prototype.destroy.call(this,world);
     world.remove_sprite(this.spr);
+    this.children.forEach(function(child) {
+        world.remove_sprite(child);
+    });
 }
 
 truffle.sprite_entity.prototype.update=function(frame, world) {
     truffle.entity.prototype.update.call(this,frame,world);
     this.spr.set_pos(new truffle.vec2(this.pos.x,this.pos.y));
     this.spr.update(frame,null);
+    var that=this;
+    this.children.forEach(function(child) {
+        child.update(frame,that.spr.transform);
+    });
 }
 
 truffle.sprite_entity.prototype.get_root=function() {
     return this.spr;
 }
 
+truffle.sprite_entity.prototype.on_sort_scene=function(world, order) {
+    this.spr.set_depth(order++);
+    this.children.forEach(function(child) {
+        child.set_depth(order++);
+    });
+    return order;
+}
 
 

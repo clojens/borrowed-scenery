@@ -23,6 +23,9 @@ var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAni
 var update_fn;
 
 truffle.main.init=function(game_create,game_update) {
+    var canvas=document.getElementById('canvas')
+    var ctx=canvas.getContext('2d');
+
     truffle.main.world=new truffle.world();
     game_create();
     update_fn=game_update;
