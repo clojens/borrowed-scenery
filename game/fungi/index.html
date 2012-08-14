@@ -6,9 +6,9 @@
   <script type="text/javascript" src="js/truffle/vec2.js"></script>   
   <script type="text/javascript" src="js/truffle/vec3.js"></script>   
   <script type="text/javascript" src="js/truffle/mat23.js"></script>   
+  <script type="text/javascript" src="js/truffle/drawable.js"></script>   
   <script type="text/javascript" src="js/truffle/sprite.js"></script>   
   <script type="text/javascript" src="js/truffle/textbox.js"></script>   
-  <script type="text/javascript" src="js/truffle/drawable.js"></script>   
   <script type="text/javascript" src="js/truffle/entity.js"></script>   
   <script type="text/javascript" src="js/truffle/sprite_entity.js"></script>   
   <script type="text/javascript" src="js/truffle/canvas_state.js"></script>   
@@ -36,11 +36,10 @@
     truffle.main.init(game_create,game_update);
   }
 </script>
-  
+
 <body onload="init()">
-  <center>
-  <h1>borrowed scenery</h1>
-  <canvas id="canvas" width="880" height="460"></canvas>
-  </centre>
+  <center><h1>borrowed scenery</h1></center>
+  <center><canvas id="canvas" width="880" height="460"></canvas></center>
+  <div id="fps"></div>
 </body>
 </html>

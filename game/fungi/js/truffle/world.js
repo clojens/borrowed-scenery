@@ -131,7 +131,7 @@ truffle.world.prototype.set_scale=function(amount) {
 truffle.world.prototype.set_translate=function(amount) {
     this.screen_offset=amount;
     this.scene.forEach(function (e) {
-        e.set_logical_pos(this,e.logical_pos);
+        e.move_to(this,e.logical_pos);
         e.update(0,this);
     });
 }
@@ -305,12 +305,10 @@ truffle.world.prototype.update_input=function() {
     // update input (runs sprite closures)
     var found_sprite=false;
     // reverse order so topmost are checked first
-    for (var n=0; n<this.sprites.length; n++)
-    {
+    for (var n=0; n<this.sprites.length; n++) {
         var i=this.sprites.length-n;
         i--;
-        if (!found_sprite && this.sprites[i].is_mouse_enabled())
-        {
+        if (!found_sprite && this.sprites[i].is_mouse_enabled()) {
             found_sprite=this.sprites[i].update_mouse(this.canvas_state);
         }
     }

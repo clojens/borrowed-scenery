@@ -18,161 +18,16 @@ truffle.textbox=function(pos, text, w, h, font) {
 
     this.font = font;
     this.pos = pos;
-    this.depth = -1;
-    this.draw_me = true;
-    this.transform = new truffle.mat23();
-    this.hide = false;
     this.width = w;
     this.height = h;
-    this.centre = new truffle.vec2(0,0);
-    this.colour = null;
     this.draw_bb = false;
     this.text_height = 20;
-
-    this.enable_mouse(false);
-    this.is_mouseover=false;
-    this.mousedown_func=null;
-    this.mouseup_func=null;
-    this.mouseover_func=null;
-    this.mouseout_func=null;
-    
-    this.parent_transform=null;
     this.last_pos=new truffle.vec2(this.pos.x,this.pos.y);
     this.set_pos(pos);
     this.set_text(text);
-    this.complex_transform=false;
 }
 
-truffle.textbox.prototype.get_id=function() {
-    return this.id;
-}
-
-truffle.textbox.prototype.set_id=function(s) {
-    this.id=s;
-}
-
-truffle.textbox.prototype.hide=function(s) {
-    this.draw_me=true;
-    this.hidden=s;
-}
-
-truffle.textbox.prototype.get_depth=function() {
-    return this.depth;
-}
-
-truffle.textbox.prototype.mouse_down=function(f) {
-    this.enable_mouse(true);
-    this.mousedown_func=f;
-}
-
-truffle.textbox.prototype.mouse_up=function(f) {
-    this.enable_mouse(true);
-    this.mouseup_func=f;
-}
-
-truffle.textbox.prototype.mouse_over=function(f) {
-    this.enable_mouse(true);
-    this.mouseover_func=f;
-}
-
-truffle.textbox.prototype.mouse_out=function(f) {
-    this.enable_mouse(true);
-    this.mouseout_func=f;
-}
-
-truffle.textbox.prototype.set_depth=function(s) {
-    this.depth=s;
-}
-    
-truffle.textbox.prototype.get_depth=function() {
-    return this.depth;
-}
-
-truffle.textbox.prototype.set_size=function(x,y) {
-    this.width=x;
-    this.height=y;
-    this.centre.x=this.width/2;
-    this.centre.y=this.height/2;
-}
-
-truffle.textbox.prototype.enable_mouse=function(s) {
-    this.mouse_enabled=s;
-}
-
-truffle.textbox.prototype.is_mouse_enabled=function() {
-    return this.mouse_enabled;
-}
-
-truffle.textbox.prototype.set_pos=function(s) { this.transform.m[4]=s.x; this.transform.m[5]=s.y; this.pos=s; this.draw_me=true; }
-truffle.textbox.prototype.set_scale=function(s) { this.transform.scale(s.x,s.y); this.complex_transform=true; this.draw_me=true; }
-truffle.textbox.prototype.set_rotate=function(angle) { this.transform.rotate(angle); this.complex_transform=true; this.draw_me=true; }
-truffle.textbox.prototype.get_tx=function() { return this.transform; }
-
-truffle.textbox.prototype.set_colour=function(s) {
-    this.colour=s;
-}
-
-truffle.textbox.prototype.get_colour=function() {
-    return this.colour;
-}
-
-truffle.textbox.prototype.transformed_pos=function() {
-    return this.transform.transform_point(0,0);
-}
-
-truffle.textbox.prototype.get_last_bbox=function() {
-    var l=this.last_pos.x-this.centre.x;
-    var t=this.last_pos.y-this.centre.y;
-    return [l,t,l+this.width,t+this.height]; 
-}
-
-truffle.textbox.prototype.get_bbox=function() {
-    var l=this.pos.x-this.centre.x;
-    var t=this.pos.y-this.centre.y;
-    return [l,t,l+this.width,t+this.height]; 
-}
-
-truffle.textbox.prototype.intersect=function(ob) {
-    var tb=this.get_bbox();
-    return !(ob[0] > tb[2] || ob[2] < tb[0] ||
-             ob[1] > tb[3] || ob[3] < tb[1]);
-}
-
-truffle.textbox.prototype.update_mouse=function(canvas_state) {
-    // assume check for mouseenabled is done already
-    var x=canvas_state.mouse_x+this.centre.x;
-    var y=canvas_state.mouse_y+this.centre.y;
-
-    // todo - correct for transform
-    if (x>this.pos.x && x<this.pos.x+this.width &&
-        y>this.pos.y && y<this.pos.y+this.height) {
-        if (!this.is_mouse_over) {
-            if (this.mouseover_func!=null) this.mouseover_func();
-            this.is_mouse_over=true;
-            return true;
-        }
-
-        if (canvas_state.mouse_changed) {
-            if (canvas_state.mouse_down) {
-                if (this.mousedown_func!=null) this.mousedown_func();
-                return true;
-            }
-            else {
-                if (this.mouseup_func!=null) this.mouseup_func();
-                return true;
-            }
-        }
-    }
-    else {
-        if (this.is_mouse_over) {
-            if (this.mouseout_func!=null) this.mouseout_func();
-            this.is_mouse_over=false;
-            return true;
-        }
-    }
-
-    return false;
-}
+truffle.textbox.prototype=inherits_from(truffle.drawable,truffle.textbox);
 
 truffle.textbox.prototype.update=function(frame, tx) {
     this.draw_me=true;

@@ -20,29 +20,209 @@ truffle.drawable=function()
     this.draw_me=true;
     this.id=-1;
     this.depth=0;
+    this.width=64;
+    this.height=112;
+    this.depth=-1;    
+    this.colour=null;
+    this.expand_bb=0;
+
+    this.pos=new truffle.vec2(0,0);
+    this.centre=new truffle.vec2(0,0);
+    this.transform = new truffle.mat23();
+    this.parent_transform=null;
+    this.complex_transform=false;
+
+    this.is_mouseover=false;
+    this.mousedown_func=null;
+    this.mouseup_func=null;
+    this.mouseover_func=null;
+    this.mouseout_func=null;
+
+    this.enable_mouse(false);
 }
 
-truffle.drawable.set_id=function(s) { this.id=s; }
-truffle.drawable.get_id=function() { return this.id; }
+truffle.drawable.prototype.set_id=function(s) { this.id=s; }
+truffle.drawable.prototype.get_id=function() { return this.id; }
 
-truffle.drawable.intersect=function(bb){
-    return false;
+// transforms and general state //////////////////////////////////////
+
+truffle.drawable.prototype.set_pos=function(s) { 
+    this.transform.m[4]=s.x; 
+    this.transform.m[5]=s.y; 
+    this.pos=s; 
+    this.draw_me=true; 
 }
 
-truffle.drawable.set_depth=function(s) {
+truffle.drawable.prototype.translate=function(s) { 
+    this.transform.translate(s.x,s.y); 
+    this.pos=this.pos.add(s); // probably not true 
+    this.complex_transform=true; 
+    this.draw_me=true; 
+}
+
+truffle.drawable.prototype.scale=function(s) { 
+    this.transform.scale(s.x,s.y); 
+    this.complex_transform=true; 
+    this.draw_me=true; 
+}
+
+truffle.drawable.prototype.rotate=function(angle) { 
+    this.transform.rotate(angle); 
+    this.complex_transform=true; 
+    this.draw_me=true; 
+}
+
+truffle.drawable.prototype.get_tx=function() { 
+    return this.transform; 
+}
+
+truffle.drawable.prototype.set_depth=function(s) {
     this.depth=s;
 }
 
-truffle.drawable.get_depth=function() {
+truffle.drawable.prototype.get_depth=function() {
     return this.depth;
 }
- 
-truffle.drawable.is_mouse_enabled=function() {
-    return false;
+
+truffle.drawable.prototype.get_colour=function() {
+    return this.colour;
 }
 
-truffle.drawable.update_input=function(cs) {}
+truffle.drawable.prototype.set_colour=function(s) {
+    this.colour=s;
+}
 
-truffle.drawable.draw=function(){
+truffle.drawable.prototype.transformed_pos=function() {
+    return this.transform.transform_point(0,0);
+}
+
+truffle.drawable.prototype.hide=function(s) {
+    this.draw_me=true;
+    this.hidden=s;
+}
+
+// bounding boxes ///////////////////////////////////////////////////
+
+truffle.drawable.prototype.set_size=function(x,y) {
+    this.width=x;
+    this.height=y;
+    if (this.do_centre_middle_bottom) {
+        this.centre.x=this.width/2;
+        this.centre.y=this.height;            
+    }
+    else {
+        this.centre.x=this.width/2;
+        this.centre.y=this.height/2;
+    }
+}
+
+truffle.drawable.prototype.centre_middle_bottom=function(s) {
+    this.do_centre_middle_bottom=s;
+}
+
+truffle.drawable.prototype.get_last_bbox=function() {
+    var l=this.last_pos.x-this.centre.x;
+    var t=this.last_pos.y-this.centre.y;
+    if (this.do_centre_middle_bottom) t=this.last_pos.y-this.height;
+    if (this.expand_bb>0) { // cater for rotate
+        var m=Math.max(this.width,this.height);
+        var h=(m/2)+this.expand_bb;
+        return [l-h,t-h,l+m+h,t+m+h]; 
+    }
+    else {
+        return [l,t,l+this.width,t+this.height]; 
+    }
+}
+
+truffle.drawable.prototype.get_bbox=function() {
+    var l=this.pos.x-this.centre.x;
+    var t=this.pos.y-this.centre.y;
+    if (this.do_centre_middle_bottom) t=this.pos.y-this.height;
+    if (this.expand_bb>0) { // cater for rotate 
+        var m=Math.max(this.width,this.height);
+        var h=(m/2)+this.expand_bb;
+        return [l-h,t-h,l+m+h,t+m+h]; 
+    }
+    else {
+        return [l,t,l+this.width,t+this.height]; 
+    }
+}
+
+truffle.drawable.prototype.intersect=function(ob) {
+    var tb=this.get_bbox();
+    return !(ob[0] > tb[2] || ob[2] < tb[0] ||
+             ob[1] > tb[3] || ob[3] < tb[1]);
+}
+
+
+truffle.drawable.prototype.draw=function(){
+}
+
+// mouse events //////////////////////////////////////////////////
+
+truffle.drawable.prototype.enable_mouse=function(s) {
+    this.mouse_enabled=s;
+}
+ 
+truffle.drawable.prototype.is_mouse_enabled=function() {
+    return this.mouse_enabled;
+}
+
+truffle.drawable.prototype.update_input=function(cs) {}
+
+truffle.drawable.prototype.mouse_down=function(f) {
+    this.enable_mouse(true);
+    this.mousedown_func=f;
+}
+
+truffle.drawable.prototype.mouse_up=function(f) {
+    this.enable_mouse(true);
+    this.mouseup_func=f;
+}
+
+truffle.drawable.prototype.mouse_over=function(f) {
+    this.enable_mouse(true);
+    this.mouseover_func=f;
+}
+
+truffle.drawable.prototype.mouse_out=function(f) {
+    this.enable_mouse(true);
+    this.mouseout_func=f;
+}
+
+truffle.drawable.prototype.update_mouse=function(canvas_state) {
+    // assume check for mouseenabled is done already
+    var x=canvas_state.mouse_x+this.centre.x;
+    var y=canvas_state.mouse_y+this.centre.y;
+
+    // todo - correct for transform
+    if (x>this.pos.x && x<this.pos.x+this.width &&
+        y>this.pos.y && y<this.pos.y+this.height) {
+        if (!this.is_mouse_over) {
+            if (this.mouseover_func!=null) this.mouseover_func();
+            this.is_mouse_over=true;
+            return true;
+        }
+
+        if (canvas_state.mouse_changed) {
+            if (canvas_state.mouse_down) {
+                if (this.mousedown_func!=null) this.mousedown_func();
+                return true;
+            }
+            else {
+                if (this.mouseup_func!=null) this.mouseup_func();
+                return true;
+            }
+        }
+    }
+    else {
+        if (this.is_mouse_over) {
+            if (this.mouseout_func!=null) this.mouseout_func();
+            this.is_mouse_over=false;
+            return true;
+        }
+    }
+
+    return false;
 }
 

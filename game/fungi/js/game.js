@@ -86,13 +86,13 @@ function game(world) {
             }
             
             that.avatar.speed=0.025;
-            that.avatar.set_logical_pos(that.world,new truffle.vec3(px,sy,0));
+            that.avatar.move_to(that.world,new truffle.vec3(px,sy,0));
             that.avatar.on_reached_dest=function() {
                 if (sy!=py) {
                     if (sy<py) that.avatar.spr.change_bitmap('images/magician-south.png');
                     else that.avatar.spr.change_bitmap('images/magician-north.png');
                 }
-                that.avatar.set_logical_pos(that.world,new truffle.vec3(px,py,0));
+                that.avatar.move_to(that.world,new truffle.vec3(px,py,0));
                 
                 that.avatar.on_reached_dest=function() {
                     world.redraw();
@@ -120,7 +120,7 @@ function game(world) {
 
                     if (that.tile_change) {
                         that.avatar.speed=0;
-                        that.avatar.set_logical_pos(that.world,new truffle.vec3(px+tcx,py+tcy,0));
+                        that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));
                     }
                     
                 };
@@ -210,7 +210,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         //e.spr.draw_bb=true;
 
         e.spr.mouse_down(function() {
-            that.avatar.set_logical_pos(that.world,new truffle.vec3(e.logical_pos.x,
+            that.avatar.move_to(that.world,new truffle.vec3(e.logical_pos.x,
                                                                     e.logical_pos.y,0));
             that.avatar.on_reached_dest=function(){
                 that.server.call("grow",[tilepos.x,
