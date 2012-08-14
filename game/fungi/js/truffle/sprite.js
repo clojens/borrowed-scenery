@@ -18,110 +18,19 @@ truffle.sprite=function(pos, tex, midbot, viz) {
     if (midbot==null) midbot=false;
     if (viz==null) viz=true;
 
-    this.id=null;
-    this.hidden=false;
     this.pos=pos;
-    this.depth=-1;
-    this.draw_me=true;
-    this.transform = new truffle.mat23();
-    this.width=64;
-    this.height=112;
-    this.centre=new truffle.vec2(0,0);
     this.do_centre_middle_bottom=midbot;
-
     this.image=null;
     this.draw_image=null;
     this.ready_to_draw=false;
-    this.colour=null;
     this.offset_colour=null;
-
     this.draw_bb=false;
-    this.expand_bb=0;
-
-    this.change_bitmap(tex);
-
-    this.enable_mouse(false);
-    this.is_mouseover=false;
-    this.mousedown_func=null;
-    this.mouseup_func=null;
-    this.mouseover_func=null;
-    this.mouseout_func=null;
-    
-    this.parent_transform=null;
+    this.change_bitmap(tex);    
     this.last_pos=new truffle.vec2(this.pos.x,this.pos.y);
     this.set_pos(this.pos);
-    this.complex_transform=false;
 }
 
-truffle.sprite.prototype.get_id=function() {
-    return this.id;
-}
-
-truffle.sprite.prototype.set_id=function(s) {
-    this.id=s;
-}
-
-truffle.sprite.prototype.hide=function(s) {
-    this.draw_me=true;
-    this.hidden=s;
-}
-
-truffle.sprite.prototype.get_depth=function() {
-    return this.depth;
-}
-
-truffle.sprite.prototype.mouse_down=function(f) {
-    this.enable_mouse(true);
-    this.mousedown_func=f;
-}
-
-truffle.sprite.prototype.mouse_up=function(f) {
-    this.enable_mouse(true);
-    this.mouseup_func=f;
-}
-
-truffle.sprite.prototype.mouse_over=function(f) {
-    this.enable_mouse(true);
-    this.mouseover_func=f;
-}
-
-truffle.sprite.prototype.mouse_out=function(f) {
-    this.enable_mouse(true);
-    this.mouseout_func=f;
-}
-
-truffle.sprite.prototype.set_depth=function(s) {
-    this.depth=s;
-}
-    
-truffle.sprite.prototype.get_depth=function() {
-    return this.depth;
-}
-
-truffle.sprite.prototype.centre_middle_bottom=function(s) {
-    this.do_centre_middle_bottom=s;
-}
-
-truffle.sprite.prototype.set_size=function(x,y) {
-    this.width=x;
-    this.height=y;
-    if (this.do_centre_middle_bottom) {
-        this.centre.x=this.width/2;
-        this.centre.y=this.height;            
-    }
-    else {
-        this.centre.x=this.width/2;
-        this.centre.y=this.height/2;
-    }
-}
-
-truffle.sprite.prototype.enable_mouse=function(s) {
-    this.mouse_enabled=s;
-}
-
-truffle.sprite.prototype.is_mouse_enabled=function() {
-    return this.mouse_enabled;
-}
+truffle.sprite.prototype=inherits_from(truffle.drawable,truffle.sprite);
 
 truffle.sprite.prototype.set_bitmap=function(b,recalc_bb) {
     this.image=b;
@@ -157,14 +66,6 @@ truffle.sprite.prototype.load_from_url=function(url) {
     this.image.src = url;  
 }
 
-truffle.sprite.prototype.set_pos=function(s) { this.transform.m[4]=s.x; this.transform.m[5]=s.y; this.pos=s; this.draw_me=true; }
-truffle.sprite.prototype.set_scale=function(s) { this.transform.scale(s.x,s.y); this.complex_transform=true; this.draw_me=true; }
-truffle.sprite.prototype.set_rotate=function(angle) { this.transform.rotate(angle); this.complex_transform=true; this.draw_me=true; }
-truffle.sprite.prototype.get_tx=function() { return this.transform; }
-
-truffle.sprite.prototype.set_colour=function(s) {
-    this.colour=s;
-}
 
 truffle.sprite.prototype.set_offset_colour=function(s) {
     this.offset_colour=s;
@@ -173,16 +74,8 @@ truffle.sprite.prototype.set_offset_colour=function(s) {
     }
 }
 
-truffle.sprite.prototype.get_colour=function() {
-    return this.colour;
-}
-
 truffle.sprite.prototype.get_offset_colour=function() {
     return this.offset_colour;
-}
-
-truffle.sprite.prototype.transformed_pos=function() {
-    return this.transform.transform_point(0,0);
 }
 
 // tint the image pixel by pixel
@@ -220,76 +113,6 @@ truffle.sprite.prototype.add_tint=function(col) {
     // image is _slightly_ faster then canvas for this, so convert
     this.draw_image = new Image();
     this.draw_image.src = canvas.toDataURL();
-}
-
-truffle.sprite.prototype.get_last_bbox=function() {
-    var l=this.last_pos.x-this.centre.x;
-    var t=this.last_pos.y-this.centre.y;
-    if (this.do_centre_middle_bottom) t=this.last_pos.y-this.height;
-    if (this.expand_bb>0) { // cater for rotate
-        var m=Math.max(this.width,this.height);
-        var h=(m/2)+this.expand_bb;
-        return [l-h,t-h,l+m+h,t+m+h]; 
-    }
-    else {
-        return [l,t,l+this.width,t+this.height]; 
-    }
-}
-
-truffle.sprite.prototype.get_bbox=function() {
-    var l=this.pos.x-this.centre.x;
-    var t=this.pos.y-this.centre.y;
-    if (this.do_centre_middle_bottom) t=this.pos.y-this.height;
-    if (this.expand_bb>0) { // cater for rotate 
-        var m=Math.max(this.width,this.height);
-        var h=(m/2)+this.expand_bb;
-        return [l-h,t-h,l+m+h,t+m+h]; 
-    }
-    else {
-        return [l,t,l+this.width,t+this.height]; 
-    }
-}
-
-truffle.sprite.prototype.intersect=function(ob) {
-    var tb=this.get_bbox();
-    return !(ob[0] > tb[2] || ob[2] < tb[0] ||
-             ob[1] > tb[3] || ob[3] < tb[1]);
-}
-
-truffle.sprite.prototype.update_mouse=function(canvas_state) {
-    // assume check for mouseenabled is done already
-    var x=canvas_state.mouse_x+this.centre.x;
-    var y=canvas_state.mouse_y+this.centre.y;
-
-    // todo - correct for transform
-    if (x>this.pos.x && x<this.pos.x+this.width &&
-        y>this.pos.y && y<this.pos.y+this.height) {
-        if (!this.is_mouse_over) {
-            if (this.mouseover_func!=null) this.mouseover_func();
-            this.is_mouse_over=true;
-            return true;
-        }
-
-        if (canvas_state.mouse_changed) {
-            if (canvas_state.mouse_down) {
-                if (this.mousedown_func!=null) this.mousedown_func();
-                return true;
-            }
-            else {
-                if (this.mouseup_func!=null) this.mouseup_func();
-                return true;
-            }
-        }
-    }
-    else {
-        if (this.is_mouse_over) {
-            if (this.mouseout_func!=null) this.mouseout_func();
-            this.is_mouse_over=false;
-            return true;
-        }
-    }
-
-    return false;
 }
 
 truffle.sprite.prototype.update=function(frame, tx) {

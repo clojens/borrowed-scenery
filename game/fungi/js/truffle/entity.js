@@ -40,19 +40,11 @@ truffle.entity.prototype.set_tile_pos=function(s) {
     this.tile_pos=s;
 }
 
-truffle.entity.prototype.set_logical_pos=function(world, pos) {
+truffle.entity.prototype.move_to=function(world, pos) {
     this.last_pos = this.pos;
     this.move_time = 0;
     this.logical_pos = pos;
     this.dest_pos = world.screen_transform(this.logical_pos);
-}
-
-truffle.entity.prototype.set_instant_logical_pos=function(world, pos) {
-    this.move_time = 2;
-    this.logical_pos = pos;
-    this.dest_pos = world.screen_transform(this.logical_pos);
-    this.pos= world.screen_transform(this.logical_pos);
-    this.last_pos = world.screen_transform(this.logical_pos);
 }
 
 truffle.entity.prototype.update=function(frame, world) {

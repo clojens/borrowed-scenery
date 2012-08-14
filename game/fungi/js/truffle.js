@@ -21,10 +21,21 @@ var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAni
     window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
 var update_fn;
+var last_time;
+var frames;
+var total_time;
+var update_time;
+var update_frames;
 
 truffle.main.init=function(game_create,game_update) {
     var canvas=document.getElementById('canvas')
     var ctx=canvas.getContext('2d');
+
+    last_time = (new Date()).getTime();
+    frames = 0;
+    total_time = 0;
+    update_time = 0;
+    update_frames =0;
 
     truffle.main.world=new truffle.world();
     game_create();
@@ -46,6 +57,19 @@ truffle.main.loop=function(timestamp) {
             window.innerWidth,
             window.innerHeight);
         truffle.main.world.redraw();
+    }
+
+    var now = (new Date()).getTime();
+    var delta = now-last_time;
+    last_time = now;
+    total_time+=delta;
+    frames++;
+    update_time+=delta;
+    update_frames++;
+    if(update_time > 1000) {
+        document.getElementById('fps').innerHTML = "fps avg: " + (1000*frames/total_time) + " cur: " + (1000*update_frames/update_time);
+        update_time = 0;
+        update_frames =0;
     }
 
     requestAnimationFrame(truffle.main.loop);
