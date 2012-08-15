@@ -120,22 +120,6 @@ truffle.world.prototype.set_current_tile_pos=function(s) {
     this.current_tile_pos=s;
 }
 
-truffle.world.prototype.set_scale=function(amount) {
-    this.screen_scale=amount;
-    this.scene.forEach(function (e) {
-        e.get_root().set_scale(amount);
-        e.update(0,this);
-    });
-}
-
-truffle.world.prototype.set_translate=function(amount) {
-    this.screen_offset=amount;
-    this.scene.forEach(function (e) {
-        e.move_to(this,e.logical_pos);
-        e.update(0,this);
-    });
-}
-
 // override for things on top
 truffle.world.prototype.post_sort_scene=function(depth) {
 }

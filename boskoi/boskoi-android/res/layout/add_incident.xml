@@ -62,78 +62,6 @@
 			</LinearLayout>-->
 			<!-- Title layout ends. -->		
 			
-
-			<!-- Location layout starts. -->
-			<LinearLayout android:orientation="vertical"
-				android:layout_width="fill_parent" 
-				android:layout_height="wrap_content"
-				android:paddingBottom="15px"  android:focusable="true" android:focusableInTouchMode="true">
-								<TextView	
-					android:id="@+id/incident_loc" 
-					android:layout_marginTop= "10px"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:textStyle="bold"
-					android:textSize="18dp"
-					android:textColor="@drawable/date_color" 
-					android:text="@string/incident_location" 
-					android:paddingBottom="5px"/>	
-		<com.google.android.maps.MapView 
-			android:id="@+id/location_map_inline"
-			android:layout_width="fill_parent"
-			android:layout_height="300px"
-			android:apiKey="@string/google_map_api_key"
-			android:enabled="true"		
-			android:clickable="true"
-			 />
-
-
-	
-				<LinearLayout android:layout_width="fill_parent"
-					android:layout_height="wrap_content" android:paddingBottom="5px"  android:paddingTop="5px" android:orientation="vertical">
-					<Button android:id="@+id/location"
-       				android:layout_width="wrap_content"
-          			android:layout_height="wrap_content"
-          			android:textStyle="bold"
-          			android:text="@string/add_location" 
-          			android:gravity="center" 
-          			android:layout_gravity="center_vertical"
-          			android:visibility="visible" 
-          			 />
-					<EditText android:id="@+id/incident_location"
-						android:layout_marginTop= "10px"
-	  					android:layout_height="100px"
-	  					android:hint="@string/hint_location"
-	  					android:layout_gravity="center_vertical" android:layout_width="fill_parent"/>	
-				
-			</LinearLayout>
-
-			<!-- Location layout ends. -->
-			
-						<!-- category layout starts. -->
-			<LinearLayout android:layout_width="fill_parent" 
-				android:layout_height="wrap_content" android:orientation="vertical">          		
-          		<TextView	android:id="@+id/lbl_category_dec" 
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:textStyle="bold"
-					android:textColor="@drawable/date_color" 
-					android:text="@string/incident_category"
-					android:textSize="18dp"
-					android:paddingTop="10px"
-					android:paddingBottom="5px" />	
-	          	<Button android:id="@+id/add_category"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:textStyle="bold"
-						android:text="@string/incident_add_category" android:gravity="center"/>
-				<TextView android:id="@+id/lbl_category" 
-						android:layout_width="fill_parent"
-						android:textStyle="bold"
-						android:textColor="@drawable/date_color" android:layout_height="fill_parent"/>	
-      		</LinearLayout>	
-			<!-- Categories layout ends.  -->
-			
 			<!-- Description layout starts -->
 			<LinearLayout android:orientation="vertical"
 				android:layout_width="fill_parent" 
@@ -156,30 +84,106 @@
 					android:scrollbars="vertical" />
 			</LinearLayout>
 			<!-- Description layout ends. -->
+
+			<!-- Location layout starts. -->
+			<LinearLayout android:orientation="vertical"
+				android:layout_width="fill_parent" 
+				android:layout_height="wrap_content"
+				android:paddingBottom="15px"  android:focusable="true" android:focusableInTouchMode="true">
+            <!--  <TextView	
+                  android:id="@+id/incident_loc" 
+					android:layout_marginTop= "10px"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:textStyle="bold"
+					android:textSize="18dp"
+					android:textColor="@drawable/date_color" 
+					android:text="@string/incident_location" 
+					android:paddingBottom="5px"/> -->	
+		<com.google.android.maps.MapView 
+			android:id="@+id/location_map_inline"
+			android:layout_width="fill_parent"
+			android:layout_height="300px"
+			android:apiKey="@string/google_map_api_key"
+			android:enabled="true"		
+			android:clickable="true"
+			 />
+
+
+        <!-- button layout -->
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="wrap_content" android:paddingBottom="5px"  
+                      android:paddingTop="5px" 
+                      android:orientation="horizontal">
+          <Button android:id="@+id/location"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textStyle="bold"
+                  android:text="@string/add_location" 
+                  android:gravity="center" 
+                  android:layout_gravity="center_vertical"
+                  android:visibility="visible" 
+                  />
+
+				<Button android:id="@+id/btnPicture" 
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textStyle="bold" 
+					android:text="@string/btn_add_photo" />		
+
+	          	<Button android:id="@+id/add_category"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textStyle="bold"
+						android:text="@string/incident_add_category" android:gravity="center"/>
+
+          <!--<EditText android:id="@+id/incident_location"
+              android:layout_marginTop= "10px"
+              android:layout_height="100px"
+              android:hint="@string/hint_location"
+              android:layout_gravity="center_vertical" android:layout_width="fill_parent"/>	-->
+          
+        </LinearLayout>
+
+			<!-- Location layout ends. -->
 			
+						<!-- category layout starts. -->
+			<LinearLayout android:layout_width="fill_parent" 
+				android:layout_height="wrap_content" android:orientation="vertical">          		
+          		<!-- <TextView	android:id="@+id/lbl_category_dec" 
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:textStyle="bold"
+					android:textColor="@drawable/date_color" 
+					android:text="@string/incident_category"
+					android:textSize="18dp"
+					android:paddingTop="10px"
+					android:paddingBottom="5px" />	-->
+                <TextView android:id="@+id/lbl_category" 
+						android:layout_width="fill_parent"
+						android:textStyle="bold"
+						android:textColor="@drawable/date_color" android:layout_height="fill_parent"/>	
+      		</LinearLayout>	
+			<!-- Categories layout ends.  -->
+						
 			
 			<!-- Photo layout starts. -->
 			<LinearLayout android:orientation="vertical"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content">
-			<TextView	android:id="@+id/lbl_incidents_photo" 
+<!--			<TextView	android:id="@+id/lbl_incidents_photo" 
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:textStyle="bold"
 					android:textSize="18dp"
 					android:textColor="@drawable/date_color" 
 					android:text="@string/incident_photo"
-					android:paddingBottom="5px"/>		
+					android:paddingBottom="5px"/>	-->	
 				
 			<LinearLayout android:orientation="horizontal"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content">
 						
-				<Button android:id="@+id/btnPicture" 
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:textStyle="bold" 
-					android:text="@string/btn_add_photo" />		
 			
 <!-- 				<TextView android:id="@+id/lbl_photo" 
 					android:layout_width="fill_parent"
@@ -209,33 +213,33 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10px">
 					
-				<TextView	android:id="@+id/lbl_incidents_date" 
+<!--				<TextView	android:id="@+id/lbl_incidents_date" 
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:textStyle="bold"
 					android:textSize="18dp"
 					android:textColor="@drawable/date_color" 
 					android:text="@string/incident_date" 
-					android:paddingBottom="5px"/>		
+					android:paddingBottom="5px"/>	-->	
 				<!-- <TextView	android:id="@+id/lbl_date" 
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:textStyle="bold"
 					android:textColor="@drawable/date_color" 
 					android:text="@string/incident_current_date" /> -->
-			 	<LinearLayout android:orientation="horizontal"
+<!--			 	<LinearLayout android:orientation="horizontal"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content">
 					<Button android:id="@+id/pick_date"
         				android:layout_width="wrap_content"
           				android:layout_height="wrap_content"
           				android:text="@string/incident_current_date"/>
-          				<!-- android:text="@string/incident_date_change"/>-->
+ 
     				<Button android:id="@+id/pick_time"
        					android:layout_width="wrap_content"
           				android:layout_height="wrap_content"
-          				android:text="@string/incident_time"/>
-      			</LinearLayout>
+          				android:text="@string/incident_time"/> -->
+      <!--			</LinearLayout> --> 
 			</LinearLayout>
 			<!-- Date layout ends. -->    
 

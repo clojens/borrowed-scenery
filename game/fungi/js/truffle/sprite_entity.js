@@ -52,10 +52,6 @@ truffle.sprite_entity.prototype.update=function(frame, world) {
     });
 }
 
-truffle.sprite_entity.prototype.get_root=function() {
-    return this.spr;
-}
-
 truffle.sprite_entity.prototype.on_sort_scene=function(world, order) {
     this.spr.set_depth(order++);
     this.children.forEach(function(child) {

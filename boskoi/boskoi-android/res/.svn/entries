@@ -1,52 +1,0 @@
-10
-
-dir
-251
-http://boskoiandroid.googlecode.com/svn/branches/Boskoi2.3/BoskoiAndroid/res
-http://boskoiandroid.googlecode.com/svn
-
-
-
-2012-02-03T22:39:24.097328Z
-243
-joeyvanderbie@gmail.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-45b13b04-00fa-d860-6a27-ab30978f9642
-
-layout
-dir
-
-values
-dir
-
-xml
-dir
-
-drawable
-dir
-
-drawable-hdpi
-dir
-
-values-nl
-dir
-
-drawable-ldpi
-dir
-
-drawable-mdpi
-dir
-

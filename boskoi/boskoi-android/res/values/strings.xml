@@ -46,7 +46,7 @@
 	<!-- Strings -->
     <string name="date_time">Event Title</string>
     <string name="prompt_mesg">Choose an edible to filter</string>
-    <string name="str_post_photos">Add a photo</string>
+    <string name="str_post_photos">Add photo</string>
     <string name="add_categories">Choose edible(s)</string>
     <string name="choose_method">Choose method</string>
     <string name="choose_pictures_method">Please choose how you would like to get the photo</string>
@@ -63,7 +63,7 @@
 	<string name="incident_description">Description</string>
 	<string name="incident_title">Title</string>
 	<string name="incident_category">Edibles</string>
-	<string name="incident_add_category">Select edible type(s)</string>
+	<string name="incident_add_category">Select types</string>
 	<string name="incident_photo">Photos</string>
 	<string name="optional">Optional</string>	
 	<string name="notification_title">Boskoi background service</string>
@@ -85,11 +85,11 @@
     <string name="btn_find">Find me</string>
     <string name="btn_reset">Reset</string>
     <string name="btn_ok">Ok</string>
-    <string name="btn_add_photo">Add a photo</string>
+    <string name="btn_add_photo">Add photo</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_send">Send</string>
-    <string name="add_location">Add a location</string>
-    <string name="change_location">Change location</string>
+    <string name="add_location">Add location</string>
+    <string name="change_location">Set location</string>
 	<string name="view_map">Show on map</string>
 	<string name="txt_about_btn">About</string>
 	<string name="incident_filter_category">Filtered by: </string>
