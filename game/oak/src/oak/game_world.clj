@@ -166,9 +166,9 @@
       :log (make-log 100)
       :id-gen id-gen
       :spirits ()
-      :players (list (make-player 97 "Charlie" -1)
-                     (make-player 98 "Percy" -1)
-                     (make-player 99 "Alan" -1))
+      :players (list (make-player 97 "Charlie" -1 (rand-nth avatar-types))
+                     (make-player 98 "Percy" -1 (rand-nth avatar-types))
+                     (make-player 99 "Alan" -1 (rand-nth avatar-types)))
       :summons {}
       :rules (load-companion-rules "rules.txt"))
      (repeatedly 100
@@ -638,8 +638,12 @@
             (modify :time (fn [t] (current-time))
                     (modify :pos (fn [p] pos) avatar))))
          ; make a new avatar
-         (merge tile {:entities (cons (make-avatar player-id (:name player) pos
-                                                   (:layer player) (count (:flowered-plants player)))
+         (merge tile {:entities (cons (make-avatar player-id
+                                                   (:name player)
+                                                   pos
+                                                   (:layer player)
+                                                   (count (:flowered-plants player))
+                                                   (:avatar-type player))
                                       (:entities tile))}))))
 
     ; have we changed tiles?
@@ -838,7 +842,7 @@
   [game-world name fbid]
   (let [player-id ((:id-gen game-world))]
     (db-add! :players
-             (make-player player-id name fbid))
+             (make-player player-id name fbid (rand-nth avatar-types)))
     ; todo: perhaps scatter a bit?
     (game-world-move-player game-world player-id (make-vec2 0 0) (make-vec2 2 2))))
 

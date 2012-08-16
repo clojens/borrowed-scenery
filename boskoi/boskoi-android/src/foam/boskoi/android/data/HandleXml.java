@@ -209,7 +209,7 @@ public class HandleXml {
 		}
 		
 
-/*			try {
+			try {
 				node = doc.getElementsByTagName("timestamp");
 				Node firstNode = node.item(0);
 
@@ -225,7 +225,7 @@ public class HandleXml {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-*/
+
 		
 		//save images
 		ImageManager.saveImage();
