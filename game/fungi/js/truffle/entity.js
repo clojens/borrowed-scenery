@@ -29,6 +29,7 @@ truffle.entity=function(world,pos) {
     world.add(this);
     this.on_reached_dest=null;
     this.every_frame=null;
+    this.delete_me=false;
 }
 
 // called by world before destruction (chance to remove sprites)
@@ -84,13 +85,11 @@ truffle.entity.prototype.update_mouse=function(x,y) {
 }
 
 truffle.entity.prototype.on_sort_scene=function(world, order) {
-    this.get_root().set_depth(order++);
     return order;
 }
 
 truffle.entity.prototype.hide=function(s) {
     this.hidden=s;
-    if (this.get_root()) this.get_root().hide(s);
 }
 
 truffle.entity.prototype.get_depth=function() {

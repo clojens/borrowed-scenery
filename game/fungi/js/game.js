@@ -23,6 +23,8 @@ function game(world) {
     this.player=null;
     this.tile_change=false;
     this.loading_spr=null;
+    this.particle_systems_this_frame=0;
+    this.max_particle_systems_per_frame=1;
 
     //centre=new truffle.vec2(51.05057,3.72729); // becomes 0,0 in world tile space
     centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
@@ -37,6 +39,13 @@ function game(world) {
     this.avatar.needs_update=true;
     this.avatar.speed=0.025;
 
+/*    this.pstest = new truffle.particles_entity(
+        world,
+        new truffle.vec3(2,2,-1),
+        "images/particle.png",
+        20,"continuous");
+    this.pstest.needs_update=true;
+*/
     var camera_pos=world.screen_transform(new truffle.vec3(5,5,1));
     world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
 
@@ -169,9 +178,32 @@ game.prototype.clear_entities=function() {
 
 game.prototype.update_entity=function(entity,from_server) {
     if (from_server["entity-type"]=="plant") {
+        // if the state has changed
         if (from_server.state!=entity.state) {
             entity.state=from_server.state;
             entity.spr.change_bitmap(this.entity_texture(from_server));
+            entity.needs_update=false; // turn off shaking
+
+            // if we have just grown, spawn a particle system
+            if (entity.state=="grow-a" || 
+                entity.state=="grow-b" ||
+                entity.state=="grow-c" || 
+                entity.state=="grow-d" || 
+                entity.state=="spore") {
+
+                if (this.particle_systems_this_frame<
+                    this.max_particle_systems_per_frame) {
+                    // particle system will delete itself when done
+                    var p=new truffle.particles_entity(
+                        this.world,
+                        new truffle.vec3(entity.logical_pos.x,
+                                         entity.logical_pos.y,
+                                         -1),
+                        "images/particle.png",
+                        20, "one-shot");
+                    this.particle_systems_this_frame++;
+                }
+            }
         }
     }
 }
@@ -209,6 +241,19 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.id=entity.id;
         //e.spr.draw_bb=true;
 
+        if (entity.state=="grow-a-ready" &&
+            this.particle_systems_this_frame<
+            this.max_particle_systems_per_frame) {
+            var p=new truffle.particles_entity(
+                this.world,
+                new truffle.vec3(gamepos.x,
+                                 gamepos.y,
+                                 -1),
+                "images/particle.png",
+                20, "one-shot");
+            this.particle_systems_this_frame++;
+        }
+
         e.spr.mouse_down(function() {
             that.avatar.move_to(that.world,new truffle.vec3(e.logical_pos.x,
                                                                     e.logical_pos.y,0));
@@ -220,6 +265,21 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                                          0]);
             };
         });
+        
+        e.spr.mouse_over(function() {
+            if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
+                e.state=="grow-c-ready" || e.state=="spore-ready") {
+                e.needs_update=true;
+                e.every_frame=function() {
+                    e.spr.rotate(Math.sin(that.world.time*50)/80);
+                }
+            }
+        });
+
+        e.spr.mouse_out(function() {
+            e.needs_update=false;
+        });
+
 
 /*        e.needs_update=true;
         e.update_freq=Math.floor(40+Math.random()*15);
@@ -303,6 +363,7 @@ game.prototype.update_tile=function() {
                 else that.make_new_entity(gamepos,tilepos,entity);
             });
         });
+        that.particle_systems_this_frame=0;
     });
 }
 
@@ -317,6 +378,7 @@ game.prototype.server_to_client_coords=function(wtx,wty,tx,ty,px,py) {
 
 game.prototype.update=function() {
     var time=(new Date).getTime();
+
     if (this.next_pull_time<time)
     {
         this.update_tile();

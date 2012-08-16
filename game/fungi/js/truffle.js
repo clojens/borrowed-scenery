@@ -15,7 +15,6 @@
 
 truffle.main={}
 truffle.main.world=null;
-truffle.main.time=0;
 
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||  
     window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
@@ -46,10 +45,10 @@ truffle.main.init=function(game_create,game_update) {
 truffle.main.loop=function(timestamp) {
     var canvas=document.getElementById('canvas')
     var ctx=canvas.getContext('2d');
+    var now = (new Date()).getTime();
 
     update_fn();
-    truffle.main.world.update(truffle.main.time);
-    truffle.main.time++;
+    truffle.main.world.update(now/1000);
 
     if (ctx.canvas.width!=window.innerWidth ||
         ctx.canvas.height!=window.innerHeight) {
@@ -59,7 +58,6 @@ truffle.main.loop=function(timestamp) {
         truffle.main.world.redraw();
     }
 
-    var now = (new Date()).getTime();
     var delta = now-last_time;
     last_time = now;
     total_time+=delta;

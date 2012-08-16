@@ -75,9 +75,9 @@ truffle.canvas_state.prototype.clear_rects=function(bboxes) {
     this.ctx.fillStyle = "#ffffff";
     var that=this;
     bboxes.forEach(function(box) {
-        that.ctx.fillRect(~~(box[0]+1.5),~~(box[1]+1.5),
-                          ~~((box[2]-box[0])-2),
-                          ~~((box[3]-box[1])-2)); // todo find out why odd rounding needed
+        that.ctx.fillRect(~~(box[0]+2),~~(box[1]+2),
+                          ~~((box[2]-box[0])-4),
+                          ~~((box[3]-box[1])-4)); 
     });
 }
 

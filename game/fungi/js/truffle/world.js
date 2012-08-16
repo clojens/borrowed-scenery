@@ -22,6 +22,8 @@ truffle.world.prototype.clear=function() {
     this.sprites=[];
     this.current_depth=1000;
     this.current_id=0;
+    this.time=0;
+
     this.canvas_state=new truffle.canvas_state();
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
     this.screen_scale=new truffle.vec2(1,1);
@@ -95,8 +97,7 @@ truffle.world.prototype.get=function(type, pos) {
     this.scene.forEach(function(e) {
         if (pos.x==e.logical_pos.x &&
             pos.y==e.logical_pos.y &&
-            typeof e==type)
-        {
+            typeof e==type) {
             return e;
         }
     });
@@ -108,8 +109,7 @@ truffle.world.prototype.get_other=function(me, type, pos) {
         if (pos.x==e.logical_pos.x &&
             pos.y==e.logical_pos.y &&
             typeof e==type &&
-            e.id!=me.id)
-        {
+            e.id!=me.id) {
             return e;
         }
     });
@@ -120,26 +120,12 @@ truffle.world.prototype.set_current_tile_pos=function(s) {
     this.current_tile_pos=s;
 }
 
-truffle.world.prototype.set_scale=function(amount) {
-    this.screen_scale=amount;
-    this.scene.forEach(function (e) {
-        e.get_root().set_scale(amount);
-        e.update(0,this);
-    });
-}
-
-truffle.world.prototype.set_translate=function(amount) {
-    this.screen_offset=amount;
-    this.scene.forEach(function (e) {
-        e.move_to(this,e.logical_pos);
-        e.update(0,this);
-    });
-}
-
 // override for things on top
 truffle.world.prototype.post_sort_scene=function(depth) {
 }
 
+// go through each entity in depth order, calling sort on them
+// to arrange child sprites in the correct order
 truffle.world.prototype.sort_scene=function() {        
     this.scene.sort(function(a, b) {                       
         if (a.get_depth()<b.get_depth()) return -1;
@@ -176,17 +162,7 @@ truffle.world.prototype.mouse_up=function(f) {
 truffle.world.prototype.mouse_move=function(f) {
 }
 
-truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
-    draw_list.forEach(function(d) {
-        if (spr.get_id()==d.spr.get_id()) {
-            d.bbox.push(bbox);
-            return draw_list;
-        }
-    });
 
-    draw_list.push({spr:spr,bbox:[bbox]});
-    return draw_list;
-}
 
 truffle.world.prototype.debug=function(txt) {
     this.debug_text+=txt+"\n";
@@ -197,10 +173,9 @@ truffle.world.prototype.debug=function(txt) {
     ctx.fillText(this.debug_text, 10, 10, 100);
 }
 
-truffle.world.prototype.update=function(time) {
+// update all the entities that need it, at the correct frequency
+truffle.world.prototype.update_entities=function(time) {
     var that=this;
-    this.sort_scene();
-
     this.scene.forEach(function(e) {
         if (e.tile_pos!=null)
         {
@@ -217,15 +192,35 @@ truffle.world.prototype.update=function(time) {
             e.update(time,that);
         }
     });
+}
 
-    // draw the sprites
+// sort the sprite list based on previous scene sorting order
+truffle.world.prototype.sort_sprites=function() {
     this.sprites.sort(function(a, b) {                       
         if (a.get_depth()>b.get_depth()) return -1;
         else return 1;
     });
+}
 
+// either adds sprites to the draw list, or collects bounding boxes
+// required for sprites that overlap with multiple changing objects
+// so they only get redrawn once
+truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
+    draw_list.forEach(function(d) {
+        if (spr.get_id()==d.spr.get_id()) {
+            d.bbox.push(bbox);
+            return draw_list;
+        }
+    });
+    draw_list.push({spr:spr,bbox:[bbox]});
+    return draw_list;
+}
+
+// creates a list of sprites that have changed, or overlapping those
+// that have changed, in depth order for redrawing
+truffle.world.prototype.build_draw_list=function() {
     var draw_list=[];
-
+    var that=this;
     // do check for overlapping sprites
     this.sprites.forEach(function(sprite) {
         // if this sprite needs redrawing
@@ -253,26 +248,54 @@ truffle.world.prototype.update=function(time) {
             });
         }
     });
+    return draw_list;
+}
 
+// draw the draw list, using the clipping bounding boxes 
+truffle.world.prototype.draw_scene=function(draw_list) {
+    var that=this;
     this.canvas_state.begin_scene();
     
     draw_list.forEach(function(d) {
         that.canvas_state.clear_rects(d.bbox);
     });
 
-    // force the order to be the same
-//    this.sprites.forEach(function(s) {
-        draw_list.forEach(function(d) {
-        //    if (s.get_id()==d.spr.get_id()) {
-                that.canvas_state.set_clip(d.bbox);
-                d.spr.draw(that.canvas_state.ctx);
-                that.canvas_state.unclip();
-         //   }
-        });
-  //  });
+    draw_list.forEach(function(d) {
+        that.canvas_state.set_clip(d.bbox);
+        d.spr.draw(that.canvas_state.ctx);
+        that.canvas_state.unclip();    
+    });
 
 //    this.canvas_state.stats(draw_list.length/this.sprites.length);
     this.canvas_state.end_scene();
+}
+
+// look for entities that have set delete_me and remove them from
+// the scene
+truffle.world.prototype.remove_deleted_entities=function() {
+    // recreate the array - splice might be faster, but still
+    // requires new arrays etc...
+    var new_scene=[];
+    for (var i=0; i<this.scene.length; i++) {
+        if (!this.scene[i].delete_me) {
+            new_scene.push(this.scene[i]);
+        }
+        else {
+            this.scene[i].destroy(this);
+        }
+    }
+    this.scene=new_scene;
+}
+
+// top level update
+truffle.world.prototype.update=function(time) {
+    var that=this;
+    this.sort_scene();
+    this.time=time;
+    this.remove_deleted_entities();
+    this.update_entities(time);
+    this.sort_sprites();
+    this.draw_scene(this.build_draw_list());    
     this.update_input();
 }
 
