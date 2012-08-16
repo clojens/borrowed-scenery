@@ -29,6 +29,7 @@ truffle.entity=function(world,pos) {
     world.add(this);
     this.on_reached_dest=null;
     this.every_frame=null;
+    this.delete_me=false;
 }
 
 // called by world before destruction (chance to remove sprites)
