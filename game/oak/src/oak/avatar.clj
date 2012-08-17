@@ -25,6 +25,7 @@
    :version 2 
    :entity-type "avatar"
    :avatar-type avatar-type
+   :chat ""
    :id id
    :owner name
    :pos pos

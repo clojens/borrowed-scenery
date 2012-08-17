@@ -668,6 +668,19 @@
 
     game-world))
 
+(defn game-world-chat [game-world text player-id tile-pos]
+  (let [player (game-world-find-player game-world player-id)]
+    (game-world-modify-tile
+     game-world
+     tile-pos
+     (fn [tile]
+       (tile-modify-entity 
+        tile player-id
+        (fn [avatar]
+          (modify :chat (fn [c] text)
+                  avatar)))))))
+
+
 (defn game-world-post-logs-to-players
   "dispatch messages to the players"
   [game-world msgs]

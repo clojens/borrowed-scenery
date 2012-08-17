@@ -62,7 +62,20 @@
        onclick="alert('not yet!');" />
     </div>
 
-  <canvas id="canvas" width="880" height="460"></canvas></center>
+  <canvas id="canvas" width="880" height="460"></canvas>
+
+  <input 
+     id='chat'
+     type='text' 
+     name='chat' 
+     style="font-family:patafont"
+     size="10"
+     onkeydown="if (event.keyCode==13) chat();"/>
+  <input 
+     type="button" 
+     value="Chat" 
+     onclick="chat();" /><br/>
   <div id="fps"></div>
+  </center>
 </body>
 </html>

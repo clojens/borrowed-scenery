@@ -84,6 +84,17 @@ truffle.canvas_state.prototype.clear_rects=function(bboxes) {
 truffle.canvas_state.prototype.set_clip=function(bboxes) {
     this.ctx.save();
 
+/*
+    this.ctx.strokeStyle = "#ff0000";
+    var that=this;
+    bboxes.forEach(function(box) {
+        that.ctx.rect(~~(box[0]+2),~~(box[1]+2),
+                      ~~((box[2]-box[0])-4),
+                      ~~((box[3]-box[1])-4)); 
+    });
+    that.ctx.stroke();
+*/
+
     // Set the clipping area
     this.ctx.beginPath();
     var that=this;

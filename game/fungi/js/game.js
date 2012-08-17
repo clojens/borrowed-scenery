@@ -99,6 +99,18 @@ game.prototype.connect_and_login=function(name) {
     });
 }
 
+game.prototype.chat=function(text) {
+    if (this.logged_in) {
+        this.server.call("chat",[this.player.id,
+                                 text,
+                                 0]);
+    }
+    else
+    {
+        alert("you need to log in first");
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 
 game.prototype.find_entity=function(id) {
@@ -155,7 +167,32 @@ game.prototype.update_entity=function(entity,from_server,tile) {
             tile.y,
             from_server.pos.x,
             from_server.pos.y);
-        entity.move_to(this.world,new truffle.vec3(pos.x,pos.y,0));
+
+        // if we have changed position
+        if (entity.logical_pos.x!=pos.x ||
+            entity.logical_pos.y!=pos.y) {
+            entity.move_to(this.world,new truffle.vec3(pos.x,pos.y,0));
+            entity.needs_update=true;
+            entity.on_reached_dest=function() {
+                entity.needs_update=false;
+            };
+        }
+
+        if (from_server.chat!=entity.chat_last) {
+//            alert("found different msg");
+            entity.chat_time=this.world.time;
+            entity.chat_text.set_text(from_server.chat);
+            entity.chat_last=from_server.chat;
+            entity.chat_active=true;
+            entity.update(this.world,0);
+        }
+
+        if (entity.chat_active &&
+            this.world.time>entity.chat_time+10) {
+            entity.chat_text.set_text("");
+            entity.chat_active=false;
+        }
+
     }
 }
 
@@ -215,9 +252,14 @@ game.prototype.move_player=function(to) {
                 that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));
             }
 
+            // need to figure out server tile by looking at current
+            // client tile (0->14)
+            var server_tile_x=that.player.tile.x+(Math.floor(px/5)-1);
+            var server_tile_y=that.player.tile.y+(Math.floor(py/5)-1);
+
             that.server.call("move-player",[that.player.id,
-                                            that.player.tile.x,
-                                            that.player.tile.y,
+                                            server_tile_x,
+                                            server_tile_y,
                                             px%5,
                                             py%5,0]);
             
@@ -260,7 +302,23 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
     if (entity["entity-type"]=="avatar") {
         // no need to display ourself
         if (entity.id==this.player.id) {
-            if (this.avatar!=null) return;
+            // if we exist already, update our chat text if required 
+            if (this.avatar!=null) {
+                if (entity.chat!=this.avatar.chat_last) {
+                    this.avatar.chat_time=this.world.time;
+                    this.avatar.chat_text.set_text(entity.chat);
+                    this.avatar.chat_last=entity.chat;
+                    this.avatar.chat_active=true;
+                }
+
+                if (this.avatar.chat_active &&
+                    this.world.time>this.avatar.chat_time+10) {
+                    this.avatar.chat_text.set_text("");
+                    this.avatar.chat_active=false;
+                }
+
+                return;
+            }
             // make the player's avatar
             this.avatar = new truffle.sprite_entity(
                 that.world,
@@ -268,7 +326,17 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 'images/'+this.player["avatar-type"]+'-south.png');
             this.avatar.needs_update=true;
             this.avatar.speed=0.025;
-            var t=new truffle.textbox(new truffle.vec2(-10,-150),
+            this.avatar.chat_time=0;
+            this.avatar.chat_last="";
+            var ct=new truffle.textbox(new truffle.vec2(0,-200),
+                                      "",
+                                      300,300,"15pt patafont");
+            ct.text_height=55;
+            ct.text_colour="#5555ff";
+            this.avatar.chat_text=ct;
+            this.avatar.chat_active=false;
+            this.avatar.add_child(this.world,ct);
+            var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
                                       300,300,"15pt times");
             t.text_height=25;
@@ -283,9 +351,20 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 new truffle.vec3(gamepos.x,gamepos.y,0),
                 this.entity_texture(entity));
             e.id=entity.id;
-            e.needs_update=true;
+            e.needs_update=false;
             e.speed=0.025;
-            var t=new truffle.textbox(new truffle.vec2(-10,-150),
+            e.chat_time=0;
+            e.chat_last="";
+            e.chat_active=false;
+            var ct=new truffle.textbox(new truffle.vec2(0,-200),
+                                      "",
+                                      300,300,"15pt patafont");
+            ct.text_height=50;
+            ct.text_colour="#55ff55";
+            e.chat_text=ct;
+            e.add_child(this.world,ct);
+
+            var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
                                       300,300,"15pt times");
             t.text_height=25;
@@ -351,11 +430,11 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             new truffle.vec3(gamepos.x,gamepos.y,0),
             "images/boskoi-"+entity.layer+".png")
         e.id=entity.id;
-        var t=new truffle.textbox(new truffle.vec2(-100,-200),
+        var t=new truffle.textbox(new truffle.vec2(0,-200),
                                   entity.incident.incidentdescription+" "+
                                   entity.incident.locationname+" "+
                                   entity.incident.incidentdate,
-                                  300,300,"15pt patafont");
+                                  200,300,"15pt patafont");
         t.text_height=25;
         e.add_child(this.world,t);
         this.entities.push(e);
@@ -435,6 +514,11 @@ function login_form() {
         element.removeChild(element.firstChild);
     }
     g.connect_and_login(name);    
+}
+
+function chat() {
+    var text=document.getElementById('chat').value;
+    g.chat(text);    
 }
 
 function game_create() {
