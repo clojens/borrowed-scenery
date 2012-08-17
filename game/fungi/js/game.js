@@ -17,27 +17,20 @@
 
 function game(world) {
     this.world=world;
-    this.connect_and_login("dave");
     this.entities=[];
     this.next_pull_time=0;
     this.player=null;
+    this.avatar=null;
     this.tile_change=false;
     this.loading_spr=null;
     this.particle_systems_this_frame=0;
-    this.max_particle_systems_per_frame=1;
+    this.max_particle_systems_per_frame=2;
 
     //centre=new truffle.vec2(51.05057,3.72729); // becomes 0,0 in world tile space
     centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
     zoom=17;
     var that=this;
 
-    // make the avatar
-    this.avatar = new truffle.sprite_entity(
-        that.world,
-        new truffle.vec3(5,5,0),
-        'images/magician-south.png');
-    this.avatar.needs_update=true;
-    this.avatar.speed=0.025;
 
 /*    this.pstest = new truffle.particles_entity(
         world,
@@ -75,65 +68,12 @@ function game(world) {
         s.spr.do_transform=true;
 
         s.spr.mouse_down(function() {
-            
-            var sx=that.avatar.logical_pos.x;
-            var sy=that.avatar.logical_pos.y;
-            var px=s.logical_pos.x;
-            var py=s.logical_pos.y;
-            var tcx=0;
-            var tcy=0;
+                      
+            that.move_player(s.logical_pos);
 
             //if (px==9) { that.player.tile.x+=2; that.update_tile() }
             //if (py==9) { that.player.tile.y+=2; that.update_tile() }
 
-            var cam=world.screen_transform(new truffle.vec3(px,py,0));
-            world.move_world_to(cam.x,cam.y);
-            
-            if (sx!=px) {
-                if (sx<px) that.avatar.spr.change_bitmap('images/magician-east.png');
-                else that.avatar.spr.change_bitmap('images/magician-west.png');
-            }
-            
-            that.avatar.speed=0.025;
-            that.avatar.move_to(that.world,new truffle.vec3(px,sy,0));
-            that.avatar.on_reached_dest=function() {
-                if (sy!=py) {
-                    if (sy<py) that.avatar.spr.change_bitmap('images/magician-south.png');
-                    else that.avatar.spr.change_bitmap('images/magician-north.png');
-                }
-                that.avatar.move_to(that.world,new truffle.vec3(px,py,0));
-                
-                that.avatar.on_reached_dest=function() {
-                    world.redraw();
-                    
-                    if (px>12) { 
-                        that.player.tile.x+=1;
-                        that.tile_change=true;
-                        tcx=-5;
-                    }
-                    if (px<2) { 
-                        that.player.tile.x-=1;
-                        that.tile_change=true;
-                        tcx=5;
-                    }  
-                    if (py>12) { 
-                        that.player.tile.y+=1;
-                        that.tile_change=true;
-                        tcy=-5;
-                    }  
-                    if (py<2) { 
-                        that.player.tile.y-=1;
-                        that.tile_change=true;
-                        tcy=5;
-                    }  
-
-                    if (that.tile_change) {
-                        that.avatar.speed=0;
-                        that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));
-                    }
-                    
-                };
-            };
         });
         return s;        
     }
@@ -149,14 +89,26 @@ game.prototype.connect_and_login=function(name) {
     var that=this;
     this.server=new truffle.server('ws://be.fo.am:8002/borrowed-scenery',
                                    function () {
-                                       that.server.call("login",["dave",0,0]);
+                                       that.server.call("login",[name,0,0]);
                                    });
     this.server.listen("login", function(player) {
+        that.logged_in=true;
         that.player=player;
-        that.player.tile.x=-1;
-        that.player.tile.y=0;
+        log(that.player.name+" has logged in");
         that.update_tile()
     });
+}
+
+game.prototype.chat=function(text) {
+    if (this.logged_in) {
+        this.server.call("chat",[this.player.id,
+                                 text,
+                                 0]);
+    }
+    else
+    {
+        alert("you need to log in first");
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +128,7 @@ game.prototype.clear_entities=function() {
     this.entities=[];
 }
 
-game.prototype.update_entity=function(entity,from_server) {
+game.prototype.update_entity=function(entity,from_server,tile) {
     if (from_server["entity-type"]=="plant") {
         // if the state has changed
         if (from_server.state!=entity.state) {
@@ -206,13 +158,128 @@ game.prototype.update_entity=function(entity,from_server) {
             }
         }
     }
+    if (from_server["entity-type"]=="avatar") {
+       // log(JSON.stringify(from_server));
+        var pos=this.server_to_client_coords(
+            this.player.tile.x,
+            this.player.tile.y,
+            tile.x,
+            tile.y,
+            from_server.pos.x,
+            from_server.pos.y);
+
+        // if we have changed position
+        if (entity.logical_pos.x!=pos.x ||
+            entity.logical_pos.y!=pos.y) {
+            entity.move_to(this.world,new truffle.vec3(pos.x,pos.y,0));
+            entity.needs_update=true;
+            entity.on_reached_dest=function() {
+                entity.needs_update=false;
+            };
+        }
+
+        if (from_server.chat!=entity.chat_last) {
+//            alert("found different msg");
+            entity.chat_time=this.world.time;
+            entity.chat_text.set_text(from_server.chat);
+            entity.chat_last=from_server.chat;
+            entity.chat_active=true;
+            entity.update(this.world,0);
+        }
+
+        if (entity.chat_active &&
+            this.world.time>entity.chat_time+10) {
+            entity.chat_text.set_text("");
+            entity.chat_active=false;
+        }
+
+    }
+}
+
+game.prototype.move_player=function(to) {
+    var that=this;
+    var sx=that.avatar.logical_pos.x;
+    var sy=that.avatar.logical_pos.y;
+    var px=to.x;
+    var py=to.y;
+    var cam=this.world.screen_transform(new truffle.vec3(px,py,0));
+    this.world.move_world_to(cam.x,cam.y);
+    
+    if (sx!=px) {
+        if (sx<px) that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-east.png');
+        else that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-west.png');
+    }
+    
+    that.avatar.speed=0.025;
+    that.avatar.move_to(that.world,new truffle.vec3(px,sy,0));
+    that.avatar.on_reached_dest=function() {
+        if (sy!=py) {
+            if (sy<py) that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-south.png');
+            else that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-north.png');
+        }
+        that.avatar.move_to(that.world,new truffle.vec3(px,py,0));
+        
+        that.avatar.on_reached_dest=function() {
+            that.world.redraw();
+
+            var tcx=0;
+            var tcy=0;
+
+            // this part sucks
+            if (px>12) { 
+                that.player.tile.x+=1;
+                that.tile_change=true;
+                tcx=-5;
+            }
+            if (px<2) { 
+                that.player.tile.x-=1;
+                that.tile_change=true;
+                tcx=5;
+            }  
+            if (py>12) { 
+                that.player.tile.y+=1;
+                that.tile_change=true;
+                tcy=-5;
+            }  
+            if (py<2) { 
+                that.player.tile.y-=1;
+                that.tile_change=true;
+                tcy=5;
+            }  
+            
+            if (that.tile_change) {
+                that.avatar.speed=0;
+                that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));
+            }
+
+            // need to figure out server tile by looking at current
+            // client tile (0->14)
+            var server_tile_x=that.player.tile.x+(Math.floor(px/5)-1);
+            var server_tile_y=that.player.tile.y+(Math.floor(py/5)-1);
+
+            that.server.call("move-player",[that.player.id,
+                                            server_tile_x,
+                                            server_tile_y,
+                                            px%5,
+                                            py%5,0]);
+            
+        };
+    };
+    
+    //that.server
 }
 
 game.prototype.entity_texture=function(entity) {
-    if (entity.type=="knobbly")
-    return "images/knobbly-"+this.state_to_texture(entity.state)+".png";
-    else
-    return "images/pointy-"+this.state_to_texture(entity.state)+".png";
+    if (entity["entity-type"]=="plant") {
+        if (entity.type=="knobbly")
+            return "images/knobbly-"+this.state_to_texture(entity.state)+".png";
+        else
+            return "images/pointy-"+this.state_to_texture(entity.state)+".png";
+    }
+    if (entity["entity-type"]=="avatar") {
+        return "images/"+entity["avatar-type"]+"-west.png";
+    }
+    return "none";
 }
 
 game.prototype.state_to_texture=function(state) {
@@ -232,7 +299,80 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
 //    if (tilepos.x!=this.player.tile.x ||
 //        tilepos.y!=this.player.tile.y) return;
 
-    if (entity["entity-type"]=="plant") {
+    if (entity["entity-type"]=="avatar") {
+        // no need to display ourself
+        if (entity.id==this.player.id) {
+            // if we exist already, update our chat text if required 
+            if (this.avatar!=null) {
+                if (entity.chat!=this.avatar.chat_last) {
+                    this.avatar.chat_time=this.world.time;
+                    this.avatar.chat_text.set_text(entity.chat);
+                    this.avatar.chat_last=entity.chat;
+                    this.avatar.chat_active=true;
+                }
+
+                if (this.avatar.chat_active &&
+                    this.world.time>this.avatar.chat_time+10) {
+                    this.avatar.chat_text.set_text("");
+                    this.avatar.chat_active=false;
+                }
+
+                return;
+            }
+            // make the player's avatar
+            this.avatar = new truffle.sprite_entity(
+                that.world,
+                new truffle.vec3(gamepos.x,gamepos.y,0),
+                'images/'+this.player["avatar-type"]+'-south.png');
+            this.avatar.needs_update=true;
+            this.avatar.speed=0.025;
+            this.avatar.chat_time=0;
+            this.avatar.chat_last="";
+            var ct=new truffle.textbox(new truffle.vec2(0,-200),
+                                      "",
+                                      300,300,"15pt patafont");
+            ct.text_height=55;
+            ct.text_colour="#5555ff";
+            this.avatar.chat_text=ct;
+            this.avatar.chat_active=false;
+            this.avatar.add_child(this.world,ct);
+            var t=new truffle.textbox(new truffle.vec2(0,-150),
+                                      entity.owner,
+                                      300,300,"15pt times");
+            t.text_height=25;
+            this.avatar.add_child(this.world,t);
+        }
+        else
+        {
+            log("making new avatar");
+            
+            var e=new truffle.sprite_entity(
+                this.world,
+                new truffle.vec3(gamepos.x,gamepos.y,0),
+                this.entity_texture(entity));
+            e.id=entity.id;
+            e.needs_update=false;
+            e.speed=0.025;
+            e.chat_time=0;
+            e.chat_last="";
+            e.chat_active=false;
+            var ct=new truffle.textbox(new truffle.vec2(0,-200),
+                                      "",
+                                      300,300,"15pt patafont");
+            ct.text_height=50;
+            ct.text_colour="#55ff55";
+            e.chat_text=ct;
+            e.add_child(this.world,ct);
+
+            var t=new truffle.textbox(new truffle.vec2(0,-150),
+                                      entity.owner,
+                                      300,300,"15pt times");
+            t.text_height=25;
+            e.add_child(this.world,t);
+            this.entities.push(e);        
+        }
+    }
+    else if (entity["entity-type"]=="plant") {
         var e=new truffle.sprite_entity(
             this.world,
             new truffle.vec3(gamepos.x,gamepos.y,0),
@@ -256,7 +396,8 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
 
         e.spr.mouse_down(function() {
             that.avatar.move_to(that.world,new truffle.vec3(e.logical_pos.x,
-                                                                    e.logical_pos.y,0));
+                                                            e.logical_pos.y,0));
+
             that.avatar.on_reached_dest=function(){
                 that.server.call("grow",[tilepos.x,
                                          tilepos.y,
@@ -280,37 +421,22 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             e.needs_update=false;
         });
 
-
-/*        e.needs_update=true;
-        e.update_freq=Math.floor(40+Math.random()*15);
-        e.every_frame=function() {
-            if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
-                e.state=="grow-c-ready" || e.state=="spore-ready")
-                e.spr.set_rotate((Math.random()-0.5)*0.05);
-        };*/
-        
         this.entities.push(e);
     }
     else if (entity["entity-type"]=="ushahidi") {
-
         log("making boskoi plant at "+gamepos.x+" "+gamepos.y);
-//        log(JSON.stringify(entity));
-
         var e=new truffle.sprite_entity(
             this.world,
             new truffle.vec3(gamepos.x,gamepos.y,0),
             "images/boskoi-"+entity.layer+".png")
         e.id=entity.id;
-//        e.spr.draw_bb=true;
-
-        var t=new truffle.textbox(new truffle.vec2(-100,-200),
+        var t=new truffle.textbox(new truffle.vec2(0,-200),
                                   entity.incident.incidentdescription+" "+
                                   entity.incident.locationname+" "+
                                   entity.incident.incidentdate,
-                                  300,300,"15pt patafont");
+                                  200,300,"15pt patafont");
         t.text_height=25;
         e.add_child(this.world,t);
-
         this.entities.push(e);
     }
 }
@@ -326,17 +452,7 @@ game.prototype.update_tile=function() {
     var that=this;
     if (!this.player) return;
 
-    this.map.update(this.player.tile,function() {
-        //that.loading_spr=new truffle.sprite(
-        //    new truffle.vec2(100,100),
-       //     "images/bbot-east.png");
-       // that.world.add_sprite(that.loading_spr);
-        //that.world.redraw();
-    }, function() {
-        //that.world.remove_sprite(that.loading_spr);
-        //that.loading_spr=null;
-        //that.world.redraw();
-    });
+    this.map.update(this.player.tile,function() {}, function() {});
 
     if (this.tile_change) {
         this.clear_entities();
@@ -359,7 +475,7 @@ game.prototype.update_tile=function() {
                     entity.pos.x,entity.pos.y);
                 
                 var existing=that.find_entity(entity.id);
-                if (existing) that.update_entity(existing,entity);
+                if (existing) that.update_entity(existing,entity,tilepos);
                 else that.make_new_entity(gamepos,tilepos,entity);
             });
         });
@@ -390,6 +506,20 @@ game.prototype.update=function() {
 
 
 var g;
+
+function login_form() {
+    var name=document.getElementById('player_name').value;
+    var element=document.getElementById("input_form");
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+    g.connect_and_login(name);    
+}
+
+function chat() {
+    var text=document.getElementById('chat').value;
+    g.chat(text);    
+}
 
 function game_create() {
     g=new game(truffle.main.world);

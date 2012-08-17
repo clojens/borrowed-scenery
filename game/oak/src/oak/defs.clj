@@ -49,6 +49,7 @@
 (def max-neighbours 20)
 (def min-neighbours 0)
 
+(def avatar-types '("hermit" "hierophant" "high-priestess" "magician"))
 
 (defn plant-type->layer [type]
   (cond

@@ -20,7 +20,7 @@
      oak.forms
      oak.fruit))
 
-(defn make-player [id name fbid]
+(defn make-player [id name fbid avatar-type]
   (hash-map
    :version 4
    :id id
@@ -39,6 +39,7 @@
    :flowered-plants ()
    :acorns 0
    :tile (make-vec2 0 0)
+   :avatar-type avatar-type
    :log (log-add-note
          (make-log 20)
          (make-note "welcome" (list "ok")))))

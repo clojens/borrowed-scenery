@@ -45,8 +45,8 @@
 ; ****************************************************************
 ; Uncomment the two lines below and run once to create a new world
 ; ****************************************************************
-(def my-game-world (ref (make-game-world 200 2)))
-(game-world-db-build! (sym-replace2 (deref my-game-world)))
+;;(def my-game-world (ref (make-game-world 200 2)))
+;;(game-world-db-build! (sym-replace2 (deref my-game-world)))
 
 (def my-game-world (ref (make-empty-game-world)))
 ;(game-world-populate-oaks (deref my-game-world) 100 10 0 1)
@@ -131,7 +131,20 @@
               (game-world-move-player
                (deref my-game-world) player-id tile-pos pos)))
     (json '("ok"))))
-       
+
+(defn s-chat [player-id text iefix]
+  (let [player-id (parse-number player-id)
+        player (game-world-find-player
+                (deref my-game-world)
+                player-id)
+        tile-pos (:tile player)]
+    (println "chat" text)
+    (dosync
+     (ref-set my-game-world
+              (game-world-chat
+               (deref my-game-world) text player-id tile-pos)))
+    (json '("ok"))))
+
 (defn s-pull [player-id tilex tiley iefix]
   (let [tiles (game-world-get-tile-with-neighbours
                 (deref my-game-world)
@@ -395,7 +408,8 @@
       "perceive" s-perceive
       "gift" s-gift
       "answer" s-answer
-      "offering" s-offering))
+      "offering" s-offering
+      "chat" s-chat))
 
 (defn dispatch [msg]
   (let [parsed (clojure.data.json/read-json msg)
