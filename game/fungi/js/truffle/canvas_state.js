@@ -28,6 +28,12 @@ truffle.canvas_state=function() {
     this.world_offset_x=-500;
     this.world_offset_y=400;
 
+    // for world to refresh areas needed by scrolling screen
+    this.refresh_top=false;
+    this.refresh_bottom=false;
+    this.refresh_left=false;
+    this.refresh_right=false;
+
     var _this=this;
 
     this.canvas.addEventListener('mousedown', function(e) {
@@ -162,17 +168,36 @@ truffle.canvas_state.prototype.move_world_to=function(x,y) {
 truffle.canvas_state.prototype.update_world_pos=function() {
     var diff_x=this.world_x+this.world_desired_x;
     var diff_y=this.world_y+this.world_desired_y;
+    
+    this.refresh_left=false;
+    this.refresh_right=false;
+    this.refresh_top=false;
+    this.refresh_bottom=false;
+
 
     var speed=3;
 
     if (Math.abs(diff_x)>speed || 
         Math.abs(diff_y)>speed)
     {
-        if (diff_x>0) diff_x=-speed;
-        else diff_x=speed;
-        if (diff_y>0) diff_y=-speed;
-        else diff_y=speed;
-        
+        if (diff_x>0) {
+            this.refresh_right=true;
+            diff_x=-speed;
+        }
+        else {
+            this.refresh_left=true;
+            diff_x=speed;
+        }
+
+        if (diff_y>0) {
+            this.refresh_bottom=true;
+            diff_y=-speed;
+        }
+        else {
+            this.refresh_top=true;
+            diff_y=speed;
+        }
+
         var sx=0;
         var dx=diff_x;
         var width=this.ctx.canvas.width-diff_x;

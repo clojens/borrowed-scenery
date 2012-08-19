@@ -153,7 +153,7 @@ truffle.textbox.prototype.draw=function(ctx) {
 
         ctx.fillStyle = "#ffffff";
         ctx.globalAlpha=0.75;
-        ctx.fillRect(-this.centre.x, -this.centre.y-this.text_height/1.7, 
+        ctx.fillRect(-this.centre.x, -this.centre.y-this.text_height/1.8, 
                      this.width,this.height); 
         ctx.globalAlpha=1;
 

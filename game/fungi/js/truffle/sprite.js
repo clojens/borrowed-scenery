@@ -125,6 +125,7 @@ truffle.sprite.prototype.draw=function(ctx) {
 
     // two render paths
     if (this.complex_transform || this.parent_transform) {
+        
         ctx.save();
         ctx.transform(this.transform.m[0],
                       this.transform.m[1],
@@ -132,7 +133,7 @@ truffle.sprite.prototype.draw=function(ctx) {
                       this.transform.m[3],
                       this.transform.m[4],
                       this.transform.m[5]);
-        
+       
         if (this.parent_transform!=null) {
             ctx.transform(this.parent_transform.m[0],
                           this.parent_transform.m[1],
