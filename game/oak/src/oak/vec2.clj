@@ -42,12 +42,8 @@
   (vec2-mag (vec2-sub a b)))
 
 (defn vec2-mod [v s]
-  (make-vec2 (if (< (:x v) 0)
-               (- (:x s) (mod (:x v) (:x s)))
-               (mod (:x v) (:x s)))
-             (if (< (:y v) 0)
-               (- (:y s) (mod (:y v) (:y s)))
-               (mod (:y v) (:y s)))))
+  (make-vec2 (mod (:x v) (:x s))
+             (mod (:y v) (:y s))))
 
 (defn vec2-eq? [a b]
   (and (= (:x a) (:x b))

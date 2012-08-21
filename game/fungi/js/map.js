@@ -35,6 +35,32 @@ map.prototype.latlon_to_tile=function(lat,lon,zoom) {
                 1/Math.cos(lat_rad))/Math.PI)/2.0*m));
 }
 
+map.prototype.tile_to_latlon=function(x,y,z) {
+    var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+    return [(180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))),
+            (x/Math.pow(2,z)*360-180)];
+}
+
+map.prototype.distance_km=function(lat1,lon1,lat2,lon2) {
+    var R = 6371; // km 
+    var la1=lat1*Math.PI/180;
+    var lo1=lon1*Math.PI/180;
+    var la2=lat2*Math.PI/180;
+    var lo2=lon2*Math.PI/180;
+    return Math.acos(Math.sin(la1)*Math.sin(la2) + 
+           Math.cos(la1)*Math.cos(la2) *
+           Math.cos(lo2-lo1)) * R;
+}
+
+map.prototype.distance_from_centre=function(game_tile_pos) {
+    var map_pos=this.game_to_map(game_tile_pos);
+    var latlon=this.tile_to_latlon(map_pos.x,map_pos.y,this.zoom);
+    return this.distance_km(this.centre.x,
+                            this.centre.y,
+                            latlon[0],
+                            latlon[1]);
+}
+
 map.prototype.tile_url=function(x,y,zoom) {
     return "http://a.tile.openstreetmap.org/"+zoom+"/"+x+"/"+y+".png";
 }

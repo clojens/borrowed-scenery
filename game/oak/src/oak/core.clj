@@ -45,8 +45,8 @@
 ; ****************************************************************
 ; Uncomment the two lines below and run once to create a new world
 ; ****************************************************************
-;;(def my-game-world (ref (make-game-world 200 2)))
-;;(game-world-db-build! (sym-replace2 (deref my-game-world)))
+(def my-game-world (ref (make-game-world 200 2)))
+(game-world-db-build! (sym-replace2 (deref my-game-world)))
 
 (def my-game-world (ref (make-empty-game-world)))
 ;(game-world-populate-oaks (deref my-game-world) 100 10 0 1)
@@ -164,7 +164,9 @@
                 tiles)
                tiles)
       :spirits
-      (:spirits (deref my-game-world))})))
+      (:spirits (deref my-game-world))
+      :most-distant-info
+      (:most-distant-info (deref my-game-world))})))
 
 (defn s-get-msgs [id iefix]
   (let [id (parse-number id)]
@@ -225,12 +227,10 @@
                (deref my-game-world)
                tile-pos
                (fn [tile]
-                 (println "tile found")
                  (tile-modify-entity
                   tile plant-id
                   (fn [plant]
-                    (println "growing")
-                    (plant-user-grow plant)))))))
+                    (plant-user-grow player plant)))))))
     (json {:ok true})))
 
 (defn s-pick [tilex tiley plant-id player-id iefix]
