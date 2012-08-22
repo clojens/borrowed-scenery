@@ -31,6 +31,7 @@
    :layer (plant-type->layer type)
    :state "planted"
    :picked-by-ids ()
+   :grown-by (list "gaia")
    :owner-id owner-id
    :owner owner
    :size 0
@@ -454,8 +455,12 @@
            (min max-fruit (+ f 1)) f))))
    plant)))
 
-(defn plant-user-grow [plant]
-  (modify :state (fn [state] (adv-user state)) plant))
+(defn plant-user-grow [player plant]
+  (modify :state (fn [state] (adv-user state))
+          (modify :grown-by
+                  (fn [gb]
+                    (cons (:name player) gb))
+                  plant)))
 
 (defn plant-update-state [plant time delta season num-neighbours]
   (prof

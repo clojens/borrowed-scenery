@@ -26,11 +26,10 @@ function game(world) {
     this.particle_systems_this_frame=0;
     this.max_particle_systems_per_frame=2;
 
-    //centre=new truffle.vec2(51.05057,3.72729); // becomes 0,0 in world tile space
-    centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
+    centre=new truffle.vec2(51.04751,3.72739); // becomes 0,0 in world tile space
+    //centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
     zoom=17;
     var that=this;
-
 
 /*    this.pstest = new truffle.particles_entity(
         world,
@@ -465,6 +464,12 @@ game.prototype.update_tile=function() {
 
     this.server.listen("pull", function(data) {
         //alert(data.tiles.length);
+        var dist=data["most-distant-info"];
+        var d=that.map.distance_from_centre(dist["tile-pos"]);
+        d=Math.round(d*100)/100;
+        document.getElementById('game-stats').innerHTML = 
+            "Fungi has reached "+d+" km from Vooruit, created by "+dist.player;
+
         data.tiles.forEach(function(tile) {
             var tilepos=tile.pos;
             tile.entities.forEach(function(entity) {

@@ -216,6 +216,30 @@ truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
     return draw_list;
 }
 
+// adds all sprites overlapping the bounding box to the drawlist 
+// in depth order, including the sprite owning the bbox if specified
+truffle.world.prototype.bbox_to_draw_list=function(draw_list,bbox,sprite) {
+    var that=this;
+    // look through the other sprites
+    that.sprites.forEach(function(other) {
+        // if the other is visible
+        // and we intersect it
+        if (!other.hidden &&
+            other.ready_to_draw &&
+            other!=sprite &&
+            other.intersect(bbox)) {
+            // redraw other
+            draw_list=that.add_to_draw_list(other,bbox,draw_list);
+        }
+        
+        // add other now - attempt to maintain the order
+        if (other==sprite) {
+            draw_list=that.add_to_draw_list(other,bbox,draw_list);
+        }
+    });
+    return draw_list;
+}
+
 // creates a list of sprites that have changed, or overlapping those
 // that have changed, in depth order for redrawing
 truffle.world.prototype.build_draw_list=function() {
@@ -228,26 +252,33 @@ truffle.world.prototype.build_draw_list=function() {
             sprite.ready_to_draw &&
             sprite.draw_me) {
             var bbox=sprite.get_last_bbox();
-
-            // look through the other sprites
-            that.sprites.forEach(function(other) {
-                // if the other is visible
-                // and we intersect it
-                if (!other.hidden &&
-                    other.ready_to_draw &&
-                    other!=sprite &&
-                    other.intersect(bbox)) {
-                    // redraw other
-                    draw_list=that.add_to_draw_list(other,bbox,draw_list);
-                }
-
-                // add other now - attempt to maintain the order
-                if (other==sprite) {
-                    draw_list=that.add_to_draw_list(other,bbox,draw_list);
-                }
-            });
+            
+            draw_list=that.bbox_to_draw_list(draw_list,bbox,sprite);
         }
     });
+
+    // do the edges of the screen
+    var l=-(this.canvas_state.world_x+this.canvas_state.world_offset_x);
+    var t=-(this.canvas_state.world_y+this.canvas_state.world_offset_y);        
+    var r=l+this.canvas_state.canvas.width;
+    var b=t+this.canvas_state.canvas.height;
+
+    if (this.canvas_state.refresh_left) {
+        draw_list=this.bbox_to_draw_list(draw_list,[l,t,l+10,b]);
+    }
+
+    if (this.canvas_state.refresh_top) {
+        draw_list=this.bbox_to_draw_list(draw_list,[l,t,r,t+10]);
+    }
+
+    if (this.canvas_state.refresh_right) {
+        draw_list=this.bbox_to_draw_list(draw_list,[r-10,t,r,b]);
+    }
+
+    if (this.canvas_state.refresh_bottom) {
+        draw_list=this.bbox_to_draw_list(draw_list,[l,b-10,r,b]);
+    }
+
     return draw_list;
 }
 

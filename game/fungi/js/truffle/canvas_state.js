@@ -28,6 +28,12 @@ truffle.canvas_state=function() {
     this.world_offset_x=-500;
     this.world_offset_y=400;
 
+    // for world to refresh areas needed by scrolling screen
+    this.refresh_top=false;
+    this.refresh_bottom=false;
+    this.refresh_left=false;
+    this.refresh_right=false;
+
     var _this=this;
 
     this.canvas.addEventListener('mousedown', function(e) {
@@ -64,6 +70,9 @@ truffle.canvas_state.prototype.begin_scene=function() {
     this.ctx.strokeStyle = "#000000";  
     this.ctx.translate(this.world_x+this.world_offset_x,
                        this.world_y+this.world_offset_y);
+
+    // debug bbox mode
+//    this.ctx.globalCompositeOperation = 'xor';
 }
 
 truffle.canvas_state.prototype.end_scene=function() {
@@ -160,43 +169,49 @@ truffle.canvas_state.prototype.move_world_to=function(x,y) {
 
 // scroll screen
 truffle.canvas_state.prototype.update_world_pos=function() {
-    var diff_x=this.world_x+this.world_desired_x;
-    var diff_y=this.world_y+this.world_desired_y;
+    var d=new truffle.vec2(this.world_x+this.world_desired_x,
+                           this.world_y+this.world_desired_y);
+    
+    this.refresh_left=false;
+    this.refresh_right=false;
+    this.refresh_top=false;
+    this.refresh_bottom=false;
 
-    var speed=3;
+    var speed=5;
 
-    if (Math.abs(diff_x)>speed || 
-        Math.abs(diff_y)>speed)
+    if (d.mag()>speed)
     {
-        if (diff_x>0) diff_x=-speed;
-        else diff_x=speed;
-        if (diff_y>0) diff_y=-speed;
-        else diff_y=speed;
-        
+        d=d.normalise().mul(-speed);
+
+        if (d.x<0) this.refresh_right=true;
+        else this.refresh_left=true;
+        if (d.y<0) this.refresh_bottom=true;
+        else this.refresh_top=true;
+
         var sx=0;
-        var dx=diff_x;
-        var width=this.ctx.canvas.width-diff_x;
-        if (diff_x<0) {
-            sx=-diff_x;
+        var dx=d.x;
+        var width=this.ctx.canvas.width-d.x;
+        if (d.x<0) {
+            sx=-d.x;
             dx=0;
-            width=this.ctx.canvas.width+diff_x;
+            width=this.ctx.canvas.width+d.x;
         }
         
         var sy=0;
-        var dy=diff_y;
-        var height=this.ctx.canvas.height-diff_y;
-        if (diff_y<0) {
-            sy=-diff_y;
+        var dy=d.y;
+        var height=this.ctx.canvas.height-d.y;
+        if (d.y<0) {
+            sy=-d.y;
             dy=0;
-            height=this.ctx.canvas.height+diff_y;
+            height=this.ctx.canvas.height+d.y;
         }
         
         this.ctx.drawImage(this.ctx.canvas,
                            ~~(sx),~~(sy),~~(width),~~(height),
                            ~~(dx),~~(dy),~~(width),~~(height));
                
-        this.world_x+=diff_x;
-        this.world_y+=diff_y;
+        this.world_x+=~~(d.x);
+        this.world_y+=~~(d.y);
     }
 }
 

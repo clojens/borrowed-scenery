@@ -170,13 +170,16 @@
                      (make-player 98 "Percy" -1 (rand-nth avatar-types))
                      (make-player 99 "Alan" -1 (rand-nth avatar-types)))
       :summons {}
-      :rules (load-companion-rules "rules.txt"))
-     (repeatedly 100
+      :rules (load-companion-rules "rules.txt")
+      :most-distant-info {:distance 0
+                          :player ""
+                          :tile-pos (make-vec2 0 0)
+                          :pos (make-vec2 0 0)})
+     (repeatedly 10
                  (fn []
                    (make-random-plant
                     (id-gen)
-                    (make-vec2 (- (rand-int 10) 5)
-                               (- (rand-int 10) 5))
+                    (make-vec2 0 0)
                     (make-vec2 (rand-int 5)
                                (rand-int 5))))))))
 
@@ -335,7 +338,11 @@
                :id-gen id-gen
                :spirits ()
                :summons {}
-               :rules (load-companion-rules "rules.txt"))]
+               :rules (load-companion-rules "rules.txt")
+               :most-distant-info {:distance 0
+                                   :player ""
+                                   :tile-pos (make-vec2 0 0)
+                                   :pos (make-vec2 0 0)})]
     (game-world-upgrade-db! world)
     world))
 
@@ -728,6 +735,42 @@
       (db-destroy! :tiles (first items))))
   game-world)
 
+(defn game-world-distance [tile-pos pos]
+  (let [wp (make-vec2 (+ (* (:x tile-pos) 5) (:x pos))
+                      (+ (* (:y tile-pos) 5) (:y pos)))]
+    (if (or (< (:x wp) 0) (> (:x wp) 0)
+            (< (:y wp) 0) (> (:y wp) 0))
+      (vec2-mag wp)
+      0)))
+
+(defn game-world-update-distance-info [game-world time]
+  (db-partial-reduce
+   (fn [gw tile]
+     (reduce
+      (fn [gw entity]
+        (if (= (:entity-type entity) "plant")
+          (let [distance (game-world-distance (:pos tile)
+                                              (:pos entity))]
+            ;;(println distance)
+            ;;(println (:most-distant-info gw))
+            (if (> distance (:distance (:most-distant-info gw)))
+              (modify
+               :most-distant-info
+               (fn [di]
+                 {:distance distance
+                  :player (first (:grown-by entity))
+                  :tile-pos (:pos tile)
+                  :pos (:pos entity)})
+               gw)
+              gw))
+          gw))
+      gw
+      (:entities tile)))
+   game-world
+   :tiles
+   time
+   server-db-items))
+
 ;; !! won't work for offesets greater than one tile
 (defn game-world-calc-world-pos [tilepos pos offset size]
   (let [new-pos (vec2-add pos offset)]
@@ -762,14 +805,17 @@
                (game-world-add-entity
                 gw
                 (:tile-pos world-pos)
-                (make-plant
-                 ((:id-gen game-world))
-                 (:tile-pos world-pos)
-                 (:pos world-pos)
-                 (:type entity)
-                 (:owner entity)
-                 (:owner-id entity)
-                 (:soil entity))
+                (modify
+                 :grown-by
+                 (fn [gb] (list (first (:grown-by entity))))
+                 (make-plant
+                  ((:id-gen game-world))
+                  (:tile-pos world-pos)
+                  (:pos world-pos)
+                  (:type entity)
+                  (:owner entity)
+                  (:owner-id entity)
+                  (:soil entity)))
                 time delta)))
            gw
            (game-world-make-rnd-pos-list))
@@ -828,17 +874,18 @@
                       (log-add-msg log msg))
                     log
                     msgs))
-            (game-world-cull-empty-tiles
-             (game-world-update-ushahidi
-              (game-world-update-players
-               (game-world-summon-to-ill-plants
-                (game-world-spore
-                 (game-world-update-tiles
-                  (game-world-post-logs-to-players
-                   (game-world-clear-old-summons
-                    game-world time delta)
-                   msgs) time delta) time delta) time) time)
-              time delta)))))
+            (game-world-update-distance-info
+             (game-world-cull-empty-tiles
+              (game-world-update-ushahidi
+               (game-world-update-players
+                (game-world-summon-to-ill-plants
+                 (game-world-spore
+                  (game-world-update-tiles
+                   (game-world-post-logs-to-players
+                    (game-world-clear-old-summons
+                     game-world time delta)
+                    msgs) time delta) time delta) time) time)
+               time delta)) time))))
 
 (defn game-world-find-spirit
   "get the spirit from it's name"
