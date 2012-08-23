@@ -18,7 +18,37 @@
    ;clojure.math.numeric-tower
    clojure.algo.generic.math-functions
    [clojure.data.json :only (read-json json-str)]
-   oak.vec2))
+   oak.vec2
+   clojure.java.jdbc))
+
+(println "1 --------------------------------------------------")
+
+(let [db-host "localhost"
+      db-port 3306
+      db-name "borrowed_scenery"]
+ 
+  (def db {:classname "com.mysql.jdbc.Driver" ; must be in classpath
+           :subprotocol "mysql"
+           :subname (str "//" db-host ":" db-port "/" db-name)
+           ; Any additional keys are passed to the driver
+           ; as driver-specific properties.
+           :user "root"
+           :password "JYbR1s1FOXtaRmBInA4a05jfQFBV"}))
+
+(println "2 --------------------------------------------------")
+
+
+(with-connection db 
+  (println "3 --------------------------------------------------")
+  (with-query-results rs ["select * from comment"] 
+    (println "4 --------------------------------------------------")
+     ; rs will be a sequence of maps, 
+     ; one for each record in the result set. 
+     (dorun (map #(println (:title %)) rs))))
+
+
+(println "5 --------------------------------------------------")
+
 
 (def url "http://borrowed-scenery.org/boskoi/api")
 (def centre (list 51.04751 3.72739))
@@ -106,4 +136,18 @@
      (:body
       (client/get (str url "?task=incidents&by=sinceid&id=" id)))))))
 
-(println (latlon-to-tile (nth centre 0) (nth centre 1) zoom))
+;;(println (latlon-to-tile (nth centre 0) (nth centre 1) zoom))
+
+(defn ushahidi-add-incident-comment [id name comment]
+  (println (str url "?task=comments&incident_id=" id
+                "&comment_author=" name
+                "&comment_description=" comment
+                "&comment_email=nebogeo@gmail.com"))
+  (println
+   (client/post (str url "?task=comments&incident_id=" id
+                     "&comment_author=" name
+                     "&comment_description=" comment
+                     "&comment_email=nebogeo@gmail.com"))))
+
+
+;;(ushahidi-add-incident-comment "11" "dave" "testing+comments")
