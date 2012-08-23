@@ -18,7 +18,8 @@
    oak.forms
    oak.log
    oak.defs
-   oak.profile))
+   oak.profile
+   oak.ushahidi))
 
 (defn make-ushahidi-plant [id name pos layer ush-id date lat lng fract incident]
   (hash-map
@@ -36,4 +37,41 @@
    :lng lng
    :fract fract
    :incident incident
+   :neighbours ()
+   :power 0
    ))
+
+(defn ushahidi-plant-count-fungi [neighbours]
+  (reduce
+   (fn [r entity]
+     (if (= (:entity-type entity) "plant")
+       (+ r 1) r))
+   0
+   neighbours))
+
+
+(defn ushahidi-plant-add-neighbour [plant entity]
+  (modify
+   :neighbours (fn [n] (cons (:id entity) n)) plant))
+
+(defn ushahidi-plant-thank [plant player-name]
+  plant)
+  
+(defn ushahidi-plant-powerup [plant entity]
+  (reduce
+   (fn [plant player-name]
+     (ushahidi-plant-thank plant player-name))
+   (ushahidi-plant-add-neighbour plant entity)
+   (:grown-by entity)))
+    
+(defn ushahidi-plant-update-neighbours [plant neighbours]
+  (reduce
+   (fn [plant entity]
+     (if (not (list-contains? (:id entity)))
+       (ushahidi-plant-powerup plant entity)
+       plant))
+   plant
+   neighbours))
+
+(defn ushahidi-plant-update [plant neighbours]
+  (ushahidi-plant-update-neighbours plant neighbours))

@@ -21,34 +21,8 @@
    oak.vec2
    clojure.java.jdbc))
 
-(println "1 --------------------------------------------------")
-
-(let [db-host "localhost"
-      db-port 3306
-      db-name "borrowed_scenery"]
- 
-  (def db {:classname "com.mysql.jdbc.Driver" ; must be in classpath
-           :subprotocol "mysql"
-           :subname (str "//" db-host ":" db-port "/" db-name)
-           ; Any additional keys are passed to the driver
-           ; as driver-specific properties.
-           :user "root"
-           :password "JYbR1s1FOXtaRmBInA4a05jfQFBV"}))
-
-(println "2 --------------------------------------------------")
-
-
-(with-connection db 
-  (println "3 --------------------------------------------------")
-  (with-query-results rs ["select * from comment"] 
-    (println "4 --------------------------------------------------")
-     ; rs will be a sequence of maps, 
-     ; one for each record in the result set. 
-     (dorun (map #(println (:title %)) rs))))
-
-
-(println "5 --------------------------------------------------")
-
+;; sellotape and scissors in here, mixing normal requests via the public
+;; api and direct database manipulation
 
 (def url "http://borrowed-scenery.org/boskoi/api")
 (def centre (list 51.04751 3.72739))
@@ -127,6 +101,7 @@
                        (mod (* wy game-tile-div) 1))}))
 
 ;;-----------------------------------------------------------------
+;; input - via the ushahidi api
 
 ; todo - error check!
 (defn ushahidi-get-incidents-since [id]
@@ -138,16 +113,24 @@
 
 ;;(println (latlon-to-tile (nth centre 0) (nth centre 1) zoom))
 
+;;-----------------------------------------------------------------
+;; output - direct via sql :(
+
+(def db {:classname "com.mysql.jdbc.Driver"
+         :subprotocol "mysql"
+         :subname "//localhost:3306/borrowed_scenery"
+         :user "root"
+         :password (slurp "secret.txt")})
+
+(defn insert-comment [id name comment]
+  (insert-values :comment
+                 [:incident_id :comment_author :comment_description]
+                 [id name comment]))
+
 (defn ushahidi-add-incident-comment [id name comment]
-  (println (str url "?task=comments&incident_id=" id
-                "&comment_author=" name
-                "&comment_description=" comment
-                "&comment_email=nebogeo@gmail.com"))
-  (println
-   (client/post (str url "?task=comments&incident_id=" id
-                     "&comment_author=" name
-                     "&comment_description=" comment
-                     "&comment_email=nebogeo@gmail.com"))))
+  (with-connection db
+    (insert-comment id name comment)))
 
 
-;;(ushahidi-add-incident-comment "11" "dave" "testing+comments")
+
+
