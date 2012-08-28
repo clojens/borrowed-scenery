@@ -225,6 +225,11 @@
                             (:pos tile) (:id e) (:pos e) neighbouring-tiles)))
                          rules
                          season))
+                  (= (:entity-type e) "ushahidi")
+                  (ushahidi-plant-update
+                   e
+                   (tile-get-neighbours
+                    (:pos tile) (:id e) (:pos e) neighbouring-tiles))
                   :else e))
                (filter
                 (fn [e]

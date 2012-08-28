@@ -114,7 +114,7 @@
 ;;(println (latlon-to-tile (nth centre 0) (nth centre 1) zoom))
 
 ;;-----------------------------------------------------------------
-;; output - direct via sql :(
+;; output - direct via sql! :(
 
 (def db {:classname "com.mysql.jdbc.Driver"
          :subprotocol "mysql"
@@ -122,10 +122,20 @@
          :user "root"
          :password (slurp "secret.txt")})
 
+(defn current-sql-time []
+  (.format (new java.text.SimpleDateFormat "yyyy-MM-dd hh:mm:ss")
+           (new java.util.Date)))
+
 (defn insert-comment [id name comment]
   (insert-values :comment
-                 [:incident_id :comment_author :comment_description]
-                 [id name comment]))
+                 [:incident_id
+                  :comment_author
+                  :comment_description
+                  :comment_email
+                  :comment_date
+                  :comment_active]
+                 [id name comment "nebogeo@gmail.com"
+                  (current-sql-time) 1]))
 
 (defn ushahidi-add-incident-comment [id name comment]
   (with-connection db

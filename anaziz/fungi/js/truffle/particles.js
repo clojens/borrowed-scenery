@@ -13,13 +13,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-truffle.sprite=function(pos, tex, midbot, viz) {	
-    truffle.drawable.call(this);
-    if (midbot==null) midbot=false;
-    if (viz==null) viz=true;
+// modes:
+// "one-shot" - puff of particles, use finished to desroy
+// "continuous"
+// "reverse-continuous" 
 
+truffle.particles=function(pos, tex, count, mode) {	
+    truffle.drawable.call(this);
     this.pos=pos;
-    this.do_centre_middle_bottom=midbot;
+    this.mode=mode;
+    this.max_age=100;
+    this.global_age=0;
+    this.particles=[];
+    this.delete_me=false; // will be checked by owner entity
+    this.disable_bg_redraw=true;
+
+    for (var i=0; i<count; i++) {
+        this.particles.push({
+            "vel": circ_rndvec2().mul(5),
+            "pos": new truffle.vec2(0,0),
+            "age": rndi(0,this.max_age)
+        });
+    }
+
     this.image=null;
     this.draw_image=null;
     this.ready_to_draw=false;
@@ -30,9 +46,9 @@ truffle.sprite=function(pos, tex, midbot, viz) {
     this.set_pos(this.pos);
 }
 
-truffle.sprite.prototype=inherits_from(truffle.drawable,truffle.sprite);
+truffle.particles.prototype=inherits_from(truffle.drawable,truffle.particles);
 
-truffle.sprite.prototype.set_bitmap=function(b,recalc_bb) {
+truffle.particles.prototype.set_bitmap=function(b,recalc_bb) {
     this.image=b;
     this.ready_to_draw=true;
     if (recalc_bb==undefined) this.set_size(this.image.width,this.image.height);
@@ -40,14 +56,14 @@ truffle.sprite.prototype.set_bitmap=function(b,recalc_bb) {
     this.draw_image=b;
 }
 
-truffle.sprite.prototype.change_bitmap=function(t) {
+truffle.particles.prototype.change_bitmap=function(t) {
     if (this.image==null || 
         t.name!=this.image.src) {
         this.load_from_url(t);
     }
 }
 
-truffle.sprite.prototype.load_from_url=function(url) {
+truffle.particles.prototype.load_from_url=function(url) {
     var c=this;
     this.image=new Image();
     this.image.onload = function() {
@@ -66,66 +82,54 @@ truffle.sprite.prototype.load_from_url=function(url) {
     this.image.src = url;  
 }
 
-
-truffle.sprite.prototype.set_offset_colour=function(s) {
-    this.offset_colour=s;
-    if (this.ready_to_draw) {
-        this.add_tint(s);
-    }
-}
-
-truffle.sprite.prototype.get_offset_colour=function() {
-    return this.offset_colour;
-}
-
-// tint the image pixel by pixel
-truffle.sprite.prototype.add_tint=function(col) {
-    return;
-    if (!this.ready_to_draw) return;
-
-    var w = this.image.width;
-    var h = this.image.height;
-    var canvas = document.createElement("canvas");
-    canvas.width  = w;
-    canvas.height = h;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(this.Image,0,0);
-    var pixels = ctx.getImageData(0,0,w,h).data;
-
-    var canvas = document.createElement("canvas");
-    canvas.width  = w;
-    canvas.height = h;
-    
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage( this.image, 0, 0 );
-    var to = ctx.getImageData( 0, 0, w, h );
-    var to_data = to.data;
-    
-    for (var i=0, len=pixels.length; i<len; i+=4) {
-        to_data[i  ] = pixels[i  ]+col.x;
-        to_data[i+1] = pixels[i+1]+col.y;
-        to_data[i+2] = pixels[i+2]+col.z;
-        to_data[i+3] = pixels[i+3];
-    }
-    
-    ctx.putImageData( to, 0, 0 );
-    
-    // image is _slightly_ faster then canvas for this, so convert
-    this.draw_image = new Image();
-    this.draw_image.src = canvas.toDataURL();
-}
-
-truffle.sprite.prototype.update=function(frame, tx) {
+// todo: "frame" should be "time" and made fps independant!
+truffle.particles.prototype.update=function(frame, tx) {
     this.draw_me=true;
     this.parent_transform=tx;
+    var that=this;
+
+    this.particles.forEach(function(particle) {
+        if (that.mode!="one-shot" && 
+            particle.age>that.max_age) {
+            particle.pos.x=0;
+            particle.pos.y=0;
+            particle.age=Math.floor(Math.random()*5);
+        }
+        particle.pos.x+=particle.vel.x;
+        particle.pos.y+=particle.vel.y;
+        particle.vel.x*=0.95;
+        particle.vel.y*=0.95;
+        particle.age++;
+    });
+    
+    if (this.mode=="one-shot" && this.global_age>this.max_age) {
+        this.delete_me=true;
+    }
+
+    this.global_age++;
 }
 
-truffle.sprite.prototype.draw=function(ctx) {
+truffle.particles.prototype.inner_draw=function(ctx,x,y) {
+    var that=this;
+    ctx.save()
+    //ctx.globalCompositeOperation = "lighter";
+    this.particles.forEach(function(particle) {
+        if (particle.age<that.max_age) {
+            ctx.globalAlpha=1-particle.age/(that.max_age+1); // +1 to sort glitch
+            ctx.drawImage(that.draw_image,
+                          ~~(0.5+particle.pos.x+x),
+                          ~~(0.5+particle.pos.y+y));
+        }
+    });
+    ctx.restore();
+}
+
+
+truffle.particles.prototype.draw=function(ctx) {
     if (!this.ready_to_draw) return;
 
     // two render paths
     if (this.complex_transform || this.parent_transform) {
-        
         ctx.save();
         ctx.transform(this.transform.m[0],
                       this.transform.m[1],
@@ -133,7 +137,7 @@ truffle.sprite.prototype.draw=function(ctx) {
                       this.transform.m[3],
                       this.transform.m[4],
                       this.transform.m[5]);
-       
+        
         if (this.parent_transform!=null) {
             ctx.transform(this.parent_transform.m[0],
                           this.parent_transform.m[1],
@@ -143,16 +147,13 @@ truffle.sprite.prototype.draw=function(ctx) {
                           this.parent_transform.m[5]);
         }
         
-        ctx.drawImage(this.draw_image,
-                      ~~(0.5+(-this.centre.x)),
-                      ~~(0.5+(-this.centre.y)));
+        this.inner_draw(ctx,-this.centre.x,-this.centre.y);
         ctx.restore();
     }
     else // simple render path
     {
-        ctx.drawImage(this.draw_image,
-                      ~~(0.5+this.pos.x-this.centre.x),
-                      ~~(0.5+this.pos.y-this.centre.y));
+        this.inner_draw(ctx,this.pos.x-this.centre.x,
+                        this.pos.y-this.centre.y);
     }
 
     if (this.draw_bb) {

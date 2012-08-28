@@ -18,6 +18,7 @@ truffle.drawable=function()
     this.ready_to_draw=true;
     this.hidden=false;
     this.draw_me=true;
+    this.disable_bg_redraw=false;
     this.id=-1;
     this.depth=0;
     this.width=64;
@@ -39,6 +40,7 @@ truffle.drawable=function()
     this.mouseout_func=null;
 
     this.enable_mouse(false);
+
 }
 
 truffle.drawable.prototype.set_id=function(s) { this.id=s; }

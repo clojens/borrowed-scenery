@@ -92,7 +92,6 @@ truffle.canvas_state.prototype.clear_rects=function(bboxes) {
 
 truffle.canvas_state.prototype.set_clip=function(bboxes) {
     this.ctx.save();
-
 /*
     this.ctx.strokeStyle = "#ff0000";
     var that=this;
@@ -244,8 +243,6 @@ truffle.canvas_state.prototype.update_mouse = function(e) {
 }
 
 truffle.canvas_state.prototype.stats=function(num) {
-
-
     this.ctx.fillStyle="#000000";
     this.ctx.fillRect(10,10,100,10);
 
