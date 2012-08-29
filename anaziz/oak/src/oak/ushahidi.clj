@@ -120,13 +120,13 @@
          :subprotocol "mysql"
          :subname "//localhost:3306/borrowed_scenery"
          :user "root"
-         :password (slurp "secret.txt")})
+         :password "CyonckEt8"})
 
 (defn current-sql-time []
   (.format (new java.text.SimpleDateFormat "yyyy-MM-dd hh:mm:ss")
            (new java.util.Date)))
 
-(defn insert-comment [id name text]
+(defn insert-comment [id name text time]
   (insert-values :comment
                  [:incident_id
                   :comment_author
@@ -135,11 +135,12 @@
                   :comment_date
                   :comment_active]
                  [id name text "nebogeo@gmail.com"
-                  (current-sql-time) 1]))
+                  time 1]))
 
 (defn ushahidi-add-incident-comment [id name text]
-  (comment with-connection db
-    (insert-comment id name text)))
+  (let [time (current-sql-time)]
+  (with-connection db
+    (insert-comment id name text time))))
 
 
 

@@ -89,6 +89,7 @@ div.rapidxwpr{
 
 /* header */
 div#header{
+    background: url('../images/header_photo.jpg') no-repeat left bottom;
     position: relative;
     height: 144px;
     margin: 0px 0px 0px 0px;

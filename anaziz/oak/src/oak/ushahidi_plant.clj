@@ -55,7 +55,7 @@
    :neighbours (fn [n] (cons (:id entity) n)) plant))
 
 (defn ushahidi-plant-thank [plant player-name]
-  (let [in (:incident (:incident plant))
+  (let [in (:incident plant)
         ush-id (:incidentid in)]
     (println "thanking" player-name)
     (ushahidi-add-incident-comment
