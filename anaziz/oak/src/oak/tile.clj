@@ -18,7 +18,8 @@
    oak.plant
    oak.forms
    oak.defs
-   oak.profile))
+   oak.profile
+   oak.ushahidi-plant))
 
 ; tiles are containers for all entities, their size is defined
 ; by tile-size in defs.clj. chunked together in 3X3 units for

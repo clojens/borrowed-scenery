@@ -45,7 +45,7 @@
 
 ;; borrowed scenery stuff
 (def plant-influence-distance 5)
-(def spore-count 5)
+(def spore-count 1)
 (def max-neighbours 20)
 (def min-neighbours 0)
 

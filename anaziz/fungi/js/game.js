@@ -24,7 +24,18 @@ function game(world) {
     this.tile_change=false;
     this.loading_spr=null;
     this.particle_systems_this_frame=0;
-    this.max_particle_systems_per_frame=2;
+    this.max_particle_systems_per_frame=1;
+    this.map_update_frame_count=0;
+    this.update_next_frame=false;
+    this.border_min=1;
+    this.border_max=13;
+
+    this.arrow_indicator=new truffle.sprite_entity(
+        this.world,
+        new truffle.vec3(-999,5,-1),
+        "");
+    this.arrow_indicator.needs_update=true;
+    this.arrow_indicator.depth_offset=-100;
 
     centre=new truffle.vec2(51.04751,3.72739); // becomes 0,0 in world tile space
     //centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
@@ -38,17 +49,18 @@ function game(world) {
         20,"continuous");
     this.pstest.needs_update=true;
 */
-    var camera_pos=world.screen_transform(new truffle.vec3(5,5,1));
+    var camera_pos=world.screen_transform(new truffle.vec3(7,7,1));
     world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
 
     this.map=new map(centre,zoom);
     this.map.do_create_tile=function(world_x,world_y,sub_image) {
+        var x=world_x+sub_image[0];
+        var y=world_y+sub_image[1];
+
         var s=new truffle.sprite_entity(
             that.world,
-            new truffle.vec3(world_x+sub_image[0],
-                             world_y+sub_image[1],0),
+            new truffle.vec3(x,y,0),
             "images/empty_map.png");
-        
 
         //s.spr.draw_bb=true;
         s.spr.set_bitmap(sub_image[2]); 
@@ -66,8 +78,25 @@ function game(world) {
         s.spr.expand_bb=20; // enable larger clipping region
         s.spr.do_transform=true;
 
+        // show the compass
+        if (x>that.border_max || x<that.border_min || 
+            y>that.border_max || y<that.border_min) { 
+            s.spr.mouse_over(function() {
+                if (x>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-east.png");
+                if (x<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-west.png");
+                if (y>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-south.png");
+                if (y<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-north.png");
+
+                that.arrow_indicator.move_to(that.world,new truffle.vec3(x,y,0));
+            });
+            s.spr.mouse_out(function() {
+                // hack
+                that.arrow_indicator.move_to(that.world,new truffle.vec3(-999,0,0));
+            });
+        }
+
         s.spr.mouse_down(function() {
-                      
+            
             that.move_player(s.logical_pos);
 
             //if (px==9) { that.player.tile.x+=2; that.update_tile() }
@@ -80,7 +109,20 @@ function game(world) {
     this.map.do_update_tile=function(world_x,world_y,sub_image,entity) {
         entity.spr.set_bitmap(sub_image[2],true); 
     }
+
+    this.updating_text=new truffle.textbox(new truffle.vec2(0,0),
+                                           "loading map...",
+                                           500,300,"50pt times");
+    this.world.add_sprite(this.updating_text);
+    this.updating_text.hide(true);
+    this.world.pre_sort_scene=function(depth) {
+        that.updating_text.set_depth(depth++);
+        return depth;
+    }
+
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -93,6 +135,7 @@ game.prototype.connect_and_login=function(name) {
     this.server.listen("login", function(player) {
         that.logged_in=true;
         that.player=player;
+        that.tile_change=true;
         log(that.player.name+" has logged in");
         that.update_tile()
     });
@@ -151,7 +194,7 @@ game.prototype.update_entity=function(entity,from_server,tile) {
                                          entity.logical_pos.y,
                                          -1),
                         "images/particle.png",
-                        20, "one-shot");
+                        10, "one-shot");
                     this.particle_systems_this_frame++;
                 }
             }
@@ -225,22 +268,22 @@ game.prototype.move_player=function(to) {
             var tcy=0;
 
             // this part sucks
-            if (px>12) { 
+            if (px>that.border_max) { 
                 that.player.tile.x+=1;
                 that.tile_change=true;
                 tcx=-5;
             }
-            if (px<2) { 
+            if (px<that.border_min) { 
                 that.player.tile.x-=1;
                 that.tile_change=true;
                 tcx=5;
             }  
-            if (py>12) { 
+            if (py>that.border_max) { 
                 that.player.tile.y+=1;
                 that.tile_change=true;
                 tcy=-5;
             }  
-            if (py<2) { 
+            if (py<that.border_min) { 
                 that.player.tile.y-=1;
                 that.tile_change=true;
                 tcy=5;
@@ -249,6 +292,7 @@ game.prototype.move_player=function(to) {
             if (that.tile_change) {
                 that.avatar.speed=0;
                 that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));
+                that.avatar.hide(true);
             }
 
             // need to figure out server tile by looking at current
@@ -448,10 +492,33 @@ game.prototype.shift_entities=function(x,y) {
 //////////////////////////////////////////////////////////////////////////
 
 game.prototype.update_tile=function() {
+    // defer doing the update so the wait text gets shown
+    if (this.update_next_frame) {
+        this.do_update_tile();
+        this.update_next_frame=false;
+        return;
+    }
+
+    if (this.tile_change) {
+        this.updating_text.hide(false);
+        this.updating_text.set_pos(this.world.in_screen_coords(0,-200));
+        this.update_next_frame=true;
+        this.world.redraw();
+        this.world.do_render=false;
+        return;
+    }
+ 
+    this.do_update_tile();
+}
+
+game.prototype.do_update_tile=function() {
     var that=this;
     if (!this.player) return;
 
-    this.map.update(this.player.tile,function() {}, function() {});
+    this.map.update(this.player.tile, 
+                    function() {
+                        that.map_update_frame_count=1;
+                    });
 
     if (this.tile_change) {
         this.clear_entities();
@@ -499,6 +566,19 @@ game.prototype.server_to_client_coords=function(wtx,wty,tx,ty,px,py) {
 
 game.prototype.update=function() {
     var time=(new Date).getTime();
+
+    // render some frame to make sure! :(
+    if (this.map_update_frame_count>5) {
+        this.updating_text.hide(true);
+        this.map_update_frame_count=0;
+        this.world.do_render=true;
+        this.avatar.hide(false);
+        this.world.redraw();
+    }
+
+    if (this.map_update_frame_count>0) {
+        this.map_update_frame_count++;
+    }
 
     if (this.next_pull_time<time)
     {

@@ -27,7 +27,6 @@ truffle.textbox=function(pos, text, w, h, font) {
     this.last_parent_pos=new truffle.vec2(this.pos.x,this.pos.y);
     this.text_colour="#000000";
     this.ready_to_draw=true;
-    this.hidden=false;
 
     this.set_pos(pos);
     this.set_text(text);
@@ -37,7 +36,6 @@ truffle.textbox.prototype=inherits_from(truffle.drawable,truffle.textbox);
 
 truffle.textbox.prototype.update=function(frame, tx) {
     this.ready_to_draw=true;
-    this.hidden=false;
     this.draw_me=true;
     this.parent_transform=tx;
 }
@@ -114,6 +112,9 @@ truffle.textbox.prototype.get_bbox=function() {
 
 
 truffle.textbox.prototype.draw=function(ctx) {
+
+//    if (this.id=999) log("rendering text");
+
     if (this.text.length==0) {
         this.last_pos.x=this.pos.x;
         this.last_pos.y=this.pos.y;    
@@ -179,7 +180,7 @@ truffle.textbox.prototype.draw=function(ctx) {
                      this.width,this.height); 
         ctx.globalAlpha=1;
 
-        ctx.fillStyle = "#ff00ff";
+        ctx.fillStyle = this.text_colour;
         ctx.textAlign = "left";
         this.text.forEach(function(text) {
             ctx.fillText(text,

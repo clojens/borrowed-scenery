@@ -94,12 +94,12 @@
         	</intent-filter>
         </activity>
         <!-- boskoiblogtabgroup  -->
-        <activity android:name=".BoskoiBlogTabGroup" android:label="@string/add_location"  android:screenOrientation="portrait">
+ <!--       <activity android:name=".BoskoiBlogTabGroup" android:label="@string/add_location"  android:screenOrientation="portrait">
         	<intent-filter>
         		<action android:name="android.intent.action.VIEW" />
         		<category android:name="android.intent.category.DEFAULT"></category>
         	</intent-filter>
-        </activity>        
+        </activity>    -->    
         <!--  About -->
         <activity android:name=".About" android:label="@string/boskoi_about" android:screenOrientation="portrait">
             <intent-filter>

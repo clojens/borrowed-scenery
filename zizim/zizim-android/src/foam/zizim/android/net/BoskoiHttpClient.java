@@ -152,7 +152,8 @@ public class BoskoiHttpClient {
              req.setParameter("incident_photo[]", new File(BoskoiService.savePath + params.get("filename")));
              
 
-             Log.i("XXXX",req.toString());
+             Log.i("ZZZZ",req.toString());
+             Log.i("ZZZZ",params.get("incident_category"));
              
              InputStream serverInput = req.post();
 

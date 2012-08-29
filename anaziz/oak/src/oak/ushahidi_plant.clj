@@ -60,7 +60,8 @@
     (println "thanking" player-name)
     (ushahidi-add-incident-comment
      ush-id player-name
-     comment)))
+     (str player-name " has helped this plant in anaziz")))
+  plant)
   
 (defn ushahidi-plant-powerup [plant entity]
   (reduce
@@ -72,7 +73,7 @@
 (defn ushahidi-plant-update-neighbours [plant neighbours]
   (reduce
    (fn [plant entity]
-     (if (not (list-contains? (:id entity)))
+     (if (not (list-contains? (:neighbours plant) (:id entity)))
        (ushahidi-plant-powerup plant entity)
        plant))
    plant

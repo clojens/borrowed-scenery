@@ -23,6 +23,7 @@ truffle.world.prototype.clear=function() {
     this.current_depth=1000;
     this.current_id=0;
     this.time=0;
+    this.do_render=true;
 
     this.canvas_state=new truffle.canvas_state();
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
@@ -84,6 +85,11 @@ truffle.world.prototype.inverse_screen_transform=function(pos) {
     return r;
 }
 
+truffle.world.prototype.in_screen_coords=function(x,y) {
+    return new truffle.vec2(x-this.canvas_state.world_x,
+                            y-this.canvas_state.world_y);
+}
+
 truffle.world.prototype.add=function(e) {
     this.scene.push(e);
 }
@@ -121,7 +127,8 @@ truffle.world.prototype.set_current_tile_pos=function(s) {
 }
 
 // override for things on top
-truffle.world.prototype.post_sort_scene=function(depth) {
+truffle.world.prototype.pre_sort_scene=function(depth) {
+    return depth;
 }
 
 // go through each entity in depth order, calling sort on them
@@ -131,12 +138,10 @@ truffle.world.prototype.sort_scene=function() {
         if (a.get_depth()<b.get_depth()) return -1;
         else return 1;
     });
-    var i=0;
+    var i=this.pre_sort_scene(0);
     this.scene.forEach(function (e) {
         i=e.on_sort_scene(this,i);
-    });
-    
-    this.post_sort_scene(i);
+    });    
 }
 
 truffle.world.prototype.add_sprite=function(s) {
@@ -177,13 +182,13 @@ truffle.world.prototype.debug=function(txt) {
 truffle.world.prototype.update_entities=function(time) {
     var that=this;
     this.scene.forEach(function(e) {
-        if (e.tile_pos!=null)
-        {
+//        if (e.tile_pos!=null)
+//        {
             // the current tile pos is surrounded by 8 other
             // visible ones, so see if we are in one of those
-            var diff=e.tile_pos.sub(that.current_tile_pos);
-            e.hide(Math.abs(diff.x)>1 || Math.abs(diff.y)>1);
-        }
+ //           var diff=e.tile_pos.sub(that.current_tile_pos);
+ //           e.hide(Math.abs(diff.x)>1 || Math.abs(diff.y)>1);
+//        }
 
         if (e.needs_update && !e.hidden &&
             (e.update_freq==0 ||
@@ -212,6 +217,12 @@ truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
             return draw_list;
         }
     });
+
+//    if (spr.id=999) { 
+//        log("hhh"); 
+//        log(spr.hidden);
+//    }
+
     draw_list.push({spr:spr,bbox:[bbox]});
     return draw_list;
 }
@@ -325,8 +336,12 @@ truffle.world.prototype.update=function(time) {
     this.remove_deleted_entities();
     this.update_entities(time);
     this.sort_sprites();
-    this.draw_scene(this.build_draw_list());    
+    if (this.do_render) this.draw_scene(this.build_draw_list());    
     this.update_input();
+}
+
+truffle.world.prototype.clear_screen=function() {
+    this.canvas_state.clear_screen();
 }
 
 truffle.world.prototype.redraw=function() {
@@ -344,7 +359,9 @@ truffle.world.prototype.redraw=function() {
 
     this.sprites.forEach(function(s) {
         s.draw_me=true;
-        s.draw(that.canvas_state.ctx);
+        if (!s.hidden) {
+            s.draw(that.canvas_state.ctx);
+        }
     });
     
     this.canvas_state.end_scene();

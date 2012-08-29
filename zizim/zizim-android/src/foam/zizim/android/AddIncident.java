@@ -112,8 +112,8 @@ public class AddIncident extends MapActivity {
     private int mHour;
     private int mMinute;
     private int counter = 0;
-    private static double longitude = 0;
-    private static double latitude = 0;
+    private static double longitude = 51.04751;
+    private static double latitude = 3.72739;
     private String errorMessage = "";
     private String dateToSubmit = "";
 	private boolean error = false;
@@ -299,9 +299,9 @@ public class AddIncident extends MapActivity {
 //				}
 				
 				if( TextUtils.isEmpty(incidentDesc.getText())) {
-					errorMessage += getString(R.string.empty_report_description)+"\n";
-					error = true;
+                    incidentDesc.setText("no description");
 				}
+
 				/*
 				if( TextUtils.isEmpty(incidentLocation.getText()) || incidentLocation.getText().length() < 3) {
 					errorMessage += getString(R.string.empty_report_location)+"\n";
@@ -310,9 +310,14 @@ public class AddIncident extends MapActivity {
 				
 				//Dipo Fix
 				if(vectorCategories.size() == 0) {
-					errorMessage += getString(R.string.empty_report_categories)+"\n";
-					error = true;
+					//errorMessage += getString(R.string.empty_report_categories)+"\n";
+					//error = true;
+                    vectorCategories.add("999");
+                    vectorCategoriesData.add("uncategorised");
+                    selectedCategories.setText("uncategorised");
                 }
+                
+                Log.i("PPPP",vectorCategories.get(0));
 
 /*				if(!TextUtils.isEmpty(firstName.getText()) && firstName.getText().length() < 3){
 					errorMessage += getString(R.string.not_enough_first_name)+"\n";
@@ -331,9 +336,12 @@ public class AddIncident extends MapActivity {
 */				
 				if( !error ) {
 					if( Util.isConnected(AddIncident.this) ){ 
+                        Log.i("PPPP","111");
 						if( !postToOnline() ) {
+                            Log.i("PPPP","sending...");
 							mHandler.post(mSentIncidentFail);
 						}else { 
+                            Log.i("PPPP","222");
 							mHandler.post(mSentIncidentSuccess);
 							clearFields();
 							
@@ -358,6 +366,7 @@ public class AddIncident extends MapActivity {
 					}
 				
 				}else{
+                    Log.i("PPPP","333");
 					final Toast t = Toast.makeText(AddIncident.this,
 							errorMessage.substring(0, errorMessage.length()-1),
 							Toast.LENGTH_LONG);
@@ -471,7 +480,7 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
 	public String[] showCategories() {
 		  Cursor cursor = BoskoiApplication.mDb.fetchAllCategories();
 
-          Log.i("XXXXXXX",""+cursor.getCount());
+          Log.i("XXXXXXX showcat",""+cursor.getCount());
 
 		  
 		  String categories[] = new String[cursor.getCount()];
@@ -486,6 +495,7 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
 			  do {
 				  categories[i] = cursor.getString(titleIndex);
                   Log.i("XXXXXXX",categories[i]);
+                  Log.i("XXXXXXX",String.valueOf(cursor.getInt(idIndex)));
 				  categoriesTitle.put(String.valueOf(cursor.getInt(idIndex)), 
 						  cursor.getString(titleIndex));
 				  categoriesId.add(String.valueOf(cursor.getInt(idIndex)));
@@ -989,6 +999,7 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
     	String categories = Util.implode(vectorCategories);
 
         Log.i("XXXXX",dateToSubmit);
+        Log.i("XXXXX",categories);
         Log.i("XXXXX",firstName.getText().toString());
         Log.i("XXXXX",lastName.getText().toString());
         Log.i("XXXXX",email.getText().toString());

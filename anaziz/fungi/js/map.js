@@ -157,13 +157,12 @@ map.prototype.game_to_map=function(tile_pos) {
         Math.round(this.centre_tile.y+tile_pos.y));
 }
 
-map.prototype.update=function(tile_pos,on_load_start,on_load_end) {
+map.prototype.update=function(tile_pos,on_load_end) {
     var tile=this.game_to_map(tile_pos);
     if (this.current_tile.x!=tile.x ||
         this.current_tile.y!=tile.y) {
         this.current_tile=tile;
 
-        on_load_start();
         this.loaded_count=0;
         this.load_count=0;
         this.on_load_end=on_load_end;

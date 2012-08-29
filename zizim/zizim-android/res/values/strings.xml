@@ -124,7 +124,7 @@
 	<string name="empty_report_title">Enter a title for the incident</string>
 	<string name="empty_report_description">Enter a description for the incident</string>
 	<string name="empty_report_location">The location description must be at least 3 characters long</string>
-	<string name="empty_report_categories">Select at least one edible type</string>
+	<string name="empty_report_categories">Select at least one type</string>
 	<string name="not_enough_first_name">A first name must be at least 3 characters long</string>
 	<string name="not_enough_last_name">A last name must be at least 3 characters long</string>
 	<string name="report_not_found_for_category">No reports for this edible found</string>
@@ -252,5 +252,5 @@ You should note that the analytics currently can not be turned off. If you do no
 	<string name="blogShareTextInteresting">Interesting</string>
 	<string name="shareBtn">Share post</string>
 
-    <string name="google_map_api_key">0TfsDcb5kkmu-cjEBaoTvz9JVCOalpcgYEzK9sg</string>
+    <string name="google_map_api_key">0TfsDcb5kkmvUfXs3mPZrZhcQEnwOzRRf5Ae1gg</string>
 </resources>

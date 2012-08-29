@@ -63,8 +63,8 @@ public class LocationMap extends MapActivity {
 	private MapController mapController;
 	public static Geocoder gc;
 	private GeoPoint defaultLocation;
-	private double latitude;
-	private double longitude;
+	private double latitude=51.04751;
+	private double longitude=3.72739;
 	private List<IncidentsData> mNewIncidents;
 	private List<IncidentsData> mOldIncidents;
 	private Button btnReset;

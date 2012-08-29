@@ -24,7 +24,7 @@
 ;; sellotape and scissors in here, mixing normal requests via the public
 ;; api and direct database manipulation
 
-(def url "http://borrowed-scenery.org/boskoi/api")
+(def url "http://borrowed-scenery.org/zizim/api")
 (def centre (list 51.04751 3.72739))
 ;;(def centre (list 51.04672 3.73121))
 (def zoom 17)
@@ -126,7 +126,7 @@
   (.format (new java.text.SimpleDateFormat "yyyy-MM-dd hh:mm:ss")
            (new java.util.Date)))
 
-(defn insert-comment [id name comment]
+(defn insert-comment [id name text]
   (insert-values :comment
                  [:incident_id
                   :comment_author
@@ -134,12 +134,12 @@
                   :comment_email
                   :comment_date
                   :comment_active]
-                 [id name comment "nebogeo@gmail.com"
+                 [id name text "nebogeo@gmail.com"
                   (current-sql-time) 1]))
 
-(defn ushahidi-add-incident-comment [id name comment]
-  (with-connection db
-    (insert-comment id name comment)))
+(defn ushahidi-add-incident-comment [id name text]
+  (comment with-connection db
+    (insert-comment id name text)))
 
 
 

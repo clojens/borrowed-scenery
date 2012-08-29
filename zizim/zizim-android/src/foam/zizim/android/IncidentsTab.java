@@ -66,7 +66,7 @@ public class IncidentsTab extends TabActivity {
         	}
         	
         }
-        Intent blogTab = new Intent(this, BoskoiBlogTabGroup.class);
+//        Intent blogTab = new Intent(this, BoskoiBlogTabGroup.class);
         
        
         tabHost.addTab(tabHost.newTabSpec("map")
@@ -81,9 +81,9 @@ public class IncidentsTab extends TabActivity {
         		.setIndicator(getText(R.string.boskoi_report),getResources().getDrawable(R.drawable.ic_tab_report))
                 .setContent(addEdible));
         
-        tabHost.addTab(tabHost.newTabSpec("News")
-        		.setIndicator(getText(R.string.menu_blog),getResources().getDrawable(R.drawable.ic_tab_blog))
-                .setContent(blogTab));
+//        tabHost.addTab(tabHost.newTabSpec("News")
+//        		.setIndicator(getText(R.string.menu_blog),getResources().getDrawable(R.drawable.ic_tab_blog))
+//                .setContent(blogTab));
         
         tabHost.addTab(tabHost.newTabSpec("About")
         		.setIndicator(getText(R.string.menu_about),getResources().getDrawable(R.drawable.ic_tab_about))
