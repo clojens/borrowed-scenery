@@ -233,7 +233,7 @@
 		<!-- / left content block -->
 
 		<!-- right content block -->
-	<!--	<div class="content-block-right">
+		<div class="content-block-right">
 			<h5><?php echo Kohana::lang('ui_main.official_news'); ?></h5>
 			<table class="table-list">
 				<thead>
@@ -264,7 +264,7 @@
 				</tbody>
 			</table>
 			<a class="more" href="<?php echo url::site() . 'feeds' ?>">View More...</a>
-		</div> -->
+		</div> 
 		<!-- / right content block -->
 
 	</div>
