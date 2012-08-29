@@ -1,7 +1,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>borrowed scenery</title>
+  <title>aniziz</title>
   <script type="text/javascript" src="js/truffle/common.js"></script>   
   <script type="text/javascript" src="js/truffle/vec2.js"></script>   
   <script type="text/javascript" src="js/truffle/vec3.js"></script>   
@@ -22,62 +22,78 @@
   <script type="text/javascript" src="js/game.js"></script>   
 
   <style type="text/css">
-    html, body {
-        width:  100%;
-        height: 100%;
-        margin: 0px;
-    }
     @font-face {
         font-family: 'patafont';
         src: url('fonts/patafont.ttf');
     }
+    @font-face {
+        font-family: 'MaidenOrange';
+        src: url('fonts/MaidenOrange.ttf');
+    }
+    html, body {
+        width:  100%;
+        height: 100%;
+        margin: 0px;
+        background: url(images/bg.jpg);
+        font-family: "MaidenOrange";
+        color: #fff;
+        font-size:  20;
+    }
+    input {
+        font-family:  "MaidenOrange";
+        font-size:  200%;
+    }
+    select {
+        font-family:  "MaidenOrange";
+        font-size:  200%;
+    }
+    canvas { background:url(images/bg.jpg) }
+    .left { float : left; width : 48%; }
+    .right { float : right; width : 48%; }
   </style>
 </head>
 
-<script>
-  function init() {
-    truffle.main.init(game_create,game_update);
-  }
-</script>
-
-<body onload="init()">
-  <center><h1>aniziz (the soil)</h1>
-    
+<body>
+  <div class=left>
+    <center>
+    <img src="images/logo-s.png"><br/>
+    <div id="game-stats"></div>
+    </center>
+  </div>
+  <div class=right>
+    <center>
+    <h2>Patabotanists of note</h2>
+    xxx is powering 31 earth plants<br>
+    yyy is powering 30 earth plants<br>
+    zzz is powering 23 earth plants<br>
+    "£$"$ is powering 21 earth plants<br>
+    r is powering 17 earth plants<br>
+    </center>
+  </div>
+  <center>
     <div id="input_form">
+      <input 
+         id='player_name' 
+         type="text" 
+         style="font-size: 500%"
+         value="What are you called?" 
+         onfocus="if(!this._haschanged){this.value=''};this._haschanged=true;"
+         autocomplete="off"
+         size="12"
+         onkeydown="if (event.keyCode==13) login_form();"/><br/>
     <input 
-       id='player_name'
-       type='text' 
-       name='player_name' 
-       autocomplete="off"
-       style="font-size:100"
-       size="10"
-       onkeydown="if (event.keyCode==13) login_form();"/><br/>
-    <input 
+       style="font-size:50"
        type="button" 
        value="Login/Register" 
        onclick="login_form();" /><br/>
     or<br/>
     <input 
+       style="font-size:50"
        type="button" 
        value="Login with FaceBook" 
        onclick="alert('not yet!');" />
     </div>
-
-  <div id="game-stats"></div>
-  <canvas id="canvas" width="880" height="460"></canvas>
-
-  <input 
-     id='chat'
-     type='text' 
-     name='chat' 
-     style="font-family:patafont"
-     size="10"
-     onkeydown="if (event.keyCode==13) chat();"/>
-  <input 
-     type="button" 
-     value="Chat" 
-     onclick="chat();" /><br/>
-  <div id="fps"></div>
+    <div id="game-goes-here"/>
   </center>
 </body>
 </html>

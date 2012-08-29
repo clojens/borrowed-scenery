@@ -20,6 +20,7 @@ truffle.canvas_state=function() {
     this.mouse_y=0;
     this.canvas=document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');         
+    this.bg_colour = "#ffffff";
 
     this.world_x=0;
     this.world_y=0;
@@ -33,6 +34,16 @@ truffle.canvas_state=function() {
     this.refresh_bottom=false;
     this.refresh_left=false;
     this.refresh_right=false;
+
+/*    var that=this;
+    this.bgimage=new Image();
+    this.bgimage.onload = function() {
+        that.clear_screen();
+    };
+    this.bgimage.onerror = function(e) {
+        log("could't load "+url);
+    }
+    this.bgimage.src = "images/bg.jpg";  */
 
     var _this=this;
 
@@ -59,8 +70,10 @@ truffle.canvas_state.prototype.resize=function(w,h) {
 }
 
 truffle.canvas_state.prototype.clear_screen=function() {
-    this.ctx.fillStyle = "#ffffff";
+    //this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    this.ctx.fillStyle = this.bg_colour;
     this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+    //this.ctx.drawImage(this.bgimage,0,0);
 }
 
 truffle.canvas_state.prototype.begin_scene=function() {
@@ -81,7 +94,7 @@ truffle.canvas_state.prototype.end_scene=function() {
 }
 
 truffle.canvas_state.prototype.clear_rects=function(bboxes) {
-    this.ctx.fillStyle = "#ffffff";
+    this.ctx.fillStyle = this.bg_colour;
     var that=this;
     bboxes.forEach(function(box) {
         that.ctx.fillRect(~~(box[0]+2),~~(box[1]+2),

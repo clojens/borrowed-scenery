@@ -29,6 +29,7 @@ function game(world) {
     this.update_next_frame=false;
     this.border_min=1;
     this.border_max=13;
+    this.world.canvas_state.bg_colour = "#000000";
 
     this.arrow_indicator=new truffle.sprite_entity(
         this.world,
@@ -68,7 +69,7 @@ function game(world) {
         // crudely set the iso projection
         var t=new truffle.mat23();
         t.translate(40,0);
-        t.scale(1.65,0.42*1.65);
+        t.scale(1.67,0.42*1.67);
         t.rotate(31*Math.PI/180);
         t.scale(1,1.2);
         t.translate(-10,-10);
@@ -112,7 +113,8 @@ function game(world) {
 
     this.updating_text=new truffle.textbox(new truffle.vec2(0,0),
                                            "loading map...",
-                                           500,300,"50pt times");
+                                           500,300,"50pt MaidenOrange");
+    this.updating_text.text_colour="#777777";
     this.world.add_sprite(this.updating_text);
     this.updating_text.hide(true);
     this.world.pre_sort_scene=function(depth) {
@@ -149,7 +151,7 @@ game.prototype.chat=function(text) {
     }
     else
     {
-        alert("you need to log in first");
+        alert("You need to log in first");
     }
 }
 
@@ -381,7 +383,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             this.avatar.add_child(this.world,ct);
             var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
-                                      300,300,"15pt times");
+                                      300,300,"15pt MaidenOrange");
             t.text_height=25;
             this.avatar.add_child(this.world,t);
         }
@@ -409,7 +411,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
 
             var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
-                                      300,300,"15pt times");
+                                      300,300,"15pt MaidenOrange");
             t.text_height=25;
             e.add_child(this.world,t);
             this.entities.push(e);        
@@ -594,11 +596,34 @@ var g;
 
 function login_form() {
     var name=document.getElementById('player_name').value;
-    var element=document.getElementById("input_form");
-    while (element.firstChild) {
-        element.removeChild(element.firstChild);
+    if (name!="" && name!="What are you called?") {
+        var element=document.getElementById("input_form");
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+        document.getElementById('game-goes-here').innerHTML = 
+            '<canvas id="canvas" width="880" height="460"></canvas>\
+<input \
+     id="chat"\
+     type="text"\
+     name="chat" \
+     style="font-family:patafont"\
+     size="10"\
+     onkeydown="if (event.keyCode==13) chat();"/>\
+<input\
+     type="button"\
+     style="font-size:50"\
+     value="Chat"\
+     onclick="chat();" /><br/>\
+<div id="fps"></div>';
+
+        truffle.main.init(game_create,game_update);
+        g.connect_and_login(name);
     }
-    g.connect_and_login(name);    
+    else
+    {
+        alert("Type in your name...");
+    }
 }
 
 function chat() {
