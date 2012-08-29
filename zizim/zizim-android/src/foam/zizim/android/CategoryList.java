@@ -109,9 +109,9 @@ public class CategoryList extends ListActivity {//implements ListView.OnScrollLi
                 Log.i("XXXXXX",childCat.getCategoryTitle());
 
    				if(locale.equals("Nederlands") || BoskoiService.language.equals("Nederlands")){
-   					childStrings[i] = childCat.getCategoryTitleNL() + " ("+childCat.getCategoryTitleLA()+")";
+   					childStrings[i] = childCat.getCategoryTitleNL();
    				}else{
-   					childStrings[i] = childCat.getCategoryTitle() + " ("+childCat.getCategoryTitleLA()+")";
+   					childStrings[i] = childCat.getCategoryTitle();
    	
    				}
    				englishStrings[i] = childCat.getCategoryTitle();
@@ -121,7 +121,7 @@ public class CategoryList extends ListActivity {//implements ListView.OnScrollLi
     		//only add filled categories
    			if(childcat.length != 0){
 
-	    		adapter.addSection(cat.getCategoryTitle() + " ("+cat.getCategoryTitleLA() + ")",
+	    		adapter.addSection(cat.getCategoryTitle(),
 	    				new ArrayAdapter<String>(
 	    						this,android.R.layout.simple_list_item_multiple_choice,
 	    						childStrings));
@@ -136,9 +136,9 @@ public class CategoryList extends ListActivity {//implements ListView.OnScrollLi
 	    		//here we also need to set the hashmap with real CatData
 	    		for(CategoriesData childCat : BoskoiService.getCategoriesFromParent(cat.getCategoryId())){
 	    			if(locale.equals("Nederlands") || BoskoiService.language.equals("Nederlands")){
-	    				hmCategories.put(childCat.getCategoryTitleNL() + " ("+childCat.getCategoryTitleLA()+")", childCat);
+	    				hmCategories.put(childCat.getCategoryTitleNL(), childCat);
 	    			}else{
-	    				hmCategories.put(childCat.getCategoryTitle() + " ("+childCat.getCategoryTitleLA()+")", childCat);
+	    				hmCategories.put(childCat.getCategoryTitle(), childCat);
 	    			}
 	    		}
 	    		hmParentCategories.put(cat.getCategoryId(), cat);
