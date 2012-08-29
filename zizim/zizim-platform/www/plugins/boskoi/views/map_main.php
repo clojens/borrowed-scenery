@@ -1,9 +1,13 @@
 <div id="blurp">
-	<h5>Introducing Boskoi</h5>
-	<p>Boskoi is a free, opensource mobile app that helps you explore and map the edible landscape wherever you are.
-	Named after the greek word for grazer or brouwser the app lays out a map of local fruits and herbs and allows users
-	to edit and add their own finds. Made by the foragers at Urban Edibles in Amsterdam Boskoi is an Ushahidi-based
-	app that comes with a few foraging guidelines.</p><br/>
-	<p>Finds can be reported on this website or via the current beta app for Android smartphones.</p><br/>
-	<h5>Map</h5>
+<p>Zizim is a field guide to remarkable plants and gardens. A valuable tool
+for a patabotanical field worker, it allows you to assemble and explore
+a growing collection of urban plants amenable to live with humans and
+gardens where people cultivate, contemplate, exchange and eat plants.</p><br/>
+
+<p>Please peruse this field guide in your neighbourhood and further afield.
+Your contributions will be of utmost value to observation and experience
+of human-plant interactions in the city.</p><br/>
+
+<p>You can report your find and affix your field-note on these pages, or
+using our mobile notebook for Android telephones.</p><br/>
 </div>

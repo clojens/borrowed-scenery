@@ -494,8 +494,9 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
 			  
 			  do {
 				  categories[i] = cursor.getString(titleIndex);
-                  Log.i("XXXXXXX",categories[i]);
-                  Log.i("XXXXXXX",String.valueOf(cursor.getInt(idIndex)));
+                  Log.i("IIIIIII",categories[i]);
+                  Log.i("&&&&&&&",String.valueOf(cursor.getInt(idIndex)));
+                  
 				  categoriesTitle.put(String.valueOf(cursor.getInt(idIndex)), 
 						  cursor.getString(titleIndex));
 				  categoriesId.add(String.valueOf(cursor.getInt(idIndex)));
