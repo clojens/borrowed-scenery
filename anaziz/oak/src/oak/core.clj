@@ -69,13 +69,14 @@
                         (deref fatima-world)
                         (deref my-game-world)
                         time) time))))
-    (dosync (ref-set my-game-world
-                     (doall-recur
+    
+    (let [new-world (doall-recur
                       (game-world-update
                        (game-world-sync<-fatima
                         (deref my-game-world)
                         (deref fatima-world))
-                       time server-tick))))))
+                       time server-tick))]
+      (dosync (ref-set my-game-world new-world)))))
 
 (defn tick []
   (Thread/sleep (* server-tick 1000))
