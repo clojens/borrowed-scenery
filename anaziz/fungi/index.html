@@ -50,10 +50,12 @@
     canvas { background:url(images/bg.jpg) }
     .left { float : left; width : 48%; }
     .right { float : right; width : 48%; }
+    .top { height : 200px; }
   </style>
 </head>
 
 <body>
+  <div class=top>
   <div class=left>
     <center>
     <img src="images/logo-s.png"><br/>
@@ -70,6 +72,7 @@
     r is powering 17 earth plants<br>
     </center>
   </div>
+  </div>
   <center>
     <div id="input_form">
       <input 
@@ -81,17 +84,17 @@
          autocomplete="off"
          size="12"
          onkeydown="if (event.keyCode==13) login_form();"/><br/>
-    <input 
-       style="font-size:50"
-       type="button" 
-       value="Login/Register" 
-       onclick="login_form();" /><br/>
-    or<br/>
-    <input 
-       style="font-size:50"
-       type="button" 
-       value="Login with FaceBook" 
-       onclick="alert('not yet!');" />
+      <input 
+         style="font-size:50"
+         type="button" 
+         value="Login/Register" 
+         onclick="login_form();" /><br/>
+      or<br/>
+      <input 
+         style="font-size:50"
+         type="button" 
+         value="Login with FaceBook" 
+         onclick="alert('not yet!');" />
     </div>
     <div id="game-goes-here"/>
   </center>
