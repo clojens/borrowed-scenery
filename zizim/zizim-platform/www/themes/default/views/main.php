@@ -264,7 +264,7 @@
 				</tbody>
 			</table>
 			<a class="more" href="<?php echo url::site() . 'feeds' ?>">View More...</a>
-		</div> 
+            </div>
 		<!-- / right content block -->
 
 	</div>
