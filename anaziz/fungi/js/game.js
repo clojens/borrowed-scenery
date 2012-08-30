@@ -532,13 +532,21 @@ game.prototype.do_update_tile=function() {
                              this.player.tile.y,0]);
 
     this.server.listen("pull", function(data) {
-        //alert(data.tiles.length);
+        // update the distance info
         var dist=data["most-distant-info"];
         var d=that.map.distance_from_centre(dist["tile-pos"]);
         d=Math.round(d*100)/100;
         document.getElementById('game-stats').innerHTML = 
             "Fungi has reached "+d+" km from Vooruit, created by "+dist.player;
 
+        // update the leaderboard
+        var leaderboard="";
+        data.leaderboard.forEach(function (score) {
+            leaderboard+=score.player+" has grown "+score.score+" fungi to help "+score.helped+" earth plants<br/>";
+        });
+        document.getElementById('leaderboard').innerHTML=leaderboard;
+            
+        // update the entities
         data.tiles.forEach(function(tile) {
             var tilepos=tile.pos;
             tile.entities.forEach(function(entity) {

@@ -19,7 +19,8 @@
    oak.log
    oak.defs
    oak.profile
-   oak.ushahidi))
+   oak.ushahidi
+   oak.db))
 
 (defn make-ushahidi-plant [id name pos layer ush-id date lat lng fract incident]
   (hash-map
@@ -58,6 +59,17 @@
   (let [in (:incident plant)
         ush-id (:incidentid in)]
     (println "thanking" player-name)
+    
+    ;; increment plant count for this player
+    (db-find-update!
+     (fn [player]
+       (println (:name player) "score is increasing")
+       (modify :plant-count (fn [c] (+ c 1))
+               (modify :has-picked (fn [p] (set-cons (:ush-id plant) p))
+                       player)))
+     :players
+     {:name player-name})
+    
     (ushahidi-add-incident-comment
      ush-id player-name
      (str player-name " has helped this plant in anaziz")))

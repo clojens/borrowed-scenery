@@ -41,6 +41,8 @@ truffle.drawable=function()
 
     this.enable_mouse(false);
 
+    this.last_bbox=[0,0,0,0];
+    this.bbox=[0,0,0,0];
 }
 
 truffle.drawable.prototype.set_id=function(s) { this.id=s; }
@@ -123,30 +125,25 @@ truffle.drawable.prototype.centre_middle_bottom=function(s) {
 }
 
 truffle.drawable.prototype.get_last_bbox=function() {
-    var l=this.last_pos.x-this.centre.x;
-    var t=this.last_pos.y-this.centre.y;
-    if (this.do_centre_middle_bottom) t=this.last_pos.y-this.height;
-    if (this.expand_bb>0) { // cater for rotate
-        var m=Math.max(this.width,this.height);
-        var h=(m/2)+this.expand_bb;
-        return [l-h,t-h,l+m+h,t+m+h]; 
-    }
-    else {
-        return [l,t,l+this.width,t+this.height]; 
-    }
+    return this.last_bbox;
 }
 
 truffle.drawable.prototype.get_bbox=function() {
+    return this.bbox;
+}
+
+truffle.drawable.prototype.recalc_bbox=function() {
+    this.last_bbox=[this.bbox[0],this.bbox[1],this.bbox[2],this.bbox[3]];
     var l=this.pos.x-this.centre.x;
     var t=this.pos.y-this.centre.y;
     if (this.do_centre_middle_bottom) t=this.pos.y-this.height;
     if (this.expand_bb>0) { // cater for rotate 
         var m=Math.max(this.width,this.height);
         var h=(m/2)+this.expand_bb;
-        return [l-h,t-h,l+m+h,t+m+h]; 
+        this.bbox=[l-h,t-h,l+m+h,t+m+h]; 
     }
     else {
-        return [l,t,l+this.width,t+this.height]; 
+        this.bbox=[l,t,l+this.width,t+this.height]; 
     }
 }
 

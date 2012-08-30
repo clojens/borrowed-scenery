@@ -167,7 +167,9 @@
       :spirits
       (:spirits (deref my-game-world))
       :most-distant-info
-      (:most-distant-info (deref my-game-world))})))
+      (:most-distant-info (deref my-game-world))
+      :leaderboard
+      (:leaderboard (deref my-game-world))})))
 
 (defn s-get-msgs [id iefix]
   (let [id (parse-number id)]

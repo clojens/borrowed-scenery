@@ -170,6 +170,7 @@
                      (make-player 98 "Percy" -1 (rand-nth avatar-types))
                      (make-player 99 "Alan" -1 (rand-nth avatar-types)))
       :summons {}
+      :leaderboard ()
       :rules (load-companion-rules "rules.txt")
       :most-distant-info {:distance 0
                           :player ""
@@ -337,6 +338,7 @@
                :log (make-log 100)
                :id-gen id-gen
                :spirits ()
+               :leaderboard ()
                :summons {}
                :rules (load-companion-rules "rules.txt")
                :most-distant-info {:distance 0
@@ -456,6 +458,38 @@
      (concat r (tile-get-decayed-owners tile)))
    ()
    :tiles))
+
+(defn add-to-leaderboard [score lb]
+  (cond
+   (empty? lb) (list score)
+   (= (:player (first lb)) (:player score)) (cons score (rest lb))
+   :else (cons (first lb) (add-to-leaderboard score (rest lb)))))
+
+(def leaderboard-size 10)
+
+(defn game-world-update-top-players
+  "for the leaderboard"
+  [game-world time]
+  (modify
+   :leaderboard
+   (fn [scores]
+     (let [lowest-score (if (empty? scores) 0 (:score (nth scores (- (count scores) 1))))
+           unsorted (db-partial-reduce
+                     (fn [scores player]
+                       (if (and (> (:plant-count player) 0)
+                                (or (< lowest-score (:plant-count player))
+                                    (< (count scores) leaderboard-size)))
+                         (add-to-leaderboard {:score (:plant-count player)
+                                              :player (:name player)
+                                              :helped (count (:has-picked player))} scores)
+                         scores))
+                     scores
+                     :players
+                     time
+                     server-db-items)
+           sorted (sort-by (fn [i] (:score i)) unsorted)]
+       (discard (reverse sorted) leaderboard-size)))
+   game-world))
 
 ; need to do this before tile update, when decayed plants
 ; are removed from the game
@@ -874,18 +908,19 @@
                       (log-add-msg log msg))
                     log
                     msgs))
-            (game-world-update-distance-info
-             (game-world-cull-empty-tiles
-              (game-world-update-ushahidi
-               (game-world-update-players
-                (game-world-summon-to-ill-plants
-                 (game-world-spore
-                  (game-world-update-tiles
-                   (game-world-post-logs-to-players
-                    (game-world-clear-old-summons
-                     game-world time delta)
-                    msgs) time delta) time delta) time) time)
-               time delta)) time))))
+            (game-world-update-top-players
+             (game-world-update-distance-info
+              (game-world-cull-empty-tiles
+               (game-world-update-ushahidi
+                (game-world-update-players
+                 (game-world-summon-to-ill-plants
+                  (game-world-spore
+                   (game-world-update-tiles
+                    (game-world-post-logs-to-players
+                     (game-world-clear-old-summons
+                      game-world time delta)
+                     msgs) time delta) time delta) time) time)
+                time delta)) time) time))))
 
 (defn game-world-find-spirit
   "get the spirit from it's name"
