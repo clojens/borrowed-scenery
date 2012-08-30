@@ -14,7 +14,6 @@
 
 (ns oak.db
   (:use
-   oak.tile
    oak.vec2
    oak.forms
    oak.profile
