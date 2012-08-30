@@ -26,7 +26,6 @@ truffle.sprite=function(pos, tex, midbot, viz) {
     this.offset_colour=null;
     this.draw_bb=false;
     this.change_bitmap(tex);    
-    this.last_pos=new truffle.vec2(this.pos.x,this.pos.y);
     this.set_pos(this.pos);
 }
 
@@ -161,9 +160,7 @@ truffle.sprite.prototype.draw=function(ctx) {
         ctx.stroke();
     }
     
-    this.last_pos.x=this.pos.x;
-    this.last_pos.y=this.pos.y;
-    
+    this.recalc_bbox();
     this.draw_me=false;
 }
 

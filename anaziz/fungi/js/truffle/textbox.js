@@ -23,8 +23,6 @@ truffle.textbox=function(pos, text, w, h, font) {
     this.height = h;
     this.draw_bb = false;
     this.text_height = 20;
-    this.last_pos=new truffle.vec2(this.pos.x,this.pos.y);
-    this.last_parent_pos=new truffle.vec2(this.pos.x,this.pos.y);
     this.text_colour="#000000";
     this.ready_to_draw=true;
 
@@ -86,19 +84,8 @@ truffle.textbox.prototype.set_text=function(text) {
     this.centre.x=this.width/2;
 }
 
-truffle.textbox.prototype.get_last_bbox=function() {
-    var l=this.last_pos.x;
-    var t=this.last_pos.y;
-    if (this.parent_transform) {
-        l+=this.last_parent_pos.x;
-        t+=this.last_parent_pos.y;
-    }
-    l+=-this.centre.x;
-    t+=-this.centre.y-this.text_height/1.7;
-    return [l,t,l+this.width,t+this.height]; 
-}
-
-truffle.textbox.prototype.get_bbox=function() {
+truffle.textbox.prototype.recalc_bbox=function() {
+    this.last_bbox=[this.bbox[0],this.bbox[1],this.bbox[2],this.bbox[3]];
     var l=this.pos.x;
     var t=this.pos.y;
     if (this.parent_transform) {
@@ -107,17 +94,14 @@ truffle.textbox.prototype.get_bbox=function() {
     }
     l+=-this.centre.x;
     t+=-this.centre.y-this.text_height/1.7;
-    return [l,t,l+this.width,t+this.height]; 
+    this.bbox=[l,t,l+this.width,t+this.height]; 
 }
-
 
 truffle.textbox.prototype.draw=function(ctx) {
 
 //    if (this.id=999) log("rendering text");
 
     if (this.text.length==0) {
-        this.last_pos.x=this.pos.x;
-        this.last_pos.y=this.pos.y;    
         this.draw_me=false;
         return;
     }
@@ -147,9 +131,6 @@ truffle.textbox.prototype.draw=function(ctx) {
 
         ctx.translate(this.parent_transform.m[4]+this.pos.x,
                       this.parent_transform.m[5]+this.pos.y);
-
-        this.last_parent_pos.x=this.parent_transform.m[4];
-        this.last_parent_pos.y=this.parent_transform.m[5];
 
 
         ctx.fillStyle = "#ffffff";
@@ -198,9 +179,8 @@ truffle.textbox.prototype.draw=function(ctx) {
         ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 
         ctx.stroke();
     }
-
-    this.last_pos.x=this.pos.x;
-    this.last_pos.y=this.pos.y;    
+    
+    this.recalc_bbox();
     this.draw_me=false;
 }
 

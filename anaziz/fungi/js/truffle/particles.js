@@ -166,6 +166,8 @@ truffle.particles.prototype.draw=function(ctx) {
     
     this.last_pos.x=this.pos.x;
     this.last_pos.y=this.pos.y;
+
+    this.recalc_bbox();
     
     this.draw_me=false;
 }
