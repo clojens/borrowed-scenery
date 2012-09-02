@@ -1,0 +1,98 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>aniziz</title>
+  <script type="text/javascript" src="js/truffle/common.js"></script>   
+  <script type="text/javascript" src="js/truffle/vec2.js"></script>   
+  <script type="text/javascript" src="js/truffle/vec3.js"></script>   
+  <script type="text/javascript" src="js/truffle/mat23.js"></script>
+  <script type="text/javascript" src="js/truffle/randomness.js"></script>   
+  <script type="text/javascript" src="js/truffle/drawable.js"></script>   
+  <script type="text/javascript" src="js/truffle/sprite.js"></script>   
+  <script type="text/javascript" src="js/truffle/particles.js"></script>   
+  <script type="text/javascript" src="js/truffle/textbox.js"></script>   
+  <script type="text/javascript" src="js/truffle/entity.js"></script>   
+  <script type="text/javascript" src="js/truffle/sprite_entity.js"></script>   
+  <script type="text/javascript" src="js/truffle/particles_entity.js"></script>   
+  <script type="text/javascript" src="js/truffle/canvas_state.js"></script>   
+  <script type="text/javascript" src="js/truffle/world.js"></script>   
+  <script type="text/javascript" src="js/truffle/server.js"></script>   
+  <script type="text/javascript" src="js/truffle.js"></script>   
+  <script type="text/javascript" src="js/map.js"></script>   
+  <script type="text/javascript" src="js/game.js"></script>   
+
+  <style type="text/css">
+    @font-face {
+        font-family: 'patafont';
+        src: url('fonts/patafont.ttf');
+    }
+    @font-face {
+        font-family: 'MaidenOrange';
+        src: url('fonts/MaidenOrange.ttf');
+    }
+    html, body {
+        width:  100%;
+        height: 100%;
+        margin: 0px;
+        background: url(images/bg.jpg);
+        font-family: "MaidenOrange";
+        color: #fff;
+        font-size:  20;
+    }
+    input {
+        font-family:  "MaidenOrange";
+        font-size:  200%;
+    }
+    select {
+        font-family:  "MaidenOrange";
+        font-size:  200%;
+    }
+    canvas { background:url(images/bg.jpg) }
+    .left { float : left; width : 48%; }
+    .right { float : right; width : 48%; }
+    .top { height : 200px; }
+  </style>
+</head>
+
+<body>
+  <div class=top>
+  <div class=left>
+    <center>
+    <img src="images/logo-s.png"><br/>
+    <div id="game-stats"></div>
+    </center>
+  </div>
+  <div class=right>
+    <center>
+    <h2>Patabotanists of note</h2>
+    <div id="leaderboard"/>
+    </center>
+  </div>
+  </div>
+  <center>
+    <div id="input_form">
+      <input 
+         id='player_name' 
+         type="text" 
+         style="font-size: 500%"
+         value="What are you called?" 
+         onfocus="if(!this._haschanged){this.value=''};this._haschanged=true;"
+         autocomplete="off"
+         size="12"
+         onkeydown="if (event.keyCode==13) login_form();"/><br/>
+      <input 
+         style="font-size:50"
+         type="button" 
+         value="Login/Register" 
+         onclick="login_form();" /><br/>
+      or<br/>
+      <input 
+         style="font-size:50"
+         type="button" 
+         value="Login with FaceBook" 
+         onclick="alert('not yet!');" />
+    </div>
+    <div id="game-goes-here"/>
+  </center>
+</body>
+</html>
