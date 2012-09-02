@@ -400,8 +400,9 @@ class Reports_Controller extends Main_Controller {
 					$i++;
 				}
 
-
-				
+				// Auto approve reports using workaround discussed at.. .  
+                                // http://forums.ushahidi.com/forums/topic/automatic-report-approval/
+				$incident->incident_active = 1;
 				$incident->save();
 
 				// STEP 3: SAVE CATEGORIES
