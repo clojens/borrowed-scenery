@@ -213,6 +213,15 @@ class PostReport
 				$incident->incident_date = $incident_date . " " .
                     $incident_time;
 				$incident->incident_dateadd = date("Y-m-d H:i:s",time());
+
+                                // Auto approve reports using workaround discussed at.. .
+                                // http://forums.ushahidi.com/forums/topic/automatic-report-approval/
+                                // note this should be possible using an 'Action' but doesn't work
+                                // with the current version (as of 20120902) for details, see.. .
+                                // https://github.com/ushahidi/Ushahidi_Web/issues/817#issuecomment-8209766
+
+                                $incident->incident_active = 1;
+
 				$incident->save();
 
 				// SAVE CATEGORIES

@@ -6,6 +6,16 @@ body,div,dl,dt,dd,ul,ol,li,pre,form,fieldset,input,textarea,p,blockquote,th,td{
     padding: 0;
 }
 
+@font-face {
+    font-family: 'patafont';
+    src: url('../fonts/patafont.ttf');
+}
+
+@font-face {
+    font-family: 'MaidenOrange';
+    src: url('../fonts/MaidenOrange.ttf');
+}
+
 fieldset,img{
     border: 0;
 }
@@ -21,7 +31,7 @@ body{
 
 /* links */
 a{
-    color: #3764aa;
+    font-family: MaidenOrange, Arial, Helvetica, sans-ser    color: #3764aa;
     text-decoration: none;
 }
 
@@ -32,7 +42,7 @@ a:hover{
 
 /* header elements */
 h1, h2, h3, h4, h5, h6{
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: MaidenOrange, Arial, Helvetica, sans-serif;
     font-weight: bold;
     margin-top: 0;
     padding: 0;
@@ -72,9 +82,9 @@ h6{
 
 /* page setup */
 body{
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: MaidenOrange, Arial, Helvetica, sans-serif;
     color: #333333;
-    font-size: 12px;
+    font-size: 16px;
 }
 
 body#page{
@@ -89,6 +99,7 @@ div.rapidxwpr{
 
 /* header */
 div#header{
+    background: url('../images/header_photo.jpg') no-repeat left bottom;
     position: relative;
     height: 144px;
     margin: 0px 0px 0px 0px;
@@ -96,27 +107,29 @@ div#header{
 
 /* logo */
 div#logo{
+    background-image:url(../images/transparent.png);
     border: 0;
-    background: #E2E2E2;
-    padding: 35px 24px;
+    padding: 3px 24px;
     float: left;
-    margin: 14px 0 0 0;
+    margin: 3px 0 0 0;
 }
 div#logo h1{
-	margin:0;
-	padding:0;
-	font-size: 20px;
+    margin:0;
+    color: #000000;
+    padding:0;
+    font-size: 100px;
 }
 div#logo span{
-	font-size:14px;
+    font-size:30px;
+    color: #000000;
 }
 
 /* main body setup */
 div#middle{
+    background-image:url(../images/transparent.png);
     width: auto;
     margin: 0px 0px 0px 0px;
     clear: both;
-    background: #FFF;
 }
 
 div#middle .background{
@@ -370,7 +383,7 @@ div#mainmenu a.active{
 
 /* filters */
 div.filters{
-    font-size: 85%;
+//    font-size: 85%;
     text-transform: uppercase;
     margin: 5px 0 15px;
 }
@@ -421,7 +434,6 @@ div.map {
     border: #999 1px solid;
     width: 573px;
     height: 400px;
-	position:relative;
 }
 #mapStatus
 {
@@ -449,6 +461,9 @@ div.map {
 	font-size: 8px;
 }
 
+div.background {
+	background-color: #FF0000;    
+}
 
 div.graph-holder {
     height:150px;

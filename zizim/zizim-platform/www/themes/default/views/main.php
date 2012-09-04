@@ -29,7 +29,8 @@
 						echo '<li><a href="#" id="cat_'. $category .'"><div '.$color_css.'>'.$category_image.'</div><div class="category-title">'.$category_title.'</div></a>';
 						// Get Children
 						echo '<div class="hide" id="child_'. $category .'"><ul>';
-						foreach ($category_info[3] as $child => $child_info)
+						
+						foreach ($category_info[5] as $child => $child_info)
 						{
 							$child_title = $child_info[0];
 							$child_color = $child_info[1];
@@ -43,7 +44,9 @@
 								$color_css = '';
 							}
 							echo '<li style="padding-left:20px;"><a href="#" id="cat_'. $child .'"><div '.$color_css.'>'.$child_image.'</div><div class="category-title">'.$child_title.'</div></a></li>';
+
 						}
+
 						echo '</ul></div></li>';
 					}
 				?>
@@ -109,6 +112,8 @@
 			<br />
 		
 			<!-- additional content -->
+
+<!--
 			<?php
 			if (Kohana::config('settings.allow_reports'))
 			{
@@ -137,6 +142,7 @@
 
 				</div>
 			<?php } ?>
+-->
 			<!-- / additional content -->
 			
 			<?php
@@ -233,7 +239,7 @@
 		<!-- / left content block -->
 
 		<!-- right content block -->
-		<div class="content-block-right">
+<!--		<div class="content-block-right">
 			<h5><?php echo Kohana::lang('ui_main.official_news'); ?></h5>
 			<table class="table-list">
 				<thead>
@@ -264,9 +270,9 @@
 				</tbody>
 			</table>
 			<a class="more" href="<?php echo url::site() . 'feeds' ?>">View More...</a>
-            </div>
+		</div> -->
 		<!-- / right content block -->
-
+		
 	</div>
 	<!-- /content blocks -->
 

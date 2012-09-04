@@ -131,7 +131,7 @@ function game(world) {
 
 game.prototype.connect_and_login=function(name) {
     var that=this;
-    this.server=new truffle.server('ws://localhost:8002/borrowed-scenery',
+    this.server=new truffle.server('ws://be.fo.am:8002/borrowed-scenery',
                                    function () {
                                        that.server.call("login",[name,0,0]);
                                    });
