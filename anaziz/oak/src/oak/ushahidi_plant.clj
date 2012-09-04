@@ -22,11 +22,19 @@
    oak.ushahidi
    oak.db))
 
-(defn make-ushahidi-plant [id name pos layer ush-id date lat lng fract incident]
+(defn temp-tile-distance
+  "calculate distance over different tiles"
+  [tilea posa tileb posb]
+  (let [diff (vec2-mul (vec2-sub tileb tilea) tile-size)]
+    (vec2-dist posa (vec2-add diff posb))))
+
+
+(defn make-ushahidi-plant [id tile name pos layer ush-id date lat lng fract incident]
   (hash-map
    :version 1
    :entity-type "ushahidi"
    :id id
+   :tile tile
    :owner name
    :pos pos  
    :state "alive"
@@ -40,6 +48,7 @@
    :incident incident
    :neighbours ()
    :power 0
+   :thanks ()
    ))
 
 (defn ushahidi-plant-count-fungi [neighbours]
@@ -55,37 +64,32 @@
   (modify
    :neighbours (fn [n] (cons (:id entity) n)) plant))
 
-(defn ushahidi-plant-thank [plant player-name]
+(defn ushahidi-plant-thank [plant player-name fungi]
   (let [in (:incident (:incident plant))
         ush-id (:incidentid in)]
-    (println "thanking" player-name)
-    
-    ;; increment plant count for this player
-    (db-find-update!
-     (fn [player]
-       (println (:name player) "score is increasing")
-       (modify :plant-count (fn [c] (+ c 1))
-               (modify :has-picked (fn [p] (set-cons (:ush-id plant) p))
-                       player)))
-     :players
-     {:name player-name})
-    
-    (ushahidi-add-incident-comment
-     ush-id player-name
-     (str player-name " has helped this plant in anaziz")))
-  plant)
+    (println "thanking" player-name (:id plant) (:id fungi))
+    (modify :thanks
+            (fn [t]
+              (cons {:name player-name
+                     :fungi-id (:id fungi)
+                     :fungi-tile (:tile fungi)} t))
+            plant)))
   
 (defn ushahidi-plant-powerup [plant entity]
   (reduce
    (fn [plant player-name]
-     (ushahidi-plant-thank plant player-name))
+     (ushahidi-plant-thank plant player-name entity))
    (ushahidi-plant-add-neighbour plant entity)
    (:grown-by entity)))
     
 (defn ushahidi-plant-update-neighbours [plant neighbours]
   (reduce
    (fn [plant entity]
-     (if (not (list-contains? (:neighbours plant) (:id entity)))
+     (if (and (= (:entity-type entity) "plant")
+              (not (list-contains? (:neighbours plant) (:id entity)))
+              (< (temp-tile-distance (:tile plant) (:pos plant)
+                                     (:tile entity) (:pos entity))
+                 ushahidi-plant-influence-distance))
        (ushahidi-plant-powerup plant entity)
        plant))
    plant

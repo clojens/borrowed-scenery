@@ -25,7 +25,6 @@ truffle.textbox=function(pos, text, w, h, font) {
     this.text_height = 20;
     this.text_colour="#000000";
     this.ready_to_draw=true;
-
     this.set_pos(pos);
     this.set_text(text);
 }
@@ -94,7 +93,9 @@ truffle.textbox.prototype.recalc_bbox=function() {
     }
     l+=-this.centre.x;
     t+=-this.centre.y-this.text_height/1.7;
-    this.bbox=[l,t,l+this.width,t+this.height]; 
+    this.bbox=[~~(l+0.5),~~(t+0.5),
+               ~~(l+this.width+0.5),
+               ~~(t+this.height+0.5)]; 
 }
 
 truffle.textbox.prototype.draw=function(ctx) {
@@ -133,16 +134,19 @@ truffle.textbox.prototype.draw=function(ctx) {
                       this.parent_transform.m[5]+this.pos.y);
 
 
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = "#777777";
         ctx.globalAlpha=0.75;
-        ctx.fillRect(-this.centre.x, -this.centre.y-this.text_height/1.8, 
-                     this.width,this.height); 
+        ctx.fillRect(~~(-this.centre.x+0.5), 
+                     ~~(-this.centre.y-this.text_height/1.8+0.5), 
+                     ~~(this.width+0.5),~~(this.height+0.5)); 
         ctx.globalAlpha=1;
 
         ctx.fillStyle = this.text_colour;
         ctx.textAlign = "left";
         this.text.forEach(function(text) {
-            ctx.fillText(text,-that.centre.x,y-that.centre.y);
+            ctx.fillText(text,
+                         ~~(-that.centre.x+0.5),
+                         ~~(y-that.centre.y+0.5));
             y+=that.text_height;
         });
 
@@ -154,25 +158,26 @@ truffle.textbox.prototype.draw=function(ctx) {
         var y=0;
         var that=this;
 
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = "#777777";
         ctx.globalAlpha=0.75;
-        ctx.fillRect(this.pos.x-this.centre.x, 
-                     this.pos.x-this.centre.y-this.text_height/1.7, 
-                     this.width,this.height); 
+        ctx.fillRect(~~(this.pos.x-this.centre.x+0.5), 
+                     ~~(this.pos.y-this.centre.y-this.text_height/1.8+0.5), 
+                     ~~(this.width+0.5),~~(this.height+0.5)); 
         ctx.globalAlpha=1;
 
         ctx.fillStyle = this.text_colour;
         ctx.textAlign = "left";
         this.text.forEach(function(text) {
             ctx.fillText(text,
-                         that.pos.x-that.centre.x,
-                         (that.pos.y-that.centre.y)+y);
+                         ~~(that.pos.x-that.centre.x+0.5),
+                         ~~((that.pos.y-that.centre.y)+y+0.5));
             y+=that.text_height;
         });
     }
 
 
-    if (this.draw_bb) {
+    if (this.draw_bb) 
+    {
         // draw bbox
         ctx.strokeStyle = "#00ffff";
         var bb=this.get_bbox();

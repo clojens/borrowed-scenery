@@ -40,6 +40,7 @@
    :tick (+ plant-tick (Math/floor (rand plant-tick-var)))
    :health start-health
    :fruit 0
+   :powering () ;; list of locations of plants we are powering
    :event-occurred ()
    :log (make-log 10)))
 
@@ -48,7 +49,7 @@
   [plant player-layer]
   (let [stripped (select-keys
                   plant
-                  [:entity-type :version :id :state :type :layer :pos :fruit :owner-id :owner :size])]
+                  [:entity-type :version :id :state :type :layer :pos :fruit :owner-id :owner :size :powering])]
     ; remove the fruit if the player hasn't reached the level yet
     (if (or (= player-layer "all")
             (= player-layer (:layer plant)))
@@ -367,93 +368,6 @@
         r (cons (:owner neighbour) r)))
     ()
     neighbours)))
-
-(defn plant-oak-update-health
-  "oaks advance state directly from neigbours"
-  [plant neighbours rules]
-  (modify
-   :state
-   (fn [state]
-     (cond
-      (= state "planted")
-      (do
-        (println "oak planted")
-        "ill-c")
-
-      (= state "ill-c")
-      (if (> (count-neighbour-owners neighbours) 0)
-        (do
-          (println "oak to ill-b")
-          "ill-b")
-        "ill-c")
-      
-      (= state "ill-b")
-      (if (> (count-neighbour-owners neighbours) 1)
-        (do
-          (println "oak to ill-a")
-          "ill-a")
-        "ill-b")
-      
-      (= state "ill-a")
-      (if (> (count-neighbour-owners neighbours) 2)
-        (do
-          (println "oak to fruit-c")
-          "fruit-c")
-        "ill-a")
-
-      (= state "fruit-c") "grown"
-      (= state "grown") "grown"))
-   plant))
-
-(defn plant-update-health [plant neighbours rules]
-  (prof
-   :plant-update-health
-   (if (= (:type plant) "oak") ; do something completely different
-     (plant-oak-update-health plant neighbours rules)
-       
-     (modify
-      :health
-      (fn [health] ; the main health algorithm
-        health (max 0 (min 100
-                           (+ health
-                              (reduce
-                               (fn [r n] ; look at companion planting rules
-                                 (let [rel (get-relationship
-                                            (:type plant) (:type n) rules)]
-                                        ; only count positive if the plant is well
-                                   (if (or (< rel 0)
-                                           (> (:health plant) min-health))
-                                     (+ r rel)
-                                     r)))
-                                        ; starting health change
-                               (+
-                                        ; soil type, if included
-                                (if (> (:version plant) 1)
-                                  (* (:soil plant) 0.1)
-                                  0)
-                                
-                                (let [nn (count neighbours)]
-                                  (cond ; general count of surrounding plants
-                                   (= 0 nn) -1
-                                   (> nn max-neighbours) (- max-neighbours nn)
-                                   :else 0)))
-                               neighbours)))))
-      plant))))
-
-(defn plant-update-fruit [plant]
-  (prof
-   :plant-update-fruit
-   (modify
-   :fruit
-   (fn [f]
-     (if (= (:type plant) "oak")
-       f ; don't add fruit to oak trees
-       (if (> f max-fruit)
-         0
-         (if (and (= (:state plant) "fruit-c")
-                  (< (rand 1000) fruit-probability))
-           (min max-fruit (+ f 1)) f))))
-   plant)))
 
 (defn plant-user-grow [player plant]
   (modify :state (fn [state] (adv-user state))

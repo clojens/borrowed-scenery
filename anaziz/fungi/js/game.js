@@ -23,8 +23,7 @@ function game(world) {
     this.avatar=null;
     this.tile_change=false;
     this.loading_spr=null;
-    this.particle_systems_this_frame=0;
-    this.max_particle_systems_per_frame=1;
+    this.time_since_last_ps=0;
     this.map_update_frame_count=0;
     this.update_next_frame=false;
     this.border_min=1;
@@ -114,7 +113,9 @@ function game(world) {
     this.updating_text=new truffle.textbox(new truffle.vec2(0,0),
                                            "loading map...",
                                            500,300,"50pt MaidenOrange");
-    this.updating_text.text_colour="#777777";
+    
+    this.updating_text.text_height=50;
+    this.updating_text.text_colour="#ffffff";
     this.world.add_sprite(this.updating_text);
     this.updating_text.hide(true);
     this.world.pre_sort_scene=function(depth) {
@@ -172,8 +173,289 @@ game.prototype.clear_entities=function() {
     this.entities=[];
 }
 
+game.prototype.calc_route=function(from,to) {
+    var dir_x=to.x-from.x;
+    var dir_y=to.y-from.y;
+    if (dir_x>0) dir_x=1;
+    else dir_x=-1;
+    if (dir_y>0) dir_y=1;
+    else dir_y=-1;
+
+    var pos_x=from.x;
+    var pos_y=from.y;
+    var route=[];
+
+    var first=true;
+    var safe=100;
+
+    var from_heading_x="e";
+    var from_heading_y="s";
+    var to_heading_x="w";
+    var to_heading_y="n";
+
+
+    if (dir_x>0) {
+        from_heading_x="w";
+        to_heading_x="e";
+    }
+    if (dir_y>0) {
+        from_heading_y="n";
+        to_heading_y="s";
+    }
+
+    if (Math.random()<0.5) {
+        var tex="m"+to_heading_x;
+
+        while (safe>0 && pos_x!=to.x) {
+            route.push({"pos":new truffle.vec2(pos_x,from.y),
+                        "tex":tex});
+            tex=from_heading_x+to_heading_x;
+            pos_x+=dir_x;
+            safe--;
+        }
+        
+        tex=from_heading_x+to_heading_y;
+        
+        while (safe>0 && pos_y!=to.y) {
+            route.push({"pos":new truffle.vec2(to.x,pos_y),
+                        "tex":tex});
+            tex=from_heading_y+to_heading_y;
+            pos_y+=dir_y;
+            safe--;
+        }
+
+        route.push({"pos":new truffle.vec2(to.x,to.y),
+                    "tex":from_heading_y+"m"});
+
+    } else {
+                
+        while (safe>0 && pos_y!=to.y) {
+            route.push({"pos":new truffle.vec2(from.x,pos_y),
+                        "tex":tex});
+            tex=from_heading_y+to_heading_y;
+            //        log(""+to.x+" "+pos_y+" "+tex);
+            pos_y+=dir_y;
+            safe--;
+        }
+
+        tex=from_heading_y+to_heading_x;
+
+        while (safe>0 && pos_x!=to.x) {
+            route.push({"pos":new truffle.vec2(pos_x,to.y),
+                        "tex":tex});
+            tex=from_heading_x+to_heading_x;
+            //        log(""+pos_x+" "+from.y+" "+tex);
+            pos_x+=dir_x;
+            safe--;
+        }
+        route.push({"pos":new truffle.vec2(to.x,to.y),
+                    "tex":from_heading_x+"m"});
+
+    }
+
+
+    return route;
+}
+
+game.prototype.make_mycorrhiza=function(from,to) {
+    var route=this.calc_route(from,to);
+    var that=this;
+
+    route.forEach(function(r) {
+        if (r.pos.x>=0 && r.pos.x<15 &&
+            r.pos.y>=0 && r.pos.y<15) {
+            var tile=that.map.find_tile_entity(r.pos.x,r.pos.y);
+            tile.entity.spr.composite("images/mycorrhiza-"+r.tex+".png","src-over");
+        }
+    });
+
+}
+
+game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
+    var that=this;
+
+//    if (tilepos.x!=this.player.tile.x ||
+//        tilepos.y!=this.player.tile.y) return;
+
+    if (entity["entity-type"]=="avatar") {
+        // no need to display ourself
+        if (entity.id==this.player.id) {
+            // if we exist already, update our chat text if required 
+            if (this.avatar!=null) {
+                if (entity.chat!=this.avatar.chat_last) {
+                    this.avatar.chat_time=this.world.time;
+                    this.avatar.chat_text.set_text(entity.chat);
+                    this.avatar.chat_last=entity.chat;
+                    this.avatar.chat_active=true;
+                }
+
+                if (this.avatar.chat_active &&
+                    this.world.time>this.avatar.chat_time+10) {
+                    this.avatar.chat_text.set_text("");
+                    this.avatar.chat_active=false;
+                }
+
+                return;
+            }
+            // make the player's avatar
+            this.avatar = new truffle.sprite_entity(
+                that.world,
+                new truffle.vec3(gamepos.x,gamepos.y,0),
+                'images/'+this.player["avatar-type"]+'-south.png');
+            this.avatar.needs_update=true;
+            this.avatar.speed=0.025;
+            this.avatar.chat_time=0;
+            this.avatar.chat_last="";
+            var ct=new truffle.textbox(new truffle.vec2(0,-200),
+                                      "",
+                                      300,300,"15pt patafont");
+            ct.text_height=55;
+            ct.text_colour="#5555ff";
+            this.avatar.chat_text=ct;
+            this.avatar.chat_active=false;
+            this.avatar.add_child(this.world,ct);
+            var t=new truffle.textbox(new truffle.vec2(0,-150),
+                                      entity.owner,
+                                      300,300,"15pt MaidenOrange");
+            t.text_height=25;
+            this.avatar.add_child(this.world,t);
+        }
+        else
+        {
+            log("making new avatar");
+            
+            var e=new truffle.sprite_entity(
+                this.world,
+                new truffle.vec3(gamepos.x,gamepos.y,0),
+                this.entity_texture(entity));
+            e.id=entity.id;
+            e.needs_update=false;
+            e.speed=0.025;
+            e.chat_time=0;
+            e.chat_last="";
+            e.chat_active=false;
+            var ct=new truffle.textbox(new truffle.vec2(0,-200),
+                                      "",
+                                      300,300,"15pt patafont");
+            ct.text_height=50;
+            ct.text_colour="#55ff55";
+            e.chat_text=ct;
+            e.add_child(this.world,ct);
+
+            var t=new truffle.textbox(new truffle.vec2(0,-150),
+                                      entity.owner,
+                                      300,300,"15pt MaidenOrange");
+            t.text_height=25;
+            e.add_child(this.world,t);
+            this.entities.push(e);        
+        }
+    }
+    else if (entity["entity-type"]=="plant") {
+        var e=new truffle.sprite_entity(
+            this.world,
+            new truffle.vec3(gamepos.x,gamepos.y,0),
+            this.entity_texture(entity))
+        e.state=entity.state;
+        e.id=entity.id;
+        e.powering=0;
+        //e.spr.draw_bb=true;
+
+        if (entity.state=="grow-a-ready") {
+            this.spawn_particles("images/particle.png",
+                                 gamepos.x,
+                                 gamepos.y,
+                                 -1);
+        }
+
+        e.spr.mouse_down(function() {
+            that.avatar.move_to(that.world,new truffle.vec3(e.logical_pos.x,
+                                                            e.logical_pos.y,0));
+
+            that.avatar.on_reached_dest=function(){
+                that.server.call("grow",[tilepos.x,
+                                         tilepos.y,
+                                         entity.id,
+                                         that.player.id,
+                                         0]);
+            };
+        });
+        
+        e.spr.mouse_over(function() {
+            if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
+                e.state=="grow-c-ready" || e.state=="spore-ready") {
+                e.needs_update=true;
+                e.every_frame=function() {
+                    e.spr.rotate(Math.sin(that.world.time*50)/80);
+                }
+            }
+        });
+
+        e.spr.mouse_out(function() {
+            e.needs_update=false;
+        });
+
+        this.entities.push(e);
+    }
+    else if (entity["entity-type"]=="ushahidi") {
+        log("making boskoi plant at "+gamepos.x+" "+gamepos.y);
+        var e=new truffle.sprite_entity(
+            this.world,
+            new truffle.vec3(gamepos.x,gamepos.y,0),
+            "images/boskoi-"+entity.layer+".png")
+        //e.id=entity.id;
+        e.id=entity.id;
+        var t=new truffle.textbox(new truffle.vec2(0,-200),
+                                  entity.incident.incidentdescription+" "+
+                                  entity.incident.locationname+" "+
+                                  entity.incident.incidentdate,
+                                  200,300,"8pt patafont");
+        t.text_height=25;
+        e.add_child(this.world,t);
+        this.entities.push(e);
+    }
+}
+
+game.prototype.spawn_particles=function(img,x,y,z) {
+    if (this.time_since_last_ps>2) {
+        // particle system will delete itself when done
+        var p=new truffle.particles_entity(
+            this.world,
+            new truffle.vec3(x,y,z),
+            img, 10, "one-shot");
+        this.time_since_last_ps=0;
+    }
+}
+
 game.prototype.update_entity=function(entity,from_server,tile) {
+    var that=this;
     if (from_server["entity-type"]=="plant") {
+        
+        // update the mycorrhiza
+        if (entity.powering<from_server.powering.length) {
+            from_server.powering.forEach(function(powering) {
+
+                that.make_mycorrhiza(
+                    entity.logical_pos,
+                    that.server_to_client_coords(that.player.tile.x,
+                                                 that.player.tile.y,
+                                                 powering.tile.x,
+                                                 powering.tile.y,
+                                                 powering.pos.x,
+                                                 powering.pos.y));
+
+                that.spawn_particles("images/powering.png",
+                                     entity.logical_pos.x,
+                                     entity.logical_pos.y,
+                                     -1);
+
+                entity.powering++;
+
+                // update to the powered texture
+                entity.spr.change_bitmap(that.entity_texture(from_server));
+
+            });
+        }
+
         // if the state has changed
         if (from_server.state!=entity.state) {
             entity.state=from_server.state;
@@ -184,21 +466,18 @@ game.prototype.update_entity=function(entity,from_server,tile) {
             if (entity.state=="grow-a" || 
                 entity.state=="grow-b" ||
                 entity.state=="grow-c" || 
-                entity.state=="grow-d" || 
-                entity.state=="spore") {
-
-                if (this.particle_systems_this_frame<
-                    this.max_particle_systems_per_frame) {
-                    // particle system will delete itself when done
-                    var p=new truffle.particles_entity(
-                        this.world,
-                        new truffle.vec3(entity.logical_pos.x,
-                                         entity.logical_pos.y,
-                                         -1),
-                        "images/particle.png",
-                        10, "one-shot");
-                    this.particle_systems_this_frame++;
-                }
+                entity.state=="grow-d") {
+                this.spawn_particles("images/particle.png",
+                                     entity.logical_pos.x,
+                                     entity.logical_pos.y,
+                                     -1);
+            }
+            
+            if (entity.state=="spore") {
+                this.spawn_particles("images/spawning.png",
+                                     entity.logical_pos.x,
+                                     entity.logical_pos.y,
+                                     -1);
             }
         }
     }
@@ -316,10 +595,14 @@ game.prototype.move_player=function(to) {
 
 game.prototype.entity_texture=function(entity) {
     if (entity["entity-type"]=="plant") {
+        var power="";
+        if (entity.powering.length>0) power="power-";
         if (entity.type=="knobbly")
-            return "images/knobbly-"+this.state_to_texture(entity.state)+".png";
+            return "images/knobbly-"+power+this.state_to_texture(entity.state)+".png";
+        else if (entity.type=="bobbly")
+            return "images/bobbly-"+power+this.state_to_texture(entity.state)+".png";
         else
-            return "images/pointy-"+this.state_to_texture(entity.state)+".png";
+            return "images/pointy-"+power+this.state_to_texture(entity.state)+".png";
     }
     if (entity["entity-type"]=="avatar") {
         return "images/"+entity["avatar-type"]+"-west.png";
@@ -328,162 +611,16 @@ game.prototype.entity_texture=function(entity) {
 }
 
 game.prototype.state_to_texture=function(state) {
-    if (state=="grow-a" || state=="grow-a-ready") return "a";
+    if (state=="grow-a" || state=="grow-a-ready" || state=="decayed") return "a";
     if (state=="grow-b" || state=="grow-b-ready") return "b";
     if (state=="grow-c" || state=="grow-c-ready") return "c";
-    if (state=="grow-d" || state=="grow-d-ready" || state=="spore") return "d";
+    if (state=="grow-d" || state=="grow-d-ready" || 
+        state=="spore" || state=="spore-ready") return "d";
     if (state=="decay-a") return "d";
     if (state=="decay-b") return "c";
     if (state=="decay-c") return "b";
     if (state=="decay-d") return "a";
-}
-
-game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
-    var that=this;
-
-//    if (tilepos.x!=this.player.tile.x ||
-//        tilepos.y!=this.player.tile.y) return;
-
-    if (entity["entity-type"]=="avatar") {
-        // no need to display ourself
-        if (entity.id==this.player.id) {
-            // if we exist already, update our chat text if required 
-            if (this.avatar!=null) {
-                if (entity.chat!=this.avatar.chat_last) {
-                    this.avatar.chat_time=this.world.time;
-                    this.avatar.chat_text.set_text(entity.chat);
-                    this.avatar.chat_last=entity.chat;
-                    this.avatar.chat_active=true;
-                }
-
-                if (this.avatar.chat_active &&
-                    this.world.time>this.avatar.chat_time+10) {
-                    this.avatar.chat_text.set_text("");
-                    this.avatar.chat_active=false;
-                }
-
-                return;
-            }
-            // make the player's avatar
-            this.avatar = new truffle.sprite_entity(
-                that.world,
-                new truffle.vec3(gamepos.x,gamepos.y,0),
-                'images/'+this.player["avatar-type"]+'-south.png');
-            this.avatar.needs_update=true;
-            this.avatar.speed=0.025;
-            this.avatar.chat_time=0;
-            this.avatar.chat_last="";
-            var ct=new truffle.textbox(new truffle.vec2(0,-200),
-                                      "",
-                                      300,300,"15pt patafont");
-            ct.text_height=55;
-            ct.text_colour="#5555ff";
-            this.avatar.chat_text=ct;
-            this.avatar.chat_active=false;
-            this.avatar.add_child(this.world,ct);
-            var t=new truffle.textbox(new truffle.vec2(0,-150),
-                                      entity.owner,
-                                      300,300,"15pt MaidenOrange");
-            t.text_height=25;
-            this.avatar.add_child(this.world,t);
-        }
-        else
-        {
-            log("making new avatar");
-            
-            var e=new truffle.sprite_entity(
-                this.world,
-                new truffle.vec3(gamepos.x,gamepos.y,0),
-                this.entity_texture(entity));
-            e.id=entity.id;
-            e.needs_update=false;
-            e.speed=0.025;
-            e.chat_time=0;
-            e.chat_last="";
-            e.chat_active=false;
-            var ct=new truffle.textbox(new truffle.vec2(0,-200),
-                                      "",
-                                      300,300,"15pt patafont");
-            ct.text_height=50;
-            ct.text_colour="#55ff55";
-            e.chat_text=ct;
-            e.add_child(this.world,ct);
-
-            var t=new truffle.textbox(new truffle.vec2(0,-150),
-                                      entity.owner,
-                                      300,300,"15pt MaidenOrange");
-            t.text_height=25;
-            e.add_child(this.world,t);
-            this.entities.push(e);        
-        }
-    }
-    else if (entity["entity-type"]=="plant") {
-        var e=new truffle.sprite_entity(
-            this.world,
-            new truffle.vec3(gamepos.x,gamepos.y,0),
-            this.entity_texture(entity))
-        e.state=entity.state;
-        e.id=entity.id;
-        //e.spr.draw_bb=true;
-
-        if (entity.state=="grow-a-ready" &&
-            this.particle_systems_this_frame<
-            this.max_particle_systems_per_frame) {
-            var p=new truffle.particles_entity(
-                this.world,
-                new truffle.vec3(gamepos.x,
-                                 gamepos.y,
-                                 -1),
-                "images/particle.png",
-                20, "one-shot");
-            this.particle_systems_this_frame++;
-        }
-
-        e.spr.mouse_down(function() {
-            that.avatar.move_to(that.world,new truffle.vec3(e.logical_pos.x,
-                                                            e.logical_pos.y,0));
-
-            that.avatar.on_reached_dest=function(){
-                that.server.call("grow",[tilepos.x,
-                                         tilepos.y,
-                                         entity.id,
-                                         that.player.id,
-                                         0]);
-            };
-        });
-        
-        e.spr.mouse_over(function() {
-            if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
-                e.state=="grow-c-ready" || e.state=="spore-ready") {
-                e.needs_update=true;
-                e.every_frame=function() {
-                    e.spr.rotate(Math.sin(that.world.time*50)/80);
-                }
-            }
-        });
-
-        e.spr.mouse_out(function() {
-            e.needs_update=false;
-        });
-
-        this.entities.push(e);
-    }
-    else if (entity["entity-type"]=="ushahidi") {
-        log("making boskoi plant at "+gamepos.x+" "+gamepos.y);
-        var e=new truffle.sprite_entity(
-            this.world,
-            new truffle.vec3(gamepos.x,gamepos.y,0),
-            "images/boskoi-"+entity.layer+".png")
-        e.id=entity.id;
-        var t=new truffle.textbox(new truffle.vec2(0,-200),
-                                  entity.incident.incidentdescription+" "+
-                                  entity.incident.locationname+" "+
-                                  entity.incident.incidentdate,
-                                  200,300,"15pt patafont");
-        t.text_height=25;
-        e.add_child(this.world,t);
-        this.entities.push(e);
-    }
+    else log("unmatched state:"+state);
 }
 
 game.prototype.shift_entities=function(x,y) {
@@ -574,8 +711,11 @@ game.prototype.server_to_client_coords=function(wtx,wty,tx,ty,px,py) {
 
 ////////////////////////////////////////////////////////////////////////////
 
+var last_time=(new Date).getTime();
+
 game.prototype.update=function() {
     var time=(new Date).getTime();
+    var delta=(time-last_time)/1000;
 
     // render some frame to make sure! :(
     if (this.map_update_frame_count>5) {
@@ -595,6 +735,9 @@ game.prototype.update=function() {
         this.update_tile();
         this.next_pull_time=time+1000;
     }
+
+    this.time_since_last_ps+=delta;
+    last_time=time;
 }
 
 ////////////////////////////////////////////////////////////////////////////
