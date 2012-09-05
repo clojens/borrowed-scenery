@@ -116,11 +116,15 @@
 ;;-----------------------------------------------------------------
 ;; output - direct via sql! :(
 
+(defn (read-secret)
+  (let [s (slurp "secret.txt")]
+    (subs s 0 (- (count s) 1))))
+
 (def db {:classname "com.mysql.jdbc.Driver"
          :subprotocol "mysql"
          :subname "//localhost:3306/borrowed_scenery"
          :user "root"
-         :password "CyonckEt8"})
+         :password (read-secret)})
 
 (defn current-sql-time []
   (.format (new java.text.SimpleDateFormat "yyyy-MM-dd hh:mm:ss")
