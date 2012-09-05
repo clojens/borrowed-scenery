@@ -116,7 +116,7 @@
 ;;-----------------------------------------------------------------
 ;; output - direct via sql! :(
 
-(defn (read-secret)
+(defn read-secret []
   (let [s (slurp "secret.txt")]
     (subs s 0 (- (count s) 1))))
 
