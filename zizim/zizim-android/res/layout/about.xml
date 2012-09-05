@@ -76,7 +76,7 @@
         		-->
     		<View android:layout_width="fill_parent" android:layout_marginTop="10px" android:layout_height="2dip" android:background="#FF000000" />
     		
-    		<Button android:id="@+id/eulaBtn"
+<!--    		<Button android:id="@+id/eulaBtn"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:textStyle="bold"
@@ -130,9 +130,9 @@
         		android:layout_marginLeft="0px"
         		android:layout_marginTop="10px"
         		android:text="@string/privacy" android:layout_gravity="center"/>
-        		
+    
         	<View android:layout_width="fill_parent" android:layout_marginTop="10px" android:layout_height="2dip" android:background="#FF000000" /> 
- 		    
+ 	-->	    
  		     		
         		
         </LinearLayout>
