@@ -117,7 +117,7 @@
 			{
 				$thumb = str_replace(".","_t.",$photo);
 				$prefix = url::base().Kohana::config('upload.relative_directory');
-				echo("<a class='photothumb' rel='lightbox-group1' href='$prefix/$photo'><img src='$prefix/$thumb'/></a> ");
+				echo("<img src='$prefix/$photo'/>");
 			}
 			?>
 		</div>
