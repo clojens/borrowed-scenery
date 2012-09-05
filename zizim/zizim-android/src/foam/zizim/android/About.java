@@ -53,7 +53,7 @@ public class About extends Activity {
         
         setContentView( R.layout.about);
    
-        versionName = (TextView) findViewById(R.id.version_name);
+/*        versionName = (TextView) findViewById(R.id.version_name);
         PackageManager manager = this.getPackageManager(); 
         PackageInfo info;
 		try {
@@ -112,7 +112,7 @@ public class About extends Activity {
                 }
 ;            }
         });  
-  
+*/
        
         
 	}
