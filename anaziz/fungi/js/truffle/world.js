@@ -103,7 +103,7 @@ truffle.world.prototype.get=function(type, pos) {
     this.scene.forEach(function(e) {
         if (pos.x==e.logical_pos.x &&
             pos.y==e.logical_pos.y &&
-            typeof e==type) {
+            e.type==type) {
             return e;
         }
     });
@@ -217,11 +217,6 @@ truffle.world.prototype.add_to_draw_list=function(spr,bbox,draw_list) {
             return draw_list;
         }
     });
-
-//    if (spr.id=999) { 
-//        log("hhh"); 
-//        log(spr.hidden);
-//    }
 
     draw_list.push({spr:spr,bbox:[bbox]});
     return draw_list;

@@ -44,7 +44,8 @@
 (def avatar-filter-time (* 10 60))
 
 ;; borrowed scenery stuff
-(def plant-influence-distance 5)
+(def plant-influence-distance 5) ; has to be greater than ->
+(def ushahidi-plant-influence-distance 3)
 (def spore-count 1)
 (def max-neighbours 20)
 (def min-neighbours 0)
@@ -113,7 +114,7 @@
                    "clover" 
                    ))
 
-(def tneg-types '("knobbly" "spiral" "bobble" "layer" "point" "knot"))
+(def tneg-types '("knobbly" "bobbly" "point"))
 
 (def plant-layers '(rhizosphere cover herbaceous shrub vertical tree canopy fungi))
 

@@ -21,7 +21,6 @@ truffle.sprite=function(pos, tex, midbot, viz) {
     this.pos=pos;
     this.do_centre_middle_bottom=midbot;
     this.image=null;
-    this.draw_image=null;
     this.ready_to_draw=false;
     this.offset_colour=null;
     this.draw_bb=false;
@@ -36,7 +35,6 @@ truffle.sprite.prototype.set_bitmap=function(b,recalc_bb) {
     this.ready_to_draw=true;
     if (recalc_bb==undefined) this.set_size(this.image.width,this.image.height);
     this.draw_me=true;
-    this.draw_image=b;
 }
 
 truffle.sprite.prototype.change_bitmap=function(t) {
@@ -56,7 +54,6 @@ truffle.sprite.prototype.load_from_url=function(url) {
         if (c.offset_colour!=null) {
             c.add_tint(c.offset_colour);
         }
-        c.draw_image = c.image;
         c.draw_me=true;
     };
     this.image.onerror = function(e) {
@@ -76,6 +73,41 @@ truffle.sprite.prototype.set_offset_colour=function(s) {
 truffle.sprite.prototype.get_offset_colour=function() {
     return this.offset_colour;
 }
+
+// composite a new image onto the sprite
+truffle.sprite.prototype.composite=function(url,comp_mode) {
+    if (!this.ready_to_draw) {
+        log("woop");
+        return;
+    }
+    var that=this;
+    var cimage=new Image();
+    cimage.onload = function() {
+        
+        var canvas = document.createElement("canvas");
+        canvas.width  = that.image.width;
+        canvas.height = that.image.height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(that.image,0,0);
+        ctx.globalCompositeOperation = comp_mode;
+        ctx.drawImage(cimage,0,0,cimage.width,cimage.height,
+                      0,0,that.image.width,that.image.width);
+        that.ready_to_draw=false;
+        
+        var image= new Image();
+        image.onload = function () {
+            that.image=image;
+            that.ready_to_draw=true;
+            that.draw_me=true;
+        };
+        image.src = canvas.toDataURL();
+    };
+    cimage.onerror = function(e) {
+        log("could't load "+url);
+    };
+    cimage.src = url;  
+}
+
 
 // tint the image pixel by pixel
 truffle.sprite.prototype.add_tint=function(col) {
@@ -110,8 +142,8 @@ truffle.sprite.prototype.add_tint=function(col) {
     ctx.putImageData( to, 0, 0 );
     
     // image is _slightly_ faster then canvas for this, so convert
-    this.draw_image = new Image();
-    this.draw_image.src = canvas.toDataURL();
+    this.image = new Image();
+    this.image.src = canvas.toDataURL();
 }
 
 truffle.sprite.prototype.update=function(frame, tx) {
@@ -141,13 +173,13 @@ truffle.sprite.prototype.draw=function(ctx) {
                           this.parent_transform.m[5]);
         }
         
-        ctx.drawImage(this.draw_image,
+        ctx.drawImage(this.image,
                       ~~(0.5+(-this.centre.x)),
                       ~~(0.5+(-this.centre.y)));
         ctx.restore();
     }
     else { // simple render path
-        ctx.drawImage(this.draw_image,
+        ctx.drawImage(this.image,
                       ~~(0.5+this.pos.x-this.centre.x),
                       ~~(0.5+this.pos.y-this.centre.y));
     }

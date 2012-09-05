@@ -180,7 +180,7 @@
                  (fn []
                    (make-random-plant
                     (id-gen)
-                    (make-vec2 0 0)
+                    (make-vec2 0 1)
                     (make-vec2 (rand-int 5)
                                (rand-int 5))))))))
 
@@ -823,6 +823,85 @@
    (fn [] {:x (- (rand-int 3) 1)
            :y (- (rand-int 3) 1)})))
 
+(defn fungi-add-powering! [fungi-id fungi-tile plant]
+  (db-find-update!
+   (fn [tile]
+     (modify
+      :entities
+      (fn [entities]
+        (map
+         (fn [entity]
+           (if (= (:id entity) fungi-id)
+             (do
+               (println "telling fungi it is helpful")
+               (modify :powering
+                       (fn [p] 
+                         (cons {:id (:id plant)
+                                :tile (:tile plant)
+                                :pos (:pos plant)} p))
+                       entity))
+             entity))
+         entities))
+      tile))
+   :tiles
+   {:pos.x (:x fungi-tile)
+    :pos.y (:y fungi-tile)}))
+  
+(defn inc-helpful-plant-count! [player-name ush-id]
+  (db-find-update!
+   (fn [player]
+     (println (:name player) "score is increasing")
+     (modify :plant-count (fn [c] (+ c 1))
+             (modify :has-picked (fn [p] (set-cons ush-id p))
+                     player)))
+   :players
+   {:name player-name}))
+
+(defn game-world-thank [game-world time]
+  ;; do the imperative bit
+  (db-partial-reduce
+   (fn [l tile]
+     (doseq [entity (:entities tile)]
+       (when (and (= (:entity-type entity) "ushahidi")
+                  (not (empty? (:thanks entity))))
+         (doseq [thank (:thanks entity)]
+           (let [ush-id (:ush-id entity)
+                 player-name (:name thank)]
+             (println "found thanks on " ush-id " for " player-name)
+             ;; tell fungi we are being helpful 
+             (fungi-add-powering!
+              (:fungi-id thank)
+              (:fungi-tile thank)
+              entity)
+              ;; increment plant count for this player
+              (inc-helpful-plant-count! player-name (:id entity))
+              ;; send comment to zizim site
+              (ushahidi-add-incident-comment
+               ush-id player-name
+               (str player-name " has helped this plant in anaziz"))))))
+     l)
+   '()
+   :tiles
+   time
+   server-db-items)
+
+  ;; clear thanks
+  (db-partial-map!
+   (fn [tile]
+     (modify
+      :entities
+      (fn [entities]
+        (map
+         (fn [entity]
+           (modify :thanks (fn [t] []) entity))
+         entities))
+      tile))
+   :tiles
+   time
+   server-db-items)
+  
+  game-world)
+
 (defn game-world-spore [game-world time delta]
   (db-partial-reduce
    (fn [gw tile]
@@ -861,10 +940,11 @@
    time
    server-db-items))
 
-(defn game-world-ushahidi-plant-exists [game-world tile-pos ush-id]
+;; wont differentiate against avatars...
+(defn game-world-other-plant-here [game-world tile-pos pos]
   (let [tile (game-world-get-tile game-world tile-pos)]
     (if tile
-      (tile-find-ushahidi tile ush-id)
+      (tile-position-taken? tile pos)
       false)))
   
 (defn game-world-update-ushahidi [game-world time delta]
@@ -873,7 +953,7 @@
      (let [in (:incident incident)
            p (ushahidi-incident->pos incident)
            ush-id (:incidentid in)]
-       (if (not (game-world-ushahidi-plant-exists gw (:tile-pos p) ush-id))
+       (if (not (game-world-other-plant-here gw (:tile-pos p) (:pos p)))
          (do
            (println "adding boskoi plant!" (:tile-pos p) (:pos p) (:locationlatitude in) (:locationlongitude in))
            (println in)
@@ -882,6 +962,7 @@
             (:tile-pos p)
             (make-ushahidi-plant
              ((:id-gen gw))
+             (:tile-pos p)
              "ushahidi"
              (:pos p)
              (rand-nth (list "canopy" "shrub" "rhyzome")) ;; todo, add to boskoi interface
@@ -908,19 +989,21 @@
                       (log-add-msg log msg))
                     log
                     msgs))
-            (game-world-update-top-players
-             (game-world-update-distance-info
-              (game-world-cull-empty-tiles
-               (game-world-update-ushahidi
-                (game-world-update-players
-                 (game-world-summon-to-ill-plants
-                  (game-world-spore
-                   (game-world-update-tiles
-                    (game-world-post-logs-to-players
-                     (game-world-clear-old-summons
-                      game-world time delta)
-                     msgs) time delta) time delta) time) time)
-                time delta)) time) time))))
+             (game-world-update-top-players
+              (game-world-update-distance-info
+               (game-world-cull-empty-tiles
+                (game-world-update-ushahidi
+                 (game-world-update-players
+                  (game-world-summon-to-ill-plants
+                   (game-world-spore
+                    (game-world-update-tiles
+                     (game-world-post-logs-to-players
+                      (game-world-clear-old-summons
+                       (game-world-thank
+                        game-world time) time delta)
+                      msgs) time delta) time delta) time) time)
+                 time delta)) time)
+              time))))
 
 (defn game-world-find-spirit
   "get the spirit from it's name"

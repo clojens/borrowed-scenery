@@ -35,23 +35,23 @@
 				?>
 				<?php print form::open(NULL, array('id' => 'contactForm', 'name' => 'contactForm')); ?>
 				<div class="report_row">
-					<strong>Your Name:</strong><br />
+					<strong>What is your name?</strong><br />
 					<?php print form::input('contact_name', $form['contact_name'], ' class="text"'); ?>
 				</div>
 				<div class="report_row">
-					<strong>Your E-Mail Address:</strong><br />
+					<strong>What is your email address?</strong><br />
 					<?php print form::input('contact_email', $form['contact_email'], ' class="text"'); ?>
 				</div>
 				<div class="report_row">
-					Your Phone Number:<br />
+					What is your telephone number?<br />
 					<?php print form::input('contact_phone', $form['contact_phone'], ' class="text"'); ?>
 				</div>
 				<div class="report_row">
-					<strong>Message Subject:</strong><br />
+					<strong>Please give a title to your correspondence.</strong><br />
 					<?php print form::input('contact_subject', $form['contact_subject'], ' class="text"'); ?>
 				</div>								
 				<div class="report_row">
-					<strong>Message:</strong><br />
+					<strong>Please include your corresepondence below.</strong><br />
 					<?php print form::textarea('contact_message', $form['contact_message'], ' rows="4" cols="40" class="textarea long" ') ?>
 				</div>		
 				<div class="report_row">
@@ -60,9 +60,15 @@
 					<?php print form::input('captcha', $form['captcha'], ' class="text"'); ?>
 				</div>
 				<div class="report_row">
-					<input name="submit" type="submit" value="Send Message" class="btn_submit" />
+					<input name="submit" type="submit" value="Dispatch your correspondence" class="btn_submit" />
 				</div>
 				<?php print form::close(); ?>
+				If you'd like to drop by our lab, this is the address:<br/>
+				Snoepwinkel<br/>
+				attn. Borrowed Scenery<br/>
+				Sint-Pietersnieuwstraat 21,<br/>
+				9000 Gent<br/>
+				(the lab is open from 1PM - 7 PM daily, except on Mondays).
 			</div>
 			
 		</div>

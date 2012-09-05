@@ -20,10 +20,10 @@ truffle.drawable=function()
     this.draw_me=true;
     this.disable_bg_redraw=false;
     this.id=-1;
-    this.depth=0;
     this.width=64;
     this.height=112;
-    this.depth=-1;    
+    this.depth=-1;
+    this.depth_offset=Math.random(); // attempt to prevent z fighting
     this.colour=null;
     this.expand_bb=0;
 
@@ -85,7 +85,7 @@ truffle.drawable.prototype.set_depth=function(s) {
 }
 
 truffle.drawable.prototype.get_depth=function() {
-    return this.depth;
+    return this.depth+this.depth_offset;
 }
 
 truffle.drawable.prototype.get_colour=function() {
@@ -140,10 +140,13 @@ truffle.drawable.prototype.recalc_bbox=function() {
     if (this.expand_bb>0) { // cater for rotate 
         var m=Math.max(this.width,this.height);
         var h=(m/2)+this.expand_bb;
-        this.bbox=[l-h,t-h,l+m+h,t+m+h]; 
+        this.bbox=[~~(0.5+l-h),~~(0.5+t-h),
+                   ~~(0.5+l+m+h),~~(0.5+t+m+h)]; 
     }
     else {
-        this.bbox=[l,t,l+this.width,t+this.height]; 
+        this.bbox=[~~(0.5+l),~~(0.5+t),
+                   ~~(0.5+l+this.width),
+                   ~~(0.5+t+this.height)]; 
     }
 }
 

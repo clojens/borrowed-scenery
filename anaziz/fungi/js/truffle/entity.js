@@ -19,6 +19,7 @@ truffle.entity=function(world,pos) {
     this.last_pos = world.screen_transform(this.logical_pos);
     this.dest_pos = world.screen_transform(this.logical_pos);
     this.tile_pos = null;
+    this.type = "entity";
     this.depth = this.pos.z;
     this.depth_offset = 0;
     this.speed = 0;

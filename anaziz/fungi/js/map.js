@@ -88,6 +88,8 @@ map.prototype.split_image=function(image,nx,ny) {
 	        var pix = imgd.data;
 	        for (var i = 0, n = pix.length; i < n; i += 4) {
 	            var grayscale = pix[i]*.3+pix[i+1]*.59+pix[i+2]*.11;
+                grayscale-=100;
+                if (grayscale<0) grayscale=0;
 	            pix[i  ] = grayscale;   // red
 	            pix[i+1] = grayscale;   // green
 	            pix[i+2] = grayscale;   // blue
