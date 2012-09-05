@@ -28,9 +28,6 @@ truffle.world.prototype.clear=function() {
     this.canvas_state=new truffle.canvas_state();
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
     this.screen_scale=new truffle.vec2(1,1);
-    this.screen_centre=new truffle.vec2(-500,400);
-//    this.screen_offset=new truffle.vec2(this.screen_centre.x,
-//                                        this.screen_centre.y);
     this.screen_offset=new truffle.vec2(0,0);
     this.debug_text="hello world\n";
 

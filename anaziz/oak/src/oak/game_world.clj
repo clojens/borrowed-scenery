@@ -465,8 +465,6 @@
    (= (:player (first lb)) (:player score)) (cons score (rest lb))
    :else (cons (first lb) (add-to-leaderboard score (rest lb)))))
 
-(def leaderboard-size 10)
-
 (defn game-world-update-top-players
   "for the leaderboard"
   [game-world time]
@@ -478,7 +476,7 @@
                      (fn [scores player]
                        (if (and (> (:plant-count player) 0)
                                 (or (< lowest-score (:plant-count player))
-                                    (< (count scores) leaderboard-size)))
+                                    (< (count scores) leaderboard-max)))
                          (add-to-leaderboard {:score (:plant-count player)
                                               :player (:name player)
                                               :helped (count (:has-picked player))} scores)
@@ -488,7 +486,7 @@
                      time
                      server-db-items)
            sorted (sort-by (fn [i] (:score i)) unsorted)]
-       (discard (reverse sorted) leaderboard-size)))
+       (discard (reverse sorted) leaderboard-max)))
    game-world))
 
 ; need to do this before tile update, when decayed plants
@@ -878,7 +876,7 @@
               ;; send comment to zizim site
               (ushahidi-add-incident-comment
                ush-id player-name
-               (str player-name " has helped this plant in anaziz"))))))
+               (str player-name " has helped this plant in aniziz"))))))
      l)
    '()
    :tiles

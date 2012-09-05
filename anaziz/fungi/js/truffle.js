@@ -20,7 +20,7 @@ var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAni
     window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
 var update_fn;
-var last_time;
+var last_time=0;
 var frames;
 var total_time;
 var update_time;
@@ -46,26 +46,31 @@ truffle.main.loop=function(timestamp) {
     var canvas=document.getElementById('canvas')
     var ctx=canvas.getContext('2d');
     var now = (new Date()).getTime();
-
-    update_fn();
+    var delta = now-last_time;
+   
+    update_fn(now,delta);
     truffle.main.world.update(now/1000);
 
-    if (ctx.canvas.width!=window.innerWidth ||
-        ctx.canvas.height!=window.innerHeight) {
+    if (ctx.canvas.width!=window.innerWidth) {
         truffle.main.world.canvas_state.resize(
             window.innerWidth,
-            window.innerHeight);
+            ctx.canvas.height);
         truffle.main.world.redraw();
     }
 
-    var delta = now-last_time;
     last_time = now;
     total_time+=delta;
     frames++;
     update_time+=delta;
     update_frames++;
+
     if(update_time > 1000) {
-        document.getElementById('fps').innerHTML = "fps avg: " + (1000*frames/total_time) + " cur: " + (1000*update_frames/update_time);
+        var av=(1000*frames/total_time);
+        av=Math.round(av*100)/100;
+        var cur=(1000*update_frames/update_time);
+        cur=Math.round(cur*100)/100;
+
+        document.getElementById('fps').innerHTML = "fps avg: " + av + " cur: " + cur;
         update_time = 0;
         update_frames =0;
     }

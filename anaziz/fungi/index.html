@@ -41,34 +41,38 @@
     }
     input {
         font-family:  "MaidenOrange";
-        font-size:  200%;
+        font-size:  100%;
     }
     select {
         font-family:  "MaidenOrange";
-        font-size:  200%;
+        font-size:  100%;
     }
     canvas { background:url(images/bg.jpg) }
-    .left { float : left; width : 48%; }
-    .right { float : right; width : 48%; }
-    .top { height : 200px; }
+    .top { height : 140px; }
+    .tarot {
+        margin: 1em 1em 1em 1em; 
+        padding: 1em 1em 1em 1em; 
+        background:url(images/transparent.png);
+        color: #000;
+        max-width: 600px; 
+    }
   </style>
 </head>
 
 <body>
-  <div class=top>
-  <div class=left>
-    <center>
-    <img src="images/logo-s.png"><br/>
-    <div id="game-stats"></div>
-    </center>
+  <center>
+  <div class="top">
+    <div style="float: left; width: 30%;"><img src="images/logo-s.png"></div>
+    <div style="float: left; width: 30%;">    
+      <b>Information</b>
+      <div id="game-stats"></div>
+    </div>
+    <div style="float: left; width: 30%;">
+      <b>Patabotanists of note</b>
+      <div id="leaderboard"/>
+    </div>
   </div>
-  <div class=right>
-    <center>
-    <h2>Patabotanists of note</h2>
-    <div id="leaderboard"/>
-    </center>
-  </div>
-  </div>
+  </center>
   <center>
     <div id="input_form">
       <input 

@@ -112,7 +112,7 @@
            my-game-world
            (game-world-login (deref my-game-world) player-id)))
          (game-log player "registered")
-         (json player)))
+         (json {:player player :status "registered"})))
      :else
      (let [player (game-world-find-player
                    (deref my-game-world) id)]
@@ -121,7 +121,7 @@
          my-game-world
          (game-world-login (deref my-game-world) id)))
        (game-log player "login")
-       (json player)))))
+       (json {:player player :status "login"})))))
 
 (defn s-move-player [player-id tilex tiley posx posy iefix]
   (let [tile-pos (make-vec2 (parse-number tilex) (parse-number tiley))

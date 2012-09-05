@@ -49,6 +49,7 @@
 (def spore-count 1)
 (def max-neighbours 20)
 (def min-neighbours 0)
+(def leaderboard-max 5)
 
 (def avatar-types '("hermit" "hierophant" "high-priestess" "magician"))
 

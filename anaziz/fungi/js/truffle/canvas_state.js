@@ -21,13 +21,14 @@ truffle.canvas_state=function() {
     this.canvas=document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');         
     this.bg_colour = "#ffffff";
-
-    this.world_x=0;
-    this.world_y=0;
+    
+    // start off at a reasonably centred position
+    this.world_x=-800;
+    this.world_y=200;
     this.world_desired_x=0;
     this.world_desired_y=0;
-    this.world_offset_x=-500;
-    this.world_offset_y=400;
+    this.world_offset_x=0;
+    this.world_offset_y=300;
 
     // for world to refresh areas needed by scrolling screen
     this.refresh_top=false;
@@ -64,7 +65,7 @@ truffle.canvas_state=function() {
 
 truffle.canvas_state.prototype.resize=function(w,h) {
     this.world_offset_x=w/2;
-    this.world_offset_y=h/2;
+    //this.world_offset_y=h/2;
     this.canvas.width=w;
     this.canvas.height=h;
 }
@@ -134,45 +135,6 @@ truffle.canvas_state.prototype.unclip=function() {
 truffle.canvas_state.prototype.update=function() {
     this.mouse_changed=false;
 }
-
-// todo: merge with below
-truffle.canvas_state.prototype.snap_world_to=function(x,y) {
-    var diff_x=this.world_x+x;
-    var diff_y=this.world_y+y;
-
-    if (diff_x>0) diff_x=-diff_x;
-    else diff_x=diff_x;
-    if (diff_y>0) diff_y=-diff_y;
-    else diff_y=diff_y;
-        
-    var sx=0;
-    var dx=diff_x;
-    var width=this.ctx.canvas.width-diff_x;
-    if (diff_x<0) {
-        sx=-diff_x;
-        dx=0;
-        width=this.ctx.canvas.width+diff_x;
-    }
-    
-    var sy=0;
-    var dy=diff_y;
-    var height=this.ctx.canvas.height-diff_y;
-    if (diff_y<0) {
-        sy=-diff_y;
-        dy=0;
-        height=this.ctx.canvas.height+diff_y;
-    }
-    
-    this.ctx.drawImage(this.ctx.canvas,
-                       ~~(sx),~~(sy),~~(width),~~(height),
-                       ~~(dx),~~(dy),~~(width),~~(height));
-    
-    this.world_x+=diff_x;
-    this.world_y+=diff_y;
-    this.world_desired_x=-this.world_x;
-    this.world_desired_y=-this.world_y;
-}
-
 
 truffle.canvas_state.prototype.move_world_to=function(x,y) {
     this.world_desired_x=x;
