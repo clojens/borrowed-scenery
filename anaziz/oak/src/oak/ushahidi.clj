@@ -138,7 +138,7 @@
                   time 1]))
 
 (defn ushahidi-add-incident-comment [id name text]
-  (let [time (current-sql-time)]
+  (comment let [time (current-sql-time)]
   (with-connection db
     (insert-comment id name text time))))
 

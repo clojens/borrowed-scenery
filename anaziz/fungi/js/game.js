@@ -49,8 +49,8 @@ function game(world) {
         20,"continuous");
     this.pstest.needs_update=true;
 */
-    var camera_pos=world.screen_transform(new truffle.vec3(7,7,1));
-    world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
+//    var camera_pos=world.screen_transform(new truffle.vec3(7,7,1));
+//    world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
 
     this.map=new map(centre,zoom);
     this.map.do_create_tile=function(world_x,world_y,sub_image) {
@@ -114,7 +114,8 @@ function game(world) {
                                            "loading map...",
                                            500,300,"50pt MaidenOrange");
     
-    this.updating_text.text_height=50;
+    this.updating_text.height=70;
+    this.updating_text.text_height=100;
     this.updating_text.text_colour="#ffffff";
     this.world.add_sprite(this.updating_text);
     this.updating_text.hide(true);
@@ -125,24 +126,7 @@ function game(world) {
 
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
-
-game.prototype.connect_and_login=function(name) {
-    var that=this;
-    this.server=new truffle.server('ws://be.fo.am:8002/borrowed-scenery',
-                                   function () {
-                                       that.server.call("login",[name,0,0]);
-                                   });
-    this.server.listen("login", function(player) {
-        that.logged_in=true;
-        that.player=player;
-        that.tile_change=true;
-        log(that.player.name+" has logged in");
-        that.update_tile()
-    });
-}
 
 game.prototype.chat=function(text) {
     if (this.logged_in) {
@@ -228,6 +212,7 @@ game.prototype.calc_route=function(from,to) {
                     "tex":from_heading_y+"m"});
 
     } else {
+        var tex="m"+to_heading_y;
                 
         while (safe>0 && pos_y!=to.y) {
             route.push({"pos":new truffle.vec2(from.x,pos_y),
@@ -319,11 +304,13 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                                       300,300,"15pt MaidenOrange");
             t.text_height=25;
             this.avatar.add_child(this.world,t);
+
+            // move the camera to focus on the player
+            var cam=g.world.screen_transform(new truffle.vec3(gamepos.x,gamepos.y,0));
+            this.world.move_world_to(cam.x,cam.y);
         }
         else
         {
-            log("making new avatar");
-            
             var e=new truffle.sprite_entity(
                 this.world,
                 new truffle.vec3(gamepos.x,gamepos.y,0),
@@ -397,7 +384,6 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         this.entities.push(e);
     }
     else if (entity["entity-type"]=="ushahidi") {
-        log("making boskoi plant at "+gamepos.x+" "+gamepos.y);
         var e=new truffle.sprite_entity(
             this.world,
             new truffle.vec3(gamepos.x,gamepos.y,0),
@@ -436,9 +422,7 @@ game.prototype.update_entity=function(entity,from_server,tile) {
 
                 that.make_mycorrhiza(
                     entity.logical_pos,
-                    that.server_to_client_coords(that.player.tile.x,
-                                                 that.player.tile.y,
-                                                 powering.tile.x,
+                    that.server_to_client_coords(powering.tile.x,
                                                  powering.tile.y,
                                                  powering.pos.x,
                                                  powering.pos.y));
@@ -484,8 +468,6 @@ game.prototype.update_entity=function(entity,from_server,tile) {
     if (from_server["entity-type"]=="avatar") {
        // log(JSON.stringify(from_server));
         var pos=this.server_to_client_coords(
-            this.player.tile.x,
-            this.player.tile.y,
             tile.x,
             tile.y,
             from_server.pos.x,
@@ -674,7 +656,8 @@ game.prototype.do_update_tile=function() {
         var d=that.map.distance_from_centre(dist["tile-pos"]);
         d=Math.round(d*100)/100;
         document.getElementById('game-stats').innerHTML = 
-            "Fungi has reached "+d+" km from Vooruit, created by "+dist.player;
+            "Fungi has reached "+d+" km from Vooruit, created by "+dist.player+"</br>"+
+            "You have grown "+data.player["plant-count"]+" helpful fungi, helping "+data.player["has-picked"].length+" earth plants";
 
         // update the leaderboard
         var leaderboard="";
@@ -688,8 +671,6 @@ game.prototype.do_update_tile=function() {
             var tilepos=tile.pos;
             tile.entities.forEach(function(entity) {
                 var gamepos=that.server_to_client_coords(
-                    that.player.tile.x,
-                    that.player.tile.y,
                     tilepos.x,tilepos.y,
                     entity.pos.x,entity.pos.y);
                 
@@ -704,18 +685,17 @@ game.prototype.do_update_tile=function() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-game.prototype.server_to_client_coords=function(wtx,wty,tx,ty,px,py) {
+game.prototype.server_to_client_coords=function(tx,ty,px,py) {
+    var wtx=this.player.tile.x;
+    var wty=this.player.tile.y;
     return new truffle.vec2(((tx-wtx)+1)*5+px,
                             ((ty-wty)+1)*5+py);
 }
 
 ////////////////////////////////////////////////////////////////////////////
 
-var last_time=(new Date).getTime();
 
-game.prototype.update=function() {
-    var time=(new Date).getTime();
-    var delta=(time-last_time)/1000;
+game.prototype.update=function(time,delta) {
 
     // render some frame to make sure! :(
     if (this.map_update_frame_count>5) {
@@ -737,23 +717,13 @@ game.prototype.update=function() {
     }
 
     this.time_since_last_ps+=delta;
-    last_time=time;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 
+// state machine please...
 
-var g;
-
-function login_form() {
-    var name=document.getElementById('player_name').value;
-    if (name!="" && name!="What are you called?") {
-        var element=document.getElementById("input_form");
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
-        document.getElementById('game-goes-here').innerHTML = 
-            '<canvas id="canvas" width="880" height="460"></canvas>\
+var game_html='<canvas id="canvas" width="880" height="500"></canvas>\
 <input \
      id="chat"\
      type="text"\
@@ -763,18 +733,106 @@ function login_form() {
      onkeydown="if (event.keyCode==13) chat();"/>\
 <input\
      type="button"\
-     style="font-size:50"\
-     value="Chat"\
-     onclick="chat();" /><br/>\
-<div id="fps"></div>';
+     style="font-size:25"\
+     value="Say something"\
+     onclick="chat();" />\
+<input\
+     type="button"\
+     style="font-size:25"\
+     value="Help me"\
+     onclick="help();"/><br/>\
+<div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>';
 
-        truffle.main.init(game_create,game_update);
-        g.connect_and_login(name);
+var reading_html='\
+<h1>Patabotanical tarot reading in progress</h1>\
+please be patient<br/>\
+<progress value="0%" max="200">progress bar</progress>';
+
+var reading_ready_html='\
+<h1>Patabotanical tarot reading complete</h1>\
+<input\
+     type="button"\
+     style="font-size:50"\
+     value="See your reading"\
+     onclick="reading_done();" /><br/>';
+
+var tarot={"hermit":"After a long and busy lifetime, building, creating, loving, hating, fighting, compromising, failing, succeeding, the Fool feels a profound need to retreat. In a small, rustic home deep in the woods, he hides, reading, cleaning, organizing, resting or just thinking. But every night at dusk he heads out, traveling across the bare, autumnal landscape. He carries only a staff and a lantern.",
+           "hierophant":"Having created a solid foundation on which to build his future, the Fool is struck with a sudden fear. What if everything he's worked for is taken away? Is stolen, or lost, or destroyed or vanishes? Or what if what he's created isn't good enough? In a panic, he heads into a temple where he finds the Hierophant, a wise and holy man. Acolytes kneel before the man ready to hear and pass on his teachings. The Fool tells the Hierophant his fears, and asks how he can be free of them.",
+           "high-priestess":"Continuing his journey, the Fool comes upon a beautiful and mysterious veiled lady enthroned between two pillars and illuminated by the moon. She is the opposite of the Magician, quiet where he was loquacious, still where he was in motion, sitting while he stood, shrouded in the night where he was out in the bright of day. Sensing that she is a great seer, the Fool lays out his sword, chalice, staff and pentacle before her. 'The Magician showed me these, but now I'm in a quandary. There are so many things I could do with them. I can't decide.'",
+           "magician":"Traveling on his way, the Fool first encounters a Magician. Skillful, self-confident, a powerful magus with the infinite as a halo floating above his head, the Magician mesmerizes the Fool. When asked, the Fool gives over his bundled pack and stick to the Magician. Raising his wand to heaven, pointing his finger to Earth, the Magician calls on all powers. Magically, the cloth of the pack unfolds upon the table, revealing its contents."
+          };
+
+function reading_done_html(type) {
+    return '\
+<h1>Patabotanical tarot reading complete</h1>\
+<div class="tarot">\
+Your avatar is: The '+type+'<br/>\
+<img src="images/'+type+'-west.png"><br/>\
+<p>'+tarot[type]+'</p></div>\
+<input\
+     type="button"\
+     style="font-size:50"\
+     value="Start game"\
+     onclick="enter_game();" /><br/>';
+}
+
+var g;
+var player;
+var server;
+
+function help() {
+    window.open("help.html", "Aniziz Help",
+                "status = 1, height = 550, width = 475, resizable = 0" );
+}
+
+function login_form() {
+    var name=document.getElementById('player_name').value;
+    if (name!="" && name!="What are you called?") {
+        var element=document.getElementById("input_form");
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+        connect_and_login(name);
     }
     else
     {
         alert("Type in your name...");
     }
+}
+
+function connect_and_login(name) {
+    server=new truffle.server('ws://localhost:8002/borrowed-scenery',
+                              function () {
+                                  server.call("login",[name,0,0]);
+                              });
+    server.listen("login", function(data) {
+        player=data.player;
+        log(player.name+" has logged in");
+        do_reading(data.status);
+    });
+}
+
+function do_reading(status) {
+    // if we are a new player
+    if (status=="registered") {
+        document.getElementById('game-goes-here').innerHTML = reading_html;
+        setTimeout(reading_ready,5000);
+    } else {
+        enter_game();
+    }
+}
+
+function reading_ready() {
+    document.getElementById('game-goes-here').innerHTML = reading_ready_html;
+}
+
+function reading_done() {
+    document.getElementById('game-goes-here').innerHTML = reading_done_html(player["avatar-type"]);
+}
+
+function enter_game() {
+    document.getElementById('game-goes-here').innerHTML = game_html;
+    truffle.main.init(game_create,game_update);
 }
 
 function chat() {
@@ -784,8 +842,12 @@ function chat() {
 
 function game_create() {
     g=new game(truffle.main.world);
+    g.server=server;
+    g.logged_in=true;
+    g.tile_change=true;
+    g.player=player;
 }
 
-function game_update() {
-    g.update();
+function game_update(time,delta) {
+    g.update(time,delta);
 }
