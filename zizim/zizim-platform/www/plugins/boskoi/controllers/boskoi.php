@@ -17,7 +17,7 @@ class Boskoi_Controller extends Main_Controller {
 	}
 	
 	public function _main_sidebar() {
-		View::factory('download_app')->render(FALSE);
+		View::factory('download_app')->render(TRUE);
 		View::factory('guidelines')->render(FALSE);
 		View::factory('howtoreport')->render(TRUE);
 	}
