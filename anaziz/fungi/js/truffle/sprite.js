@@ -172,6 +172,8 @@ truffle.sprite.prototype.draw=function(ctx) {
                           this.parent_transform.m[4],
                           this.parent_transform.m[5]);
         }
+
+        ctx.globalAlpha=this.alpha;
         
         ctx.drawImage(this.image,
                       ~~(0.5+(-this.centre.x)),

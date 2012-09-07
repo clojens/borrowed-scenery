@@ -97,7 +97,7 @@ function game(world) {
 
         s.spr.mouse_down(function() {
             
-            that.move_player(s.logical_pos);
+            that.move_player(s.logical_pos,function(){});
 
             //if (px==9) { that.player.tile.x+=2; that.update_tile() }
             //if (py==9) { that.player.tile.y+=2; that.update_tile() }
@@ -253,7 +253,35 @@ game.prototype.make_mycorrhiza=function(from,to) {
             tile.entity.spr.composite("images/mycorrhiza-"+r.tex+".png","src-over");
         }
     });
+}
 
+
+game.prototype.attempt_grow=function(e,tilepos){
+    var that=this;
+    if (e.resize_timer<that.world.time) {
+        if (e.state=="grow-a-ready" ||
+            e.state=="grow-b-ready" ||
+            e.state=="grow-c-ready" ||
+            e.state=="grow-d-ready" ||
+            e.state=="spore-ready") {
+            this.server.call("grow",[tilepos.x,
+                                     tilepos.y,
+                                     e.id,
+                                     this.player.id,
+                                     0]);
+        } else {
+            e.resize_timer=this.world.time+0.5;
+            e.spr.scale(new truffle.vec2(1.2,1.2));
+            e.needs_update=true;
+            e.every_frame=function() {
+                if (e.resize_timer<that.world.time) {
+                    e.spr.clear_transform();
+                    e.every_frame=null;
+                    e.needs_update=false;
+                }
+            };
+        }
+    }
 }
 
 game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
@@ -345,40 +373,48 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.state=entity.state;
         e.id=entity.id;
         e.powering=0;
+        e.resize_timer=0;
         //e.spr.draw_bb=true;
 
+/*
         if (entity.state=="grow-a-ready") {
             this.spawn_particles("images/particle.png",
                                  gamepos.x,
                                  gamepos.y,
                                  -1);
         }
-
+*/
         e.spr.mouse_down(function() {
-            that.avatar.move_to(that.world,new truffle.vec3(e.logical_pos.x,
-                                                            e.logical_pos.y,0));
-
-            that.avatar.on_reached_dest=function(){
-                that.server.call("grow",[tilepos.x,
-                                         tilepos.y,
-                                         entity.id,
-                                         that.player.id,
-                                         0]);
-            };
+            // if the avatar is in the same place, try immediately
+            if (e.logical_pos.eq(that.avatar.logical_pos)) {
+                that.attempt_grow(e,tilepos);
+                
+            } else {
+                // move the player to the right place
+                that.move_player(new truffle.vec3(e.logical_pos.x,
+                                                  e.logical_pos.y,0),
+                                 function () { 
+                                     that.attempt_grow(e,tilepos); 
+                                 });
+            }
         });
         
         e.spr.mouse_over(function() {
-            if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
-                e.state=="grow-c-ready" || e.state=="spore-ready") {
-                e.needs_update=true;
-                e.every_frame=function() {
-                    e.spr.rotate(Math.sin(that.world.time*50)/80);
+            if (e.resize_timer<that.world.time) {
+                if (e.state=="grow-a-ready" || e.state=="grow-b-ready" ||
+                    e.state=="grow-c-ready" || e.state=="spore-ready") {
+                    e.needs_update=true;
+                    e.every_frame=function() {
+                        e.spr.rotate(Math.sin(that.world.time*50)/80);
+                    }
                 }
             }
         });
 
         e.spr.mouse_out(function() {
-            e.needs_update=false;
+            if (e.resize_timer<that.world.time) {
+                e.needs_update=false;
+            }
         });
 
         this.entities.push(e);
@@ -412,6 +448,28 @@ game.prototype.spawn_particles=function(img,x,y,z) {
     }
 }
 
+game.prototype.start_ripple=function(x,y,z) {
+    var that=this;
+    var s=new truffle.sprite_entity(
+        this.world,
+        new truffle.vec3(x,y,z),
+        "images/grow.png");
+    var len=1;
+    s.spr.do_centre_middle_bottom=false;
+    s.finished_time=this.world.time+len;
+    s.needs_update=true;
+    s.spr.expand_bb=30;
+    s.spr.scale(new truffle.vec2(0.5,0.5));
+    s.every_frame=function() {
+        var a=(s.finished_time-that.world.time);
+        if (a>0) s.spr.alpha=a; 07837341881
+        s.spr.scale(new truffle.vec2(1.05,1.05));
+        if (s.finished_time<that.world.time) {
+            s.delete_me=true;
+        }
+    };
+}
+
 game.prototype.update_entity=function(entity,from_server,tile) {
     var that=this;
     if (from_server["entity-type"]=="plant") {
@@ -430,7 +488,7 @@ game.prototype.update_entity=function(entity,from_server,tile) {
                 that.spawn_particles("images/powering.png",
                                      entity.logical_pos.x,
                                      entity.logical_pos.y,
-                                     -1);
+                                     1);
 
                 entity.powering++;
 
@@ -443,18 +501,29 @@ game.prototype.update_entity=function(entity,from_server,tile) {
         // if the state has changed
         if (from_server.state!=entity.state) {
             entity.state=from_server.state;
+//            entity.spr.clear_transform(); // in case of failed grow effect
             entity.spr.change_bitmap(this.entity_texture(from_server));
             entity.needs_update=false; // turn off shaking
 
+
+/*            if (entity.state=="grow-ready-a" || 
+                entity.state=="grow-ready-b" ||
+                entity.state=="grow-ready-c" || 
+                entity.state=="grow-ready-d") {
+                entity.spr.enable_mouse(true);
+            }
+*/                
             // if we have just grown, spawn a particle system
             if (entity.state=="grow-a" || 
                 entity.state=="grow-b" ||
                 entity.state=="grow-c" || 
                 entity.state=="grow-d") {
-                this.spawn_particles("images/particle.png",
-                                     entity.logical_pos.x,
-                                     entity.logical_pos.y,
-                                     -1);
+
+//                entity.spr.enable_mouse(false);
+
+                this.start_ripple(entity.logical_pos.x,
+                                  entity.logical_pos.y,
+                                  -0.25);
             }
             
             if (entity.state=="spore") {
@@ -501,7 +570,7 @@ game.prototype.update_entity=function(entity,from_server,tile) {
     }
 }
 
-game.prototype.move_player=function(to) {
+game.prototype.move_player=function(to,on_reached_dest) {
     var that=this;
     var sx=that.avatar.logical_pos.x;
     var sy=that.avatar.logical_pos.y;
@@ -526,6 +595,8 @@ game.prototype.move_player=function(to) {
         
         that.avatar.on_reached_dest=function() {
             that.world.redraw();
+
+            on_reached_dest();
 
             var tcx=0;
             var tcy=0;

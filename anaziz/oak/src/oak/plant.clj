@@ -87,6 +87,15 @@
   (or (= season "spring")
       (= season "summer")))
 
+(defn can-grow [state]
+  (or (= state "grow-a-ready")
+      (= state "grow-b-ready")
+      (= state "grow-c-ready")
+      (= state "spore-ready")))
+
+(defn plant-can-grow? [plant]
+  (can-grow (:state plant)))
+      
 (defn adv-user [state]
   (cond
    (= state "grow-a-ready") "grow-b"

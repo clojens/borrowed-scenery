@@ -26,6 +26,7 @@ truffle.drawable=function()
     this.depth_offset=Math.random(); // attempt to prevent z fighting
     this.colour=null;
     this.expand_bb=0;
+    this.alpha=1;
 
     this.pos=new truffle.vec2(0,0);
     this.centre=new truffle.vec2(0,0);
@@ -55,6 +56,11 @@ truffle.drawable.prototype.set_pos=function(s) {
     this.transform.m[5]=s.y; 
     this.pos=s; 
     this.draw_me=true; 
+}
+
+truffle.drawable.prototype.clear_transform=function() {
+    this.transform = new truffle.mat23();
+    this.draw_me=true;
 }
 
 truffle.drawable.prototype.translate=function(s) { 

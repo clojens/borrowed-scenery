@@ -44,7 +44,7 @@ import android.view.Window;
 public class SplashScreen extends Activity implements Eula.OnEulaAgreedTo {
 
 
-    private boolean mAlreadyAgreedToEula = false;
+    private boolean mAlreadyAgreedToEula = true;
 
     
 	/** Called when the activity is first created. */
@@ -57,7 +57,7 @@ public class SplashScreen extends Activity implements Eula.OnEulaAgreedTo {
         BoskoiService.loadSettings(SplashScreen.this);
         BoskoiService.trackPageView(SplashScreen.this, "/SplashScreen");        
         
-        mAlreadyAgreedToEula = Eula.show(this);
+        mAlreadyAgreedToEula = true; //Eula.show(this);
         
         startSplashThread();
     }
