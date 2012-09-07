@@ -458,7 +458,7 @@ game.prototype.start_ripple=function(x,y,z) {
     s.spr.do_centre_middle_bottom=false;
     s.finished_time=this.world.time+len;
     s.needs_update=true;
-    s.spr.expand_bb=30;
+    s.spr.expand_bb=50;
     s.spr.scale(new truffle.vec2(0.5,0.5));
     s.every_frame=function() {
         var a=(s.finished_time-that.world.time);
