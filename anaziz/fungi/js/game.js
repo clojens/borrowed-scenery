@@ -463,7 +463,7 @@ game.prototype.start_ripple=function(x,y,z) {
     s.every_frame=function() {
         var a=(s.finished_time-that.world.time);
         if (a>0) s.spr.alpha=a; 07837341881
-        s.spr.scale(new truffle.vec2(1.01,1.01));
+        s.spr.scale(new truffle.vec2(1.02,1.02));
         if (s.finished_time<that.world.time) {
             s.delete_me=true;
         }
