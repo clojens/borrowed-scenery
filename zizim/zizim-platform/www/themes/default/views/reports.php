@@ -48,7 +48,29 @@
 								If no images, show the default image placeholder (report-thumb-default.jpg)
 								If there are images, show the thumbnail for the most recent one.
 								-->
-								<img src="<?php echo url::site(); ?>media/img/report-thumb-default.jpg" height="59" width="89" /> </a>
+								<?
+								$incident_photo = array();
+								foreach($incident->media as $media)
+								{					
+								    if ($media->media_type == 1)
+								    {
+								        $incident_photo[] = $media->media_link;
+								    }
+								}
+
+								if( count($incident_photo) > 0 )
+								{ 
+								    $thumb = str_replace(".","_t.",$incident_photo[0]);
+								    $prefix = url::base().Kohana::config('upload.relative_directory');
+								    echo("<a href='".url::site()."reports/view/".$incident_id."'><img src='$prefix/$thumb'/></a>");
+								} else {
+								    echo("<img src='.url::site().'media/img/report-thumb-default.jpg' height='59' width='89' /> </a>");
+
+								} 
+								?>
+
+
+
 							</p>
 
 							<!-- Only show this if the report has a video -->

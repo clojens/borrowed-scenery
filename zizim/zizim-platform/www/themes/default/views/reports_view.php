@@ -67,28 +67,6 @@
 	</div>
 </div>
 
-<div class="report-description">
-	<h3>Plant Sighting</h3>
-		<div class="content">
-			<?php echo $incident_description; ?>
-			<div class="credibility">
-				Credibility:
-				<a href="javascript:rating('<?php echo $incident_id; ?>','add','original','oloader_<?php echo $incident_id; ?>')"><img id="oup_<?php echo $incident_id; ?>" src="<?php echo url::base() . 'media/img/'; ?>thumb-up.jpg" alt="UP" title="UP" border="0" /></a>&nbsp;
-				<a href="javascript:rating('<?php echo $incident_id; ?>','subtract','original')"><img id="odown_<?php echo $incident_id; ?>" src="<?php echo url::base() . 'media/img/'; ?>thumb-down.jpg" alt="DOWN" title="DOWN" border="0" /></a>&nbsp;
-				<a href="" class="rating_value" id="orating_<?php echo $incident_id; ?>"><?php echo $incident_rating; ?></a>
-				<a href="" id="oloader_<?php echo $incident_id; ?>" class="rating_loading" ></a>
-			</div>
-		</div>
-		<a name="discussion"></a>
-		<?php
-		// Action::report_extra - Add Items to the Report Extra block
-		Event::run('ushahidi_action.report_extra', $incident_id);
-		
-		// Filter::comments_block - The block that contains posted comments
-		Event::run('ushahidi_filter.comment_block', $comments);
-		echo $comments;
-		?>		
-	</div>
 
 	<?php
 	if( count($incident_photos) > 0 ) 
@@ -103,7 +81,7 @@
 			{
 				$thumb = str_replace(".","_t.",$photo);
 				$prefix = url::base().Kohana::config('upload.relative_directory');
-				echo("<a class='photothumb' rel='lightbox-group1' href='$prefix/$photo'><img src='$prefix/$thumb'/></a> ");
+				echo("<img src='$prefix/$photo'/>");
 			}
 			?>
 		</div>
@@ -148,6 +126,29 @@
 	<?php
 	}?>
 
+<div class="report-description">
+
+	<h3>Plant Sighting</h3>
+		<div class="content">
+			<?php echo $incident_description; ?>
+			<div class="credibility">
+				Credibility:
+				<a href="javascript:rating('<?php echo $incident_id; ?>','add','original','oloader_<?php echo $incident_id; ?>')"><img id="oup_<?php echo $incident_id; ?>" src="<?php echo url::base() . 'media/img/'; ?>thumb-up.jpg" alt="UP" title="UP" border="0" /></a>&nbsp;
+				<a href="javascript:rating('<?php echo $incident_id; ?>','subtract','original')"><img id="odown_<?php echo $incident_id; ?>" src="<?php echo url::base() . 'media/img/'; ?>thumb-down.jpg" alt="DOWN" title="DOWN" border="0" /></a>&nbsp;
+				<a href="" class="rating_value" id="orating_<?php echo $incident_id; ?>"><?php echo $incident_rating; ?></a>
+				<a href="" id="oloader_<?php echo $incident_id; ?>" class="rating_loading" ></a>
+			</div>
+		</div>
+		<a name="discussion"></a>
+		<?php
+		// Action::report_extra - Add Items to the Report Extra block
+		Event::run('ushahidi_action.report_extra', $incident_id);
+		
+		// Filter::comments_block - The block that contains posted comments
+		Event::run('ushahidi_filter.comment_block', $comments);
+		echo $comments;
+		?>		
+	</div>
 
 	<div class="report-description">
 		<h3>Plan/Plant/Planet</h3>
