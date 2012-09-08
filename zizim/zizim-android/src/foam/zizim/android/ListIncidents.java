@@ -143,7 +143,7 @@ public class ListIncidents extends Activity
         		  long id) {
 				
 				incidentsBundle.putInt("id", mOldIncidents.get(position).getIncidentId());
-				incidentsBundle.putString("title",mOldIncidents.get(position).getIncidentTitle());
+				incidentsBundle.putString("title",mOldIncidents.get(position).getIncidentDesc());
 				incidentsBundle.putString("desc", mOldIncidents.get(position).getIncidentDesc());
 				incidentsBundle.putString("longitude",mOldIncidents.get(position).getIncidentLocLongitude());
 				incidentsBundle.putString("latitude",mOldIncidents.get(position).getIncidentLocLatitude());
@@ -233,7 +233,7 @@ public class ListIncidents extends Activity
         body.setTextColor(Color.BLACK);
         body.setText(inci.getIncidentDesc());
         
-        status = (TextView) dialog.findViewById( R.id.status);
+/*        status = (TextView) dialog.findViewById( R.id.status);
         
 		//change colored to red if text is not Verified
 		if(iStatus.equals("Verified")) {
@@ -242,7 +242,7 @@ public class ListIncidents extends Activity
 			status.setTextColor(Color.parseColor(getText(R.string.notverified_string).toString()));//Color.rgb(237, 0, 0));
 		}
         status.setText(iStatus);
-    	
+*/  	
     	media = inci.getIncidentMedia();
     	
     	ImageAdapter imageAdapter = new ImageAdapter(this);
