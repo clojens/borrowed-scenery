@@ -836,7 +836,7 @@ function reading_done_html(type) {
     return '\
 <h1>Patabotanist invoked...</h1>\
 <div class="tarot">\
-Your avatar is: The '+type+'<br/>\
+Your avatar is: '+type+'<br/>\
 <img src="images/'+type+'-west.png"><br/>\
 <p>'+tarot[type]+'</p></div>\
 <input\
