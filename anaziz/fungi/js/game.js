@@ -815,27 +815,26 @@ var game_html='<canvas id="canvas" width="880" height="500"></canvas>\
 <div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>';
 
 var reading_html='\
-<h1>Patabotanical tarot reading in progress</h1>\
+<h1>Contacting patabotanists in your local parallel reality</h1>\
 please be patient<br/>\
 <progress value="0%" max="200">progress bar</progress>';
 
 var reading_ready_html='\
-<h1>Patabotanical tarot reading complete</h1>\
+<h1>Success! Patabotanist invoked</h1>\
 <input\
      type="button"\
      style="font-size:50"\
-     value="See your reading"\
+     value="See who..."\
      onclick="reading_done();" /><br/>';
 
-var tarot={"hermit":"After a long and busy lifetime, building, creating, loving, hating, fighting, compromising, failing, succeeding, the Fool feels a profound need to retreat. In a small, rustic home deep in the woods, he hides, reading, cleaning, organizing, resting or just thinking. But every night at dusk he heads out, traveling across the bare, autumnal landscape. He carries only a staff and a lantern.",
-           "hierophant":"Having created a solid foundation on which to build his future, the Fool is struck with a sudden fear. What if everything he's worked for is taken away? Is stolen, or lost, or destroyed or vanishes? Or what if what he's created isn't good enough? In a panic, he heads into a temple where he finds the Hierophant, a wise and holy man. Acolytes kneel before the man ready to hear and pass on his teachings. The Fool tells the Hierophant his fears, and asks how he can be free of them.",
-           "high-priestess":"Continuing his journey, the Fool comes upon a beautiful and mysterious veiled lady enthroned between two pillars and illuminated by the moon. She is the opposite of the Magician, quiet where he was loquacious, still where he was in motion, sitting while he stood, shrouded in the night where he was out in the bright of day. Sensing that she is a great seer, the Fool lays out his sword, chalice, staff and pentacle before her. 'The Magician showed me these, but now I'm in a quandary. There are so many things I could do with them. I can't decide.'",
-           "magician":"Traveling on his way, the Fool first encounters a Magician. Skillful, self-confident, a powerful magus with the infinite as a halo floating above his head, the Magician mesmerizes the Fool. When asked, the Fool gives over his bundled pack and stick to the Magician. Raising his wand to heaven, pointing his finger to Earth, the Magician calls on all powers. Magically, the cloth of the pack unfolds upon the table, revealing its contents."
-          };
+var tarot={"Trismegisto Herbert Taraxi":"organo-linguistic engineer Transdisciplinary craftsman, building machinery for cross-species (mis)communication. Master in hybrid techniques of esoteric magic and ritual science. Interests: systems and interface design, illusionism, biotechnology and shoemaking. Personality traits: willpower, virtuoso manual skills, trickster.",
+           "Alchemilla Lily Umiliata":"principal patabotanist Investigator of non-human sentiences, atmosphere diffuser and wrangler of pataphors. Interests: atemporality, reconnecting with the vegetal mind, empirical divination. Personality traits: introverted, persevering, intuitive, otherworldly.",
+           "Eleuz Ashton Querlano, translator":" Medium and cross-species thalience linguist, in charge of channeling and communicating with non-human sentiences. Interests: linguistics, science fiction, the planetary Other, artificial intelligence, vegetal cognition. Personality traits: enlightened, irreverent, wise, pillar of the group, indulges in alcoholic beverages.",
+	   "Castuus Larch Absinthian":"resident mystic One of the few people able to have a direct experience of Viriditas. Invokes Viriditas to open up communication channels between humans and plants. Interests: direct experience, introspection, alternative mind-states, collective consciousness, cognitive science, obscure literature. Personality traits: asocial, meditative, dissociated, wise old man."};
 
 function reading_done_html(type) {
     return '\
-<h1>Patabotanical tarot reading complete</h1>\
+<h1>Patabotanist invoked...</h1>\
 <div class="tarot">\
 Your avatar is: The '+type+'<br/>\
 <img src="images/'+type+'-west.png"><br/>\
