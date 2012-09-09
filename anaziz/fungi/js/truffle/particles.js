@@ -30,7 +30,7 @@ truffle.particles=function(pos, tex, count, mode) {
 
     for (var i=0; i<count; i++) {
         this.particles.push({
-            "vel": circ_rndvec2().mul(5),
+            "vel": circ_rndvec2().mul(2),
             "pos": new truffle.vec2(0,0),
             "age": rndi(0,this.max_age)
         });

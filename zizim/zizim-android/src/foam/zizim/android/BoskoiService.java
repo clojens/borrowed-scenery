@@ -78,6 +78,7 @@ public class BoskoiService extends Service {
 	public static String password = "";
 	public static long blogLastUpdate = 0;
 	public static String lastUpdate = "1970-01-01 00:00:00"; // default value
+	public static long lastId = 0; // default value
 	public static long updateInterval = 24 * 60 * 60 * 1000; // currently 24
 	// hours
 	public static String language = "english";
@@ -244,6 +245,7 @@ public class BoskoiService extends Service {
 		firstname = settings.getString("Firstname", "");
 		lastname = settings.getString("Lastname", "");
 		lastUpdate = settings.getString("LastUpdate", "");
+		lastId = settings.getLong("LastId", 0);
 		email = settings.getString("Email", "");
 		countries = settings.getInt("Countries", 0);
 		AutoUpdateDelay = settings.getInt("AutoUpdateDelay", 5);
@@ -278,6 +280,7 @@ public class BoskoiService extends Service {
 		editor.putString("Firstname", firstname);
 		editor.putString("Lastname", lastname);
 		editor.putString("LastUpdate", lastUpdate);
+		editor.putLong("LastId", lastId);
 		editor.putString("Language", language);
 		editor.putString("LastVersion", lastVersion);
 

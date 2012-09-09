@@ -331,35 +331,38 @@ public class Util{
 					return 1;
 				}
 				  String timeLastUpdated = BoskoiService.lastUpdate;
+				  long lastId = BoskoiService.lastId;
 				  if(BoskoiApplication.mDb.fetchAllIncidentsCount() == 0){
 					  BoskoiService.lastUpdate = "1970-01-01 00:00:00";
+					  BoskoiService.lastId = 0;                      
 					  timeLastUpdated = "1970-01-01 00:00:00";
+                      lastId=0;
 				  }
-				if( Incidents.getAllIncidentsFromWeb(timeLastUpdated) ){
-					mNewIncidents =  HandleXml.processIncidentsXml( BoskoiService.incidentsResponse , context);					
-					
-				} else {
-					return 1;
-				}
-				
-				if(mNewCategories != null && mNewIncidents != null ) {
-
-					 BoskoiService.numberOfNewReports = mNewIncidents.size();
-					 BoskoiApplication.mDb.addCategories(mNewCategories, false);
-					 BoskoiApplication.mDb.addIncidents(mNewIncidents, false);
-					 
-					 findDeletedIncidents(context);
-					 
-					 return 0;
-				 
-				 } else {
-					 return 1;
-				 }
+                  if( Incidents.getAllIncidentsFromWeb(lastId) ){
+                      mNewIncidents =  HandleXml.processIncidentsXml( BoskoiService.incidentsResponse , context);					
+                      
+                  } else {
+                      return 1;
+                  }
+                  
+                  if(mNewCategories != null && mNewIncidents != null ) {
+                      
+                      BoskoiService.numberOfNewReports = mNewIncidents.size();
+                      BoskoiApplication.mDb.addCategories(mNewCategories, false);
+                      BoskoiApplication.mDb.addIncidents(mNewIncidents, false);
+                      
+                      findDeletedIncidents(context);
+                      
+                      return 0;
+                      
+                  } else {
+                      return 1;
+                  }
 				  
-
-				} else {
-					return 4;
-				}
+                  
+            } else {
+                return 4;
+            }
 		} catch (IOException e) {
 			//means there was a problem getting it
 		}

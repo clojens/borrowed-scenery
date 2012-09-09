@@ -115,7 +115,7 @@
 	<string name="retrieving_reports">Retrieving new reports</string>
 	<string name="retrieved_reports">Retrieved new reports</string>
 		<!-- Add Report Screen -->
-	<string name="report_successfully_added_online">Report successfully posted online and is awaiting approval.</string>
+	<string name="report_successfully_added_online">Thankyou for your field note.</string>
 	<string name="report_successfully_added_offline">Report sent to local storage due to 
 		unvailability of internet. Remember to sync to the online 
 		instance when there there is internet connection.</string>
@@ -186,8 +186,9 @@
 	<string name="version_name_lbl">Version </string>
 	<string name="menu_about">About</string>
 	<string name="boskoi_url">more about FoAM</string>
-	<string name="welcome_mgs">A mobile phone guide to edible urban wild-food sources, combining the ancient skills of foragers with current open source media. 
-	\n\nThis pilot-project is initiated by FoAm (http://www.fo.am),\nsupported by het Prins Bernhard cultuurfonds (http://www.prinsbernhardcultuurfonds.nl)\nand developed by \nJoey van der Bie (http://www.vanderBie.net), \nMaarten van der Mark (http://www.vdmark.info) and \nVincent Vijn (http://www.vijn.me)
+	<string name="welcome_mgs">
+      Zizim is a field guide to remarkable plants and gardens. A valuable tool for the patabotanical field worker, it allows you to assemble and explore a growing collection of urban plants amenable to living with humans and in gardens where people cultivate, contemplate, exchange and eat plants.\n\n
+      Zizim is based on Boskoi technology (http://www.boskoi.org) and Ushahidi (http://ushahidi.com/) 
 	</string>
 	
 	<!--  Blog screen -->

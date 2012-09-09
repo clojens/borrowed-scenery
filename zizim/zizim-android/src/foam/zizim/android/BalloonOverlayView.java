@@ -239,7 +239,7 @@ public class BalloonOverlayView extends FrameLayout {
         body.setTextColor(Color.BLACK);
         body.setText(inci.getIncidentDesc());
         
-        status = (TextView) dialog.findViewById( R.id.status);
+        /*status = (TextView) dialog.findViewById( R.id.status);
         
 		//change colored to red if text is not Verified
 		if(iStatus.equals("Verified")) {
@@ -248,7 +248,7 @@ public class BalloonOverlayView extends FrameLayout {
 			status.setTextColor(Color.parseColor(getContext().getText(R.string.notverified_string).toString()));//Color.rgb(237, 0, 0));
 		}
         status.setText(iStatus);
-    	
+    	*/
     	media = inci.getIncidentMedia();
     		
     	ImageAdapter imageAdapter = new ImageAdapter(this.getContext());

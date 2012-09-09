@@ -94,8 +94,13 @@ public class HandleXml {
 				
 				NodeList id = idElement.getChildNodes();
 		
-				incidentData.setIncidentId(Integer.parseInt(((Node) id.item(0)).getNodeValue()));
+                int idl=Integer.parseInt(((Node) id.item(0)).getNodeValue());
+				incidentData.setIncidentId(idl);
 				
+				if (BoskoiService.lastId<idl) {
+                    BoskoiService.lastId=idl;
+                }
+
 				NodeList dateElementList = element.getElementsByTagName("date");
 				Element dateElement = (Element) dateElementList.item(0);
 				

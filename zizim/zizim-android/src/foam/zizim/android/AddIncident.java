@@ -966,7 +966,7 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
     	AddIncidentData addIncidentData = new AddIncidentData();
     	addIncidentsData.add(addIncidentData);
     	
-    	//addIncidentData.setIncidentTitle(incidentTitle.getText().toString());
+    	addIncidentData.setIncidentTitle(incidentDesc.getText().toString());
     	addIncidentData.setIncidentDesc(incidentDesc.getText().toString());
     	addIncidentData.setIncidentDate(dates[0]);
     	addIncidentData.setIncidentHour(Integer.parseInt(time[0]));
@@ -1010,7 +1010,7 @@ private void placeMarker( int markerLatitude, int markerLongitude ) {
     	urlBuilder.append("/api");
     	params.put("task","report");
     	
-		params.put("incident_title",selectedCategories.getText().toString());
+		params.put("incident_title", incidentDesc.getText().toString());
     	Log.i("Categories selected", selectedCategories.getText().toString());
     	
     	params.put("incident_description", incidentDesc.getText().toString()); 

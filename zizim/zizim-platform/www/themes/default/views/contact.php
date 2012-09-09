@@ -3,6 +3,15 @@
 		<!-- start contacts block -->
 		<div class="big-block">
 			<h1><?php echo Kohana::lang('ui_main.contact'); ?></h1>
+			        <p>
+				If you'd like to drop by our lab, this is the address:
+				<p>
+				Snoepwinkel<br/>
+				attn. Borrowed Scenery<br/>
+				Sint-Pietersnieuwstraat 21,<br/>
+				9000 Gent<br/>
+				(the lab is open from 1PM - 7 PM daily, except on Mondays).<br/>
+				</p></p>
 			<div id="contact_us" class="contact">
 				<?php
 				if ($form_error)
@@ -63,12 +72,6 @@
 					<input name="submit" type="submit" value="Dispatch your correspondence" class="btn_submit" />
 				</div>
 				<?php print form::close(); ?>
-				If you'd like to drop by our lab, this is the address:<br/>
-				Snoepwinkel<br/>
-				attn. Borrowed Scenery<br/>
-				Sint-Pietersnieuwstraat 21,<br/>
-				9000 Gent<br/>
-				(the lab is open from 1PM - 7 PM daily, except on Mondays).
 			</div>
 			
 		</div>

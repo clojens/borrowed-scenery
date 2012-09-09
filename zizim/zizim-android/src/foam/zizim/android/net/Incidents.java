@@ -33,7 +33,7 @@ import android.util.Log;
 public class Incidents {
 	
 	
-	public static boolean getAllIncidentsFromWeb(String sinceDate) throws IOException {
+	public static boolean getAllIncidentsFromWeb(long sinceId) throws IOException {
         BoskoiService.tracker.trackPageView("/Incidents/IncidentsFromWeb");
 		
 		HttpResponse response;
@@ -41,8 +41,8 @@ public class Incidents {
 		
 		StringBuilder uriBuilder = new StringBuilder( BoskoiService.domain);
 		uriBuilder.append("/api?task=incidents");
-		uriBuilder.append("&by=sincedate");
-		uriBuilder.append("&date="+sinceDate.replace(" ", "%20")); //format date url correctly by replacing whitespace
+		uriBuilder.append("&by=sinceid");
+		uriBuilder.append("&id="+String.valueOf(sinceId)); //format date url correctly by replacing whitespace
 		uriBuilder.append("&limit=5000");
 		uriBuilder.append("&resp=xml");
 		Log.i("URL: ", uriBuilder.toString());
