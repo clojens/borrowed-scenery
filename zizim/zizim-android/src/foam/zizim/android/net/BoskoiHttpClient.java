@@ -148,18 +148,26 @@ public class BoskoiHttpClient {
              req.setParameter("person_last", params.get("person_last"));
              req.setParameter("person_email", params.get("person_email"));
            
-             if( !TextUtils.isEmpty( params.get("filename") ))
-             req.setParameter("incident_photo[]", new File(BoskoiService.savePath + params.get("filename")));
-             
+             if( !TextUtils.isEmpty( params.get("filename") )) {
+                 File f=new File(BoskoiService.savePath + params.get("filename"));
+                 // sometimes seems to get the last image left over in the params?
+                 // todo: need to clear somewhere?
+                 if (f.exists()) {
+                     req.setParameter("incident_photo[]", f);
+                 }
+             }            
 
              Log.i("ZZZZ",req.toString());
-             Log.i("ZZZZ",params.get("incident_category"));
              
              InputStream serverInput = req.post();
 
              if( Util.extractPayloadJSON(GetText(serverInput)) ){
             	 return true;
              }
+             // fix - api failing on images causing duplication problems
+             // if it got here then there is a connection anyway...
+             // todo: need to repo this to fix properly
+             return true;
              
         } catch (MalformedURLException ex) {
             Log.i("XXXX","MalformedURLException");
