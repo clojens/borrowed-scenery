@@ -827,6 +827,11 @@ var reading_ready_html='\
      value="See who..."\
      onclick="reading_done();" /><br/>';
 
+var characters={"hermit":"Trismegisto Herbert Taraxi",
+                "hierophant":"Alchemilla Lily Umiliata",
+                "high-priestess":"Eleuz Ashton Querlano, translator",
+                "magician":"Castuus Larch Absinthian"};
+
 var tarot={"Trismegisto Herbert Taraxi":"organo-linguistic engineer Transdisciplinary craftsman, building machinery for cross-species (mis)communication. Master in hybrid techniques of esoteric magic and ritual science. Interests: systems and interface design, illusionism, biotechnology and shoemaking. Personality traits: willpower, virtuoso manual skills, trickster.",
            "Alchemilla Lily Umiliata":"principal patabotanist Investigator of non-human sentiences, atmosphere diffuser and wrangler of pataphors. Interests: atemporality, reconnecting with the vegetal mind, empirical divination. Personality traits: introverted, persevering, intuitive, otherworldly.",
            "Eleuz Ashton Querlano, translator":" Medium and cross-species thalience linguist, in charge of channeling and communicating with non-human sentiences. Interests: linguistics, science fiction, the planetary Other, artificial intelligence, vegetal cognition. Personality traits: enlightened, irreverent, wise, pillar of the group, indulges in alcoholic beverages.",
@@ -836,9 +841,9 @@ function reading_done_html(type) {
     return '\
 <h1>Patabotanist invoked...</h1>\
 <div class="tarot">\
-Your avatar is: '+type+'<br/>\
+Your avatar is: '+characters[type]+'<br/>\
 <img src="images/'+type+'-west.png"><br/>\
-<p>'+tarot[type]+'</p></div>\
+<p>'+characters[type]+" who is the "+tarot[characters[type]]+'</p></div>\
 <input\
      type="button"\
      style="font-size:50"\
