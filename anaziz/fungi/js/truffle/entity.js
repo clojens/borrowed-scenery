@@ -49,7 +49,7 @@ truffle.entity.prototype.move_to=function(world, pos) {
     this.dest_pos = world.screen_transform(this.logical_pos);
 }
 
-truffle.entity.prototype.update=function(frame, world) {
+truffle.entity.prototype.update=function(time, delta, world) {
     if (!this.override_pos)
     {
         if (this.speed==0) {
@@ -59,7 +59,7 @@ truffle.entity.prototype.update=function(frame, world) {
         else {
             if (this.move_time<1.0) {
                 this.pos = this.last_pos.lerp(this.dest_pos,this.move_time);
-                this.move_time += this.speed;
+                this.move_time += this.speed*delta;
                 if (this.on_reached_dest!=null && 
                     this.move_time>=1.0) {
                     // in case we reset from within

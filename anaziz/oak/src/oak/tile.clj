@@ -35,16 +35,17 @@
 
 (defn tile-strip
   "remove crud for download"
-  [tile player-layer]
+  [tile player-layer player-id]
   (modify
    :entities
    (fn [entities]
      (filter ; todo - enable for all
       (fn [entity]
-        (comment or (not (= (:entity-type entity) "avatar"))
-            (< (current-time)
-               (+ (:time entity) avatar-filter-time)))
-        true)
+        (or
+         (not (= (:entity-type entity) "avatar"))
+         (= (:id entity) player-id) ; need to show the player!
+         (< (current-time)
+            (+ (:time entity) avatar-filter-time))))
       (map (fn [entity]
              (cond
               (= (:entity-type entity) "plant")

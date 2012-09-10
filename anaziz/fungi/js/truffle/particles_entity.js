@@ -30,10 +30,10 @@ truffle.particles_entity.prototype.destroy=function(world) {
     world.remove_sprite(this.particles);
 }
 
-truffle.particles_entity.prototype.update=function(frame, world) {
-    truffle.entity.prototype.update.call(this,frame,world);
+truffle.particles_entity.prototype.update=function(time, delta, world) {
+    truffle.entity.prototype.update.call(this,time,delta,world);
     this.delete_me=this.particles.delete_me;
-    this.particles.update(frame,null);
+    this.particles.update(time,delta);
 }
 
 truffle.particles_entity.prototype.on_sort_scene=function(world, order) {

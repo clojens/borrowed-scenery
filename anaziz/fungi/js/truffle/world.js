@@ -23,6 +23,7 @@ truffle.world.prototype.clear=function() {
     this.current_depth=1000;
     this.current_id=0;
     this.time=0;
+    this.delta=0;
     this.do_render=true;
 
     this.canvas_state=new truffle.canvas_state();
@@ -176,7 +177,7 @@ truffle.world.prototype.debug=function(txt) {
 }
 
 // update all the entities that need it, at the correct frequency
-truffle.world.prototype.update_entities=function(time) {
+truffle.world.prototype.update_entities=function() {
     var that=this;
     this.scene.forEach(function(e) {
 //        if (e.tile_pos!=null)
@@ -190,8 +191,8 @@ truffle.world.prototype.update_entities=function(time) {
         if (e.needs_update && !e.hidden &&
             (e.update_freq==0 ||
              (time % e.update_freq)==0))
-        {
-            e.update(time,that);
+        {   
+            e.update(that.time,that.delta,that);
         }
     });
 }
@@ -251,7 +252,8 @@ truffle.world.prototype.build_draw_list=function() {
     // do check for overlapping sprites
     this.sprites.forEach(function(sprite) {
         // if this sprite needs redrawing
-        if (!sprite.hidden &&
+        if (sprite.zone==0 &&
+            !sprite.hidden &&
             sprite.ready_to_draw &&
             sprite.draw_me) {
             var bbox=sprite.get_last_bbox();
@@ -300,7 +302,7 @@ truffle.world.prototype.draw_scene=function(draw_list) {
     });
 
 //    this.canvas_state.stats(draw_list.length/this.sprites.length);
-    this.canvas_state.end_scene();
+    this.canvas_state.end_scene(this.delta);
 }
 
 // look for entities that have set delete_me and remove them from
@@ -321,12 +323,13 @@ truffle.world.prototype.remove_deleted_entities=function() {
 }
 
 // top level update
-truffle.world.prototype.update=function(time) {
+truffle.world.prototype.update=function(time,delta) {
     var that=this;
     this.sort_scene();
     this.time=time;
+    this.delta=delta;
     this.remove_deleted_entities();
-    this.update_entities(time);
+    this.update_entities();
     this.sort_sprites();
     if (this.do_render) this.draw_scene(this.build_draw_list());    
     this.update_input();
@@ -356,7 +359,7 @@ truffle.world.prototype.redraw=function() {
         }
     });
     
-    this.canvas_state.end_scene();
+    this.canvas_state.end_scene(this.delta);
 }
 
 truffle.world.prototype.move_world_to=function(x,y) {

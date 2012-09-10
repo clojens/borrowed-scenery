@@ -31,7 +31,7 @@ truffle.textbox=function(pos, text, w, h, font) {
 
 truffle.textbox.prototype=inherits_from(truffle.drawable,truffle.textbox);
 
-truffle.textbox.prototype.update=function(frame, tx) {
+truffle.textbox.prototype.update_parent_tx=function(tx) {
     this.ready_to_draw=true;
     this.draw_me=true;
     this.parent_transform=tx;

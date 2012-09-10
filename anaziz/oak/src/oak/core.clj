@@ -161,7 +161,7 @@
                (map
                 (fn [tile]
                                         ; take off the fruit we are not allowed to pick
-                  (tile-strip tile player-layer))
+                  (tile-strip tile player-layer player-id))
                 tiles)
                tiles)
       :spirits

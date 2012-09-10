@@ -89,9 +89,9 @@ truffle.canvas_state.prototype.begin_scene=function() {
 //    this.ctx.globalCompositeOperation = 'xor';
 }
 
-truffle.canvas_state.prototype.end_scene=function() {
+truffle.canvas_state.prototype.end_scene=function(delta) {
     this.ctx.restore();
-    this.update_world_pos();
+    this.update_world_pos(delta);
 }
 
 truffle.canvas_state.prototype.clear_rects=function(bboxes) {
@@ -142,7 +142,7 @@ truffle.canvas_state.prototype.move_world_to=function(x,y) {
 }
 
 // scroll screen
-truffle.canvas_state.prototype.update_world_pos=function() {
+truffle.canvas_state.prototype.update_world_pos=function(delta) {
     var d=new truffle.vec2(this.world_x+this.world_desired_x,
                            this.world_y+this.world_desired_y);
     
@@ -151,7 +151,7 @@ truffle.canvas_state.prototype.update_world_pos=function() {
     this.refresh_top=false;
     this.refresh_bottom=false;
 
-    var speed=5;
+    var speed=200*delta;
 
     if (d.mag()>speed)
     {

@@ -28,6 +28,8 @@ truffle.drawable=function()
     this.expand_bb=0;
     this.alpha=1;
 
+    this.zone=0; // use for partitioning bbox overlaps
+
     this.pos=new truffle.vec2(0,0);
     this.centre=new truffle.vec2(0,0);
     this.transform = new truffle.mat23();

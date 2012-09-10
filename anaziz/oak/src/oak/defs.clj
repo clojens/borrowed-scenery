@@ -41,7 +41,7 @@
 (def ill-plant-summons-expire 5) ; time till summons are deleted
 (def player-summons-expire 60) ; player summons stick around
 (def summons-period 10) ; min time at any location
-(def avatar-filter-time (* 10 60))
+(def avatar-filter-time (* 20 60))
 
 ;; borrowed scenery stuff
 (def plant-influence-distance 5) ; has to be greater than ->

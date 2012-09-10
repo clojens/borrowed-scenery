@@ -146,7 +146,7 @@ truffle.sprite.prototype.add_tint=function(col) {
     this.image.src = canvas.toDataURL();
 }
 
-truffle.sprite.prototype.update=function(frame, tx) {
+truffle.sprite.prototype.update_parent_tx=function(tx) {
     this.draw_me=true;
     this.parent_transform=tx;
 }

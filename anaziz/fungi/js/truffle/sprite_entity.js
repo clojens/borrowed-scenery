@@ -29,7 +29,7 @@ truffle.sprite_entity.prototype=
 
 truffle.sprite_entity.prototype.add_child=function(world,child) {
     world.add_sprite(child);
-    child.update(0,this.spr.transform);
+    child.update_parent_tx(this.spr.transform);
     this.children.push(child);
 }
 
@@ -42,13 +42,12 @@ truffle.sprite_entity.prototype.destroy=function(world) {
     });
 }
 
-truffle.sprite_entity.prototype.update=function(frame, world) {
-    truffle.entity.prototype.update.call(this,frame,world);
+truffle.sprite_entity.prototype.update=function(time,delta,world) {
+    truffle.entity.prototype.update.call(this,time,delta,world);
     this.spr.set_pos(new truffle.vec2(this.pos.x,this.pos.y));
-    this.spr.update(frame,null);
     var that=this;
     this.children.forEach(function(child) {
-        child.update(frame,that.spr.transform);
+        child.update_parent_tx(that.spr.transform);
     });
 }
 

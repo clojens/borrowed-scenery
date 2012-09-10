@@ -52,6 +52,15 @@ function game(world) {
 //    var camera_pos=world.screen_transform(new truffle.vec3(7,7,1));
 //    world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
 
+    for (var x=-10; x<25; x++) {
+        for (var y=-10; y<25; y++) {
+            if ((x<0 || x>=15) ||
+                (y<0 || y>=15)) {
+                this.create_empty_tile(x,y);
+            }
+        }
+    }
+
     this.map=new map(centre,zoom);
     this.map.do_create_tile=function(world_x,world_y,sub_image) {
         var x=world_x+sub_image[0];
@@ -64,36 +73,8 @@ function game(world) {
 
         //s.spr.draw_bb=true;
         s.spr.set_bitmap(sub_image[2]); 
-        s.depth_offset=100;
-        // crudely set the iso projection
-        var t=new truffle.mat23();
-        t.translate(40,0);
-        t.scale(1.67,0.42*1.67);
-        t.rotate(31*Math.PI/180);
-        t.scale(1,1.2);
-        t.translate(-10,-10);
-        t.rotate(270*Math.PI/180);
-
-        s.spr.parent_transform=t;
-        s.spr.expand_bb=20; // enable larger clipping region
-        s.spr.do_transform=true;
-
-        // show the compass
-        if (x>that.border_max || x<that.border_min || 
-            y>that.border_max || y<that.border_min) { 
-            s.spr.mouse_over(function() {
-                if (x>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-east.png");
-                if (x<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-west.png");
-                if (y>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-south.png");
-                if (y<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-north.png");
-
-                that.arrow_indicator.move_to(that.world,new truffle.vec3(x,y,0));
-            });
-            s.spr.mouse_out(function() {
-                // hack
-                that.arrow_indicator.move_to(that.world,new truffle.vec3(-999,0,0));
-            });
-        }
+ 
+        that.setup_tile(s);
 
         s.spr.mouse_down(function() {
             
@@ -124,6 +105,64 @@ function game(world) {
         return depth;
     }
 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+game.prototype.create_empty_tile=function(x,y) {
+    var that=this;
+    var s=new truffle.sprite_entity(
+        that.world,
+        new truffle.vec3(x,y,0),
+        "images/empty_map_"+Math.floor(Math.random()*3)+".png");
+    
+    s.spr.zone=1;
+    this.setup_tile(s);
+
+    // show the compass
+    if (x>that.border_max || x<that.border_min || 
+        y>that.border_max || y<that.border_min) { 
+        s.spr.mouse_over(function() {
+            if (x>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-east.png");
+            if (x<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-west.png");
+                if (y>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-south.png");
+            if (y<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-north.png");
+            
+            that.arrow_indicator.move_to(that.world,new truffle.vec3(x,y,0));
+        });
+        s.spr.mouse_out(function() {
+            // hack
+            that.arrow_indicator.move_to(that.world,new truffle.vec3(-999,0,0));
+        });
+    }
+    
+    s.spr.mouse_down(function() {
+        var x=s.logical_pos.x;
+        var y=s.logical_pos.y;
+        
+        that.move_player(new truffle.vec3(x,y,0),function(){});
+        
+        //if (px==9) { that.player.tile.x+=2; that.update_tile() }
+        //if (py==9) { that.player.tile.y+=2; that.update_tile() }
+        
+    });
+}
+
+
+game.prototype.setup_tile=function(s) {
+    s.depth_offset=100;
+    // crudely set the iso projection
+    var t=new truffle.mat23();
+    t.translate(40,0);
+    t.scale(1.67,0.42*1.67);
+    t.rotate(31*Math.PI/180);
+    t.scale(1,1.2);
+    t.translate(-10,-10);
+    t.rotate(270*Math.PI/180);
+    
+    s.spr.parent_transform=t;
+    s.spr.expand_bb=20; // enable larger clipping region
+    s.spr.do_transform=true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -316,7 +355,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 new truffle.vec3(gamepos.x,gamepos.y,0),
                 'images/'+this.player["avatar-type"]+'-south.png');
             this.avatar.needs_update=true;
-            this.avatar.speed=0.025;
+            this.avatar.speed=1;
             this.avatar.chat_time=0;
             this.avatar.chat_last="";
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
@@ -345,7 +384,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 this.entity_texture(entity));
             e.id=entity.id;
             e.needs_update=false;
-            e.speed=0.025;
+            e.speed=1;
             e.chat_time=0;
             e.chat_last="";
             e.chat_active=false;
@@ -427,10 +466,10 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         //e.id=entity.id;
         e.id=entity.id;
         var t=new truffle.textbox(new truffle.vec2(0,-200),
-                                  entity.incident.incidentdescription+" "+
-                                  entity.incident.locationname+" "+
-                                  entity.incident.incidentdate,
-                                  200,300,"8pt patafont");
+                                  entity.incident.incidentdescription,//+" "+
+                                  //entity.incident.locationname+" "+
+                                  //entity.incident.incidentdate,
+                                  200,300,"25pt MaidenOrange");
         t.text_height=25;
         e.add_child(this.world,t);
         this.entities.push(e);
@@ -462,8 +501,9 @@ game.prototype.start_ripple=function(x,y,z) {
     s.spr.scale(new truffle.vec2(0.5,0.5));
     s.every_frame=function() {
         var a=(s.finished_time-that.world.time);
-        if (a>0) s.spr.alpha=a; 07837341881
-        s.spr.scale(new truffle.vec2(1.03,1.03));
+        if (a>0) s.spr.alpha=a;
+        var sc=1+that.world.delta*2;
+        s.spr.scale(new truffle.vec2(sc,sc));
         if (s.finished_time<that.world.time) {
             s.delete_me=true;
         }
@@ -558,7 +598,7 @@ game.prototype.update_entity=function(entity,from_server,tile) {
             entity.chat_text.set_text(from_server.chat);
             entity.chat_last=from_server.chat;
             entity.chat_active=true;
-            entity.update(this.world,0);
+   //         entity.update(this.world,0);
         }
 
         if (entity.chat_active &&
@@ -584,7 +624,7 @@ game.prototype.move_player=function(to,on_reached_dest) {
         else that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-west.png');
     }
     
-    that.avatar.speed=0.025;
+    that.avatar.speed=1;
     that.avatar.move_to(that.world,new truffle.vec3(px,sy,0));
     that.avatar.on_reached_dest=function() {
         if (sy!=py) {
@@ -774,6 +814,8 @@ game.prototype.update=function(time,delta) {
         this.map_update_frame_count=0;
         this.world.do_render=true;
         this.avatar.hide(false);
+        var cam=this.world.screen_transform(this.avatar.logical_pos);
+        this.world.move_world_to(cam.x,cam.y);
         this.world.redraw();
     }
 
@@ -829,12 +871,12 @@ var reading_ready_html='\
 
 var characters={"hermit":"Trismegisto Herbert Taraxi",
                 "hierophant":"Alchemilla Lily Umiliata",
-                "high-priestess":"Eleuz Ashton Querlano, translator",
+                "high-priestess":"Eleuz Ashton Querlano",
                 "magician":"Castuus Larch Absinthian"};
 
 var tarot={"Trismegisto Herbert Taraxi":"organo-linguistic engineer Transdisciplinary craftsman, building machinery for cross-species (mis)communication. Master in hybrid techniques of esoteric magic and ritual science. Interests: systems and interface design, illusionism, biotechnology and shoemaking. Personality traits: willpower, virtuoso manual skills, trickster.",
-           "Alchemilla Lily Umiliata":"principal patabotanist Investigator of non-human sentiences, atmosphere diffuser and wrangler of pataphors. Interests: atemporality, reconnecting with the vegetal mind, empirical divination. Personality traits: introverted, persevering, intuitive, otherworldly.",
-           "Eleuz Ashton Querlano, translator":" Medium and cross-species thalience linguist, in charge of channeling and communicating with non-human sentiences. Interests: linguistics, science fiction, the planetary Other, artificial intelligence, vegetal cognition. Personality traits: enlightened, irreverent, wise, pillar of the group, indulges in alcoholic beverages.",
+           "Alchemilla Lily Umiliata":"principal patabotanist, investigator of non-human sentiences, atmosphere diffuser and wrangler of pataphors. Interests: atemporality, reconnecting with the vegetal mind, empirical divination. Personality traits: introverted, persevering, intuitive, otherworldly.",
+           "Eleuz Ashton Querlano":"translator, medium and cross-species thalience linguist, in charge of channeling and communicating with non-human sentiences. Interests: linguistics, science fiction, the planetary Other, artificial intelligence, vegetal cognition. Personality traits: enlightened, irreverent, wise, pillar of the group, indulges in alcoholic beverages.",
 	   "Castuus Larch Absinthian":"resident mystic One of the few people able to have a direct experience of Viriditas. Invokes Viriditas to open up communication channels between humans and plants. Interests: direct experience, introspection, alternative mind-states, collective consciousness, cognitive science, obscure literature. Personality traits: asocial, meditative, dissociated, wise old man."};
 
 function reading_done_html(type) {
@@ -843,7 +885,7 @@ function reading_done_html(type) {
 <div class="tarot">\
 Your avatar is: '+characters[type]+'<br/>\
 <img src="images/'+type+'-west.png"><br/>\
-<p>'+characters[type]+" who is the "+tarot[characters[type]]+'</p></div>\
+<p>'+characters[type]+", "+tarot[characters[type]]+'</p></div>\
 <input\
      type="button"\
      style="font-size:50"\
@@ -876,7 +918,7 @@ function login_form() {
 }
 
 function connect_and_login(name) {
-    server=new truffle.server('ws://borrowed-scenery.org:8002/borrowed-scenery',
+    server=new truffle.server('ws://localhost:8002/borrowed-scenery',
                               function () {
                                   server.call("login",[name,0,0]);
                               });

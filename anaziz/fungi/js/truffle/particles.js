@@ -30,7 +30,7 @@ truffle.particles=function(pos, tex, count, mode) {
 
     for (var i=0; i<count; i++) {
         this.particles.push({
-            "vel": circ_rndvec2().mul(2),
+            "vel": circ_rndvec2().mul(200), // px per sec
             "pos": new truffle.vec2(0,0),
             "age": rndi(0,this.max_age)
         });
@@ -82,10 +82,8 @@ truffle.particles.prototype.load_from_url=function(url) {
     this.image.src = url;  
 }
 
-// todo: "frame" should be "time" and made fps independant!
-truffle.particles.prototype.update=function(frame, tx) {
+truffle.particles.prototype.update=function(time, delta) {
     this.draw_me=true;
-    this.parent_transform=tx;
     var that=this;
 
     this.particles.forEach(function(particle) {
@@ -95,8 +93,8 @@ truffle.particles.prototype.update=function(frame, tx) {
             particle.pos.y=0;
             particle.age=Math.floor(Math.random()*5);
         }
-        particle.pos.x+=particle.vel.x;
-        particle.pos.y+=particle.vel.y;
+        particle.pos.x+=particle.vel.x*delta;
+        particle.pos.y+=particle.vel.y*delta;
         particle.vel.x*=0.95;
         particle.vel.y*=0.95;
         particle.age++;
