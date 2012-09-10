@@ -460,12 +460,12 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.id=entity.id;
         e.game_type=entity["entity-type"];
         e.layer=entity.layer;
-        e.neighbours=entity.neighbours.length;
+        e.neighbours=entity.power;
 
         if (e.neighbours==0) {
             e.power_state="low";
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
-        } else if (entity.neighbours>2 && entity.neighbours<=4) {
+        } else if (entity.neighbours>0 && entity.neighbours<=4) {
             e.power_state="med"; 
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {
@@ -627,12 +627,12 @@ game.prototype.update_entity=function(entity,from_server,tile) {
     }
 
     if (from_server["entity-type"]=="ushahidi") {
-        entity.neighbours=from_server.neighbours.length;
+        entity.neighbours=from_server.power;
 
         if (entity.neighbours==0) {
             entity.power_state="low";
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c4"+".png");
-        } else if (entity.neighbours>2 && entity.neighbours<=4) {
+        } else if (entity.neighbours>0 && entity.neighbours<=4) {
             entity.power_state="med"; 
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {

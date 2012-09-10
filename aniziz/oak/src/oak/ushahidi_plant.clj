@@ -75,25 +75,32 @@
                      :fungi-tile (:tile fungi)} t))
             plant)))
   
-(defn ushahidi-plant-powerup [plant entity]
+(defn ushahidi-plant-dothank [plant entity]
   (reduce
    (fn [plant player-name]
      (ushahidi-plant-thank plant player-name entity))
    (ushahidi-plant-add-neighbour plant entity)
    (:grown-by entity)))
-    
+
+(defn ushahidi-plant-dopower [plant]
+  (modify :power (fn [p] (+ p 1)) plant))
+
 (defn ushahidi-plant-update-neighbours [plant neighbours]
-  (reduce
-   (fn [plant entity]
-     (if (and (= (:entity-type entity) "plant")
-              (not (list-contains? (:neighbours plant) (:id entity)))
-              (< (temp-tile-distance (:tile plant) (:pos plant)
-                                     (:tile entity) (:pos entity))
-                 ushahidi-plant-influence-distance))
-       (ushahidi-plant-powerup plant entity)
-       plant))
-   plant
-   neighbours))
+  (let [plant (modify :power (fn [p] 0) plant)]
+    (reduce
+     (fn [plant entity]
+       (if (and (= (:entity-type entity) "plant")
+                (< (temp-tile-distance (:tile plant) (:pos plant)
+                                       (:tile entity) (:pos entity))
+                   ushahidi-plant-influence-distance))
+         (ushahidi-plant-dopower
+          ;; only thank if we haven't seen it before
+          (if (not (list-contains? (:neighbours plant) (:id entity)))
+            (ushahidi-plant-dothank plant entity)
+            plant))
+         plant))
+     plant
+     neighbours)))
 
 (defn ushahidi-plant-update [plant neighbours]
   (ushahidi-plant-update-neighbours plant neighbours))
