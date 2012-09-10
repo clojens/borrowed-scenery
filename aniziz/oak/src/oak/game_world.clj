@@ -166,6 +166,7 @@
       :log (make-log 100)
       :id-gen id-gen
       :spirits ()
+      :next-ushahidi 0
       :players (list (make-player 97 "Charlie" -1 (rand-nth avatar-types))
                      (make-player 98 "Percy" -1 (rand-nth avatar-types))
                      (make-player 99 "Alan" -1 (rand-nth avatar-types)))
@@ -337,6 +338,7 @@
                :version 1
                :log (make-log 100)
                :id-gen id-gen
+               :next-ushahidi 0
                :spirits ()
                :leaderboard ()
                :summons {}
@@ -946,36 +948,38 @@
       false)))
   
 (defn game-world-update-ushahidi [game-world time delta]
-  (reduce
-   (fn [gw incident]
-     (let [in (:incident incident)
-           p (ushahidi-incident->pos incident)
-           ush-id (:incidentid in)]
-       (if (not (game-world-other-plant-here gw (:tile-pos p) (:pos p)))
-         (do
-           (println "adding boskoi plant!" (:tile-pos p) (:pos p) (:locationlatitude in) (:locationlongitude in))
-           (println in)
-           (game-world-add-entity
-            gw
-            (:tile-pos p)
-            (make-ushahidi-plant
-             ((:id-gen gw))
-             (:tile-pos p)
-             "ushahidi"
-             (:pos p)
-             (rand-nth (list "canopy" "shrub" "rhyzome")) ;; todo, add to boskoi interface
-             ush-id
-             (:incidentdate in)
-             (Float/parseFloat (:locationlatitude in))
-             (Float/parseFloat (:locationlongitude in))
-             (:fract p)
-             in)
-            time
-            delta))
-         gw)))
-   game-world
-   (ushahidi-get-incidents-since 0)))
-
+  (if (> time (:next-ushahidi game-world))
+    (do
+      (reduce
+       (fn [gw incident]
+         (let [in (:incident incident)
+               p (ushahidi-incident->pos incident)
+               ush-id (:incidentid in)]
+           (if (not (game-world-other-plant-here gw (:tile-pos p) (:pos p)))
+             (do
+               (println "adding boskoi plant!" (:tile-pos p) (:pos p) (:locationlatitude in) (:locationlongitude in))
+               (println in)
+               (game-world-add-entity
+                gw
+                (:tile-pos p)
+              (make-ushahidi-plant
+               ((:id-gen gw))
+               (:tile-pos p)
+               "ushahidi"
+               (:pos p)
+               (rand-nth (list "canopy" "shrub" "rhyzome")) ;; todo, add to boskoi interface
+               ush-id
+               (:incidentdate in)
+               (Float/parseFloat (:locationlatitude in))
+               (Float/parseFloat (:locationlongitude in))
+               (:fract p)
+               in)
+              time
+              delta))
+             gw)))
+       (modify :next-ushahidi (fn [n] (+ time 30)) game-world)
+       (ushahidi-get-incidents-since 0)))
+    game-world))
 
 (defn game-world-update
   "main update"
