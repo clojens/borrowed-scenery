@@ -918,7 +918,7 @@ function login_form() {
 }
 
 function connect_and_login(name) {
-    server=new truffle.server('ws://localhost:8002/borrowed-scenery',
+    server=new truffle.server('ws://borrowed-scenery.org:8002/borrowed-scenery',
                               function () {
                                   server.call("login",[name,0,0]);
                               });
