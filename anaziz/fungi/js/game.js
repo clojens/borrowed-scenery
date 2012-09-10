@@ -19,6 +19,7 @@ function game(world) {
     this.world=world;
     this.entities=[];
     this.next_pull_time=0;
+    this.check_zizim_time=0;
     this.player=null;
     this.avatar=null;
     this.tile_change=false;
@@ -41,16 +42,6 @@ function game(world) {
     //centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
     zoom=17;
     var that=this;
-
-/*    this.pstest = new truffle.particles_entity(
-        world,
-        new truffle.vec3(2,2,-1),
-        "images/particle.png",
-        20,"continuous");
-    this.pstest.needs_update=true;
-*/
-//    var camera_pos=world.screen_transform(new truffle.vec3(7,7,1));
-//    world.canvas_state.snap_world_to(camera_pos.x,camera_pos.y);
 
     for (var x=-10; x<25; x++) {
         for (var y=-10; y<25; y++) {
@@ -383,6 +374,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 new truffle.vec3(gamepos.x,gamepos.y,0),
                 this.entity_texture(entity));
             e.id=entity.id;
+            e.game_type=entity["entity-type"];
             e.needs_update=false;
             e.speed=1;
             e.chat_time=0;
@@ -411,6 +403,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             this.entity_texture(entity))
         e.state=entity.state;
         e.id=entity.id;
+        e.game_type=entity["entity-type"];
         e.powering=0;
         e.resize_timer=0;
         //e.spr.draw_bb=true;
@@ -465,6 +458,21 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             "images/boskoi-"+entity.layer+".png")
         //e.id=entity.id;
         e.id=entity.id;
+        e.game_type=entity["entity-type"];
+        e.layer=entity.layer;
+        e.neighbours=entity.neighbours.length;
+
+        if (e.neighbours==0) {
+            e.power_state="low";
+            e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
+        } else if (entity.neighbours>2 && entity.neighbours<=4) {
+            e.power_state="med"; 
+            e.spr.change_bitmap("images/boskoi-"+e.layer+"-c1"+".png");
+        } else if (entity.neighbours>4) {
+            e.spr.change_bitmap("images/boskoi-"+e.layer+".png");
+            e.power_state="high";
+        }    
+
         var t=new truffle.textbox(new truffle.vec2(0,-200),
                                   entity.incident.incidentdescription,//+" "+
                                   //entity.incident.locationname+" "+
@@ -488,24 +496,33 @@ game.prototype.spawn_particles=function(img,x,y,z) {
 }
 
 game.prototype.start_ripple=function(x,y,z) {
-    var that=this;
-    var s=new truffle.sprite_entity(
+    var that=this; // lexical scope in js annoyance
+
+    var effect=new truffle.sprite_entity(
         this.world,
         new truffle.vec3(x,y,z),
         "images/grow.png");
-    var len=1;
-    s.spr.do_centre_middle_bottom=false;
-    s.finished_time=this.world.time+len;
-    s.needs_update=true;
-    s.spr.expand_bb=50;
-    s.spr.scale(new truffle.vec2(0.5,0.5));
-    s.every_frame=function() {
-        var a=(s.finished_time-that.world.time);
-        if (a>0) s.spr.alpha=a;
-        var sc=1+that.world.delta*2;
-        s.spr.scale(new truffle.vec2(sc,sc));
-        if (s.finished_time<that.world.time) {
-            s.delete_me=true;
+
+    var len=1; // in seconds
+
+    effect.spr.do_centre_middle_bottom=false;
+    effect.finished_time=this.world.time+len;
+    effect.needs_update=true; // will be updated every frame
+    effect.spr.expand_bb=50; // expand the bbox as we're scaling up
+    effect.spr.scale(new truffle.vec2(0.5,0.5)); // start small
+
+    effect.every_frame=function() { 
+        // fade out with time
+        var a=(effect.finished_time-that.world.time);
+        if (a>0) effect.spr.alpha=a; 
+   
+        // scale up with time
+        var sc=1+that.world.delta*2; 
+        effect.spr.scale(new truffle.vec2(sc,sc));
+
+        // delete ourselves when done
+        if (effect.finished_time<that.world.time) {
+            effect.delete_me=true;
         }
     };
 }
@@ -607,6 +624,21 @@ game.prototype.update_entity=function(entity,from_server,tile) {
             entity.chat_active=false;
         }
 
+    }
+
+    if (from_server["entity-type"]=="ushahidi") {
+        entity.neighbours=from_server.neighbours.length;
+
+        if (entity.neighbours==0) {
+            entity.power_state="low";
+            entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c4"+".png");
+        } else if (entity.neighbours>2 && entity.neighbours<=4) {
+            entity.power_state="med"; 
+            entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c1"+".png");
+        } else if (entity.neighbours>4) {
+            entity.spr.change_bitmap("images/boskoi-"+entity.layer+".png");
+            entity.power_state="high";
+        }    
     }
 }
 
@@ -723,6 +755,53 @@ game.prototype.shift_entities=function(x,y) {
 
 //////////////////////////////////////////////////////////////////////////
 
+game.prototype.update_zizim=function() {
+    var that=this;
+    var zizim=[];
+
+    this.entities.forEach(function(entity) {
+        if (entity.game_type=="ushahidi" &&
+            entity.power_state!="high") {
+            zizim.push(entity);
+        }
+    });
+
+    if (zizim.length>0) {
+        // pick a random one
+        var z=truffle.choose(zizim);
+        z.fizzing_stop=this.world.time+2;
+        z.needs_update=true;
+        z.every_frame=function() {
+            
+            if (z.power_state=="low") {
+                if (Math.random()>0.5) {
+                    z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
+                                        Math.floor(Math.random()*3+1)+".png");
+                } else {
+                    z.spr.change_bitmap("images/empty.png");
+                }
+            } else { 
+                if (z.power_state="med") {
+                    z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
+                                        Math.floor(Math.random()*3+1)+".png");
+                }
+            }
+            
+            if (z.fizzing_stop<that.world.time) {
+                if (z.power_state=="low") {
+                    z.spr.change_bitmap("images/boskoi-"+z.layer+"-c4.png");
+                } else if (z.power_state=="med") {
+                    z.spr.change_bitmap("images/boskoi-"+z.layer+"-c2.png");
+                }
+                z.every_frame=null;
+                z.needs_update=false;
+            }
+        };
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 game.prototype.update_tile=function() {
     // defer doing the update so the wait text gets shown
     if (this.update_next_frame) {
@@ -826,7 +905,13 @@ game.prototype.update=function(time,delta) {
     if (this.next_pull_time<time)
     {
         this.update_tile();
-        this.next_pull_time=time+1000;
+        this.next_pull_time=time+1;
+    }
+
+    if (this.check_zizim_time<time)
+    {
+        this.update_zizim();        
+        this.check_zizim_time=time+5;
     }
 
     this.time_since_last_ps+=delta;
@@ -869,15 +954,15 @@ var reading_ready_html='\
      value="See who..."\
      onclick="reading_done();" /><br/>';
 
-var characters={"hermit":"Trismegisto Herbert Taraxi",
-                "hierophant":"Alchemilla Lily Umiliata",
-                "high-priestess":"Eleuz Ashton Querlano",
-                "magician":"Castuus Larch Absinthian"};
+var characters={"magician":"Trismegisto Herbert Taraxi",
+                "high-priestess":"Alchemilla Lily Umiliata",
+                "hierophant":"Eleuz Ashton Querlano",
+                "hermit":"Castuus Larch Absinthian"};
 
 var tarot={"Trismegisto Herbert Taraxi":"organo-linguistic engineer Transdisciplinary craftsman, building machinery for cross-species (mis)communication. Master in hybrid techniques of esoteric magic and ritual science. Interests: systems and interface design, illusionism, biotechnology and shoemaking. Personality traits: willpower, virtuoso manual skills, trickster.",
            "Alchemilla Lily Umiliata":"principal patabotanist, investigator of non-human sentiences, atmosphere diffuser and wrangler of pataphors. Interests: atemporality, reconnecting with the vegetal mind, empirical divination. Personality traits: introverted, persevering, intuitive, otherworldly.",
            "Eleuz Ashton Querlano":"translator, medium and cross-species thalience linguist, in charge of channeling and communicating with non-human sentiences. Interests: linguistics, science fiction, the planetary Other, artificial intelligence, vegetal cognition. Personality traits: enlightened, irreverent, wise, pillar of the group, indulges in alcoholic beverages.",
-	   "Castuus Larch Absinthian":"resident mystic One of the few people able to have a direct experience of Viriditas. Invokes Viriditas to open up communication channels between humans and plants. Interests: direct experience, introspection, alternative mind-states, collective consciousness, cognitive science, obscure literature. Personality traits: asocial, meditative, dissociated, wise old man."};
+	       "Castuus Larch Absinthian":"resident mystic One of the few people able to have a direct experience of Viriditas. Invokes Viriditas to open up communication channels between humans and plants. Interests: direct experience, introspection, alternative mind-states, collective consciousness, cognitive science, obscure literature. Personality traits: asocial, meditative, dissociated, wise old man."};
 
 function reading_done_html(type) {
     return '\

@@ -48,7 +48,7 @@ truffle.main.loop=function(timestamp) {
     var now = (new Date()).getTime();
     var delta = now-last_time;
    
-    update_fn(now,delta);
+    update_fn(now/1000,delta/1000);
     truffle.main.world.update(now/1000,delta/1000);
 
     if (ctx.canvas.width!=window.innerWidth) {
