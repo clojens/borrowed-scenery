@@ -31,10 +31,10 @@ truffle.canvas_state=function() {
     this.world_offset_y=300;
 
     // for world to refresh areas needed by scrolling screen
-    this.refresh_top=false;
-    this.refresh_bottom=false;
-    this.refresh_left=false;
-    this.refresh_right=false;
+    this.refresh_top=0;
+    this.refresh_bottom=0;
+    this.refresh_left=0;
+    this.refresh_right=0;
 
 /*    var that=this;
     this.bgimage=new Image();
@@ -47,6 +47,22 @@ truffle.canvas_state=function() {
     this.bgimage.src = "images/bg.jpg";  */
 
     var _this=this;
+
+    this.canvas.addEventListener('touchstart',function(e) {
+        _this.mouse_changed=true;
+        _this.mouse_down=true;
+    }, false);
+
+    this.canvas.addEventListener('touchmove',function(e) {
+        _this.update_mouse(e);
+    }, false);
+
+    this.canvas.addEventListener('touchend',function(e) {
+        _this.mouse_changed=true;
+        _this.mouse_down=false;
+    }, false);
+
+//---------------
 
     this.canvas.addEventListener('mousedown', function(e) {
         _this.mouse_changed=true;
@@ -146,10 +162,10 @@ truffle.canvas_state.prototype.update_world_pos=function(delta) {
     var d=new truffle.vec2(this.world_x+this.world_desired_x,
                            this.world_y+this.world_desired_y);
     
-    this.refresh_left=false;
-    this.refresh_right=false;
-    this.refresh_top=false;
-    this.refresh_bottom=false;
+    this.refresh_left=0;
+    this.refresh_right=0;
+    this.refresh_top=0;
+    this.refresh_bottom=0;
 
     var speed=200*delta;
 
@@ -157,10 +173,10 @@ truffle.canvas_state.prototype.update_world_pos=function(delta) {
     {
         d=d.normalise().mul(-speed);
 
-        if (d.x<0) this.refresh_right=true;
-        else this.refresh_left=true;
-        if (d.y<0) this.refresh_bottom=true;
-        else this.refresh_top=true;
+        if (d.x<0) this.refresh_right=-d.x;
+        else this.refresh_left=d.x;
+        if (d.y<0) this.refresh_bottom=-d.y;
+        else this.refresh_top=d.y;
 
         var sx=0;
         var dx=d.x;
