@@ -267,20 +267,24 @@ truffle.world.prototype.build_draw_list=function() {
     var r=l+this.canvas_state.canvas.width;
     var b=t+this.canvas_state.canvas.height;
 
-    if (this.canvas_state.refresh_left) {
-        draw_list=this.bbox_to_draw_list(draw_list,[l,t,l+10,b]);
+    if (this.canvas_state.refresh_left>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[l,t,l+(this.canvas_state.refresh_left+5),b]);
     }
 
-    if (this.canvas_state.refresh_top) {
-        draw_list=this.bbox_to_draw_list(draw_list,[l,t,r,t+10]);
+    if (this.canvas_state.refresh_top>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[l,t,r,t+(this.canvas_state.refresh_top+5)]);
     }
 
-    if (this.canvas_state.refresh_right) {
-        draw_list=this.bbox_to_draw_list(draw_list,[r-10,t,r,b]);
+    if (this.canvas_state.refresh_right>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[r-(this.canvas_state.refresh_right+5),t,r,b]);
     }
 
-    if (this.canvas_state.refresh_bottom) {
-        draw_list=this.bbox_to_draw_list(draw_list,[l,b-10,r,b]);
+    if (this.canvas_state.refresh_bottom>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[l,b-(this.canvas_state.refresh_bottom+5),r,b]);
     }
 
     return draw_list;

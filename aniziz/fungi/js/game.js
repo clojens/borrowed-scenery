@@ -62,11 +62,8 @@ function game(world) {
             new truffle.vec3(x,y,0),
             "images/empty_map.png");
 
-        //s.spr.draw_bb=true;
         s.spr.set_bitmap(sub_image[2]); 
- 
         that.setup_tile(s);
-
         s.spr.mouse_down(function() {
             
             that.move_player(s.logical_pos,function(){});
@@ -349,6 +346,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             this.avatar.speed=1;
             this.avatar.chat_time=0;
             this.avatar.chat_last="";
+
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
                                       "",
                                       300,300,"15pt patafont");
@@ -366,9 +364,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             // move the camera to focus on the player
             var cam=g.world.screen_transform(new truffle.vec3(gamepos.x,gamepos.y,0));
             this.world.move_world_to(cam.x,cam.y);
-        }
-        else
-        {
+        } else {
             var e=new truffle.sprite_entity(
                 this.world,
                 new truffle.vec3(gamepos.x,gamepos.y,0),
