@@ -917,7 +917,42 @@ game.prototype.update=function(time,delta) {
 
 // state machine please...
 
-var game_html='<canvas id="canvas" width="880" height="500"></canvas>\
+var game_html='\
+<div id="help">\
+<div id="help-content">\
+<div id="help-inner">\
+  <p>\
+    Your job is to feed the plants people have tagged using <a href="../zizim">Zizim</a>.\
+    They look like this, protected from the unfamiliar forces of this world \
+    by their glass cloches.\
+  </p>\
+  <center><img src="images/boskoi-herbs.png"></center>\
+  <p>\
+    Feed the zizim plants by growing fungi near them. Click on the fungi to grow them. \
+    When they have grown to full size the spores released will grow new fungi nearby.\
+  </p>\
+  <center><img src="images/knobbly-b.png"></center>\
+  <p>\
+    Fungi will light up when they are connected to a Zizim plant, this \
+    will increase your score. Click on the edges of the map to explore the world.\
+  </p>\
+  <center><img src="images/bobbly-power-d.png"></center>\
+</div>\
+<img class="button" src="images/help.png" alt="help label" />\
+</div></div>\
+\
+<div id="readme">\
+<div id="readme-content">\
+<div id="readme-inner">\
+<h1>Patabotanists of note</h1>\
+<div id="leaderboard"/></div>\
+<div id="game-stats"></div>\
+</div>\
+<img class="button" src="images/info.png" alt="help label" />\
+</div></div>\
+\
+<canvas id="canvas" width="880" height="500"></canvas>\
+<center>\
 <input \
      id="chat"\
      type="text"\
@@ -930,12 +965,8 @@ var game_html='<canvas id="canvas" width="880" height="500"></canvas>\
      style="font-size:25"\
      value="Say something"\
      onclick="chat();" />\
-<input\
-     type="button"\
-     style="font-size:25"\
-     value="Help me"\
-     onclick="help();"/><br/>\
-<div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>';
+<div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>\
+</centre>';
 
 var reading_html='\
 <h1>Contacting patabotanists in your local parallel reality</h1>\
@@ -977,11 +1008,6 @@ Your avatar is: '+characters[type]+'<br/>\
 var g;
 var player;
 var server;
-
-function help() {
-    window.open("help.html", "Aniziz Help",
-                "status = 1, height = 550, width = 475, resizable = 0" );
-}
 
 function login_form() {
     var name=document.getElementById('player_name').value;
@@ -1030,6 +1056,8 @@ function reading_done() {
 
 function enter_game() {
     document.getElementById('game-goes-here').innerHTML = game_html;
+    readme_setup();
+    help_setup();
     truffle.main.init(game_create,game_update);
 }
 
