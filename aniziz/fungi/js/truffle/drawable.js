@@ -140,6 +140,20 @@ truffle.drawable.prototype.get_bbox=function() {
     return this.bbox;
 }
 
+truffle.drawable.prototype.get_delta_bbox=function() {
+    var l=this.bbox[0];
+    var t=this.bbox[1];
+    var r=this.bbox[2];
+    var b=this.bbox[3];
+
+    if (l>this.last_bbox[0]) l=this.last_bbox[0];
+    if (t>this.last_bbox[1]) t=this.last_bbox[1];
+    if (r<this.last_bbox[2]) r=this.last_bbox[2];
+    if (b<this.last_bbox[3]) b=this.last_bbox[3];
+
+    return [l,t,r,b];
+}
+
 truffle.drawable.prototype.recalc_bbox=function() {
     this.last_bbox=[this.bbox[0],this.bbox[1],this.bbox[2],this.bbox[3]];
     var l=this.pos.x-this.centre.x;
