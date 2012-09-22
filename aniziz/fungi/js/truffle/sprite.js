@@ -153,6 +153,8 @@ truffle.sprite.prototype.update_parent_tx=function(tx) {
 
 truffle.sprite.prototype.draw=function(ctx) {
     if (!this.ready_to_draw) return;
+    truffle.drawable.prototype.draw.call(this,ctx);
+    if (this.hidden) return;
 
     // two render paths
     if (this.complex_transform || this.parent_transform) {        
@@ -188,6 +190,7 @@ truffle.sprite.prototype.draw=function(ctx) {
 
     if (this.draw_bb) {
         // draw bbox
+        ctx.beginPath();
         ctx.strokeStyle = "#00ffff";
         var bb=this.get_bbox();
         ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 

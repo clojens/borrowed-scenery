@@ -27,8 +27,8 @@ function game(world) {
     this.time_since_last_ps=0;
     this.map_update_frame_count=0;
     this.update_next_frame=false;
-    this.border_min=1;
-    this.border_max=13;
+    this.border_min=0;
+    this.border_max=14;
     this.world.canvas_state.bg_colour = "#000000";
 
     this.arrow_indicator=new truffle.sprite_entity(
@@ -40,7 +40,7 @@ function game(world) {
 
     centre=new truffle.vec2(51.04751,3.72739); // becomes 0,0 in world tile space
     //centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
-    zoom=17;
+    zoom=18;
     var that=this;
 
     for (var x=-10; x<25; x++) {
@@ -83,9 +83,9 @@ function game(world) {
                                            "loading map...",
                                            500,300,"50pt MaidenOrange");
     
-    this.updating_text.height=70;
+    this.updating_text.height=60;
     this.updating_text.text_height=100;
-    this.updating_text.text_colour="#ffffff";
+    this.updating_text.text_colour="#000";
     this.world.add_sprite(this.updating_text);
     this.updating_text.hide(true);
     this.world.pre_sort_scene=function(depth) {
@@ -342,7 +342,6 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 that.world,
                 new truffle.vec3(gamepos.x,gamepos.y,0),
                 'images/'+this.player["avatar-type"]+'-south.png');
-            this.avatar.needs_update=true;
             this.avatar.speed=1;
             this.avatar.chat_time=0;
             this.avatar.chat_last="";
@@ -350,7 +349,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
                                       "",
                                       300,300,"15pt patafont");
-            ct.text_height=55;
+            ct.text_height=35;
             ct.text_colour="#5555ff";
             this.avatar.chat_text=ct;
             this.avatar.chat_active=false;
@@ -358,7 +357,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
                                       300,300,"15pt MaidenOrange");
-            t.text_height=25;
+            t.text_height=20;
             this.avatar.add_child(this.world,t);
 
             // move the camera to focus on the player
@@ -379,7 +378,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
                                       "",
                                       300,300,"15pt patafont");
-            ct.text_height=50;
+            ct.text_height=20;
             ct.text_colour="#55ff55";
             e.chat_text=ct;
             e.add_child(this.world,ct);
@@ -387,7 +386,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
                                       300,300,"15pt MaidenOrange");
-            t.text_height=25;
+            t.text_height=20;
             e.add_child(this.world,t);
             this.entities.push(e);        
         }
@@ -457,25 +456,37 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.game_type=entity["entity-type"];
         e.layer=entity.layer;
         e.neighbours=entity.power;
+        e.needs_update=true;
+        e.text=new truffle.textbox(new truffle.vec2(0,-200),
+                                   entity.incident.incidenttitle,
+                                   2000,300,"25pt MaidenOrange");
+        e.text.text_height=25;
+        e.text.mouse_over(function() { log("hello"); });
+        e.text.hide(true);
+        e.add_child(this.world,e.text);
+
+        e.desc_text=new truffle.textbox(new truffle.vec2(0,-150),
+                                   entity.incident.incidentdescription,
+                                   200,30,"12pt MaidenOrange");
+        e.desc_text.text_height=15;
+        e.desc_text.hide(false);
+        e.add_child(this.world,e.desc_text);
+        
 
         if (e.neighbours==0) {
             e.power_state="low";
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
+            e.text.set_text(that.mutate_text(e.text.original_text,0.4));
         } else if (entity.neighbours>0 && entity.neighbours<=4) {
             e.power_state="med"; 
+            e.text.set_text(that.mutate_text(e.text.original_text,0.1));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.1));
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {
             e.spr.change_bitmap("images/boskoi-"+e.layer+".png");
             e.power_state="high";
         }    
 
-        var t=new truffle.textbox(new truffle.vec2(0,-200),
-                                  entity.incident.incidentdescription,//+" "+
-                                  //entity.incident.locationname+" "+
-                                  //entity.incident.incidentdate,
-                                  200,300,"25pt MaidenOrange");
-        t.text_height=25;
-        e.add_child(this.world,t);
         this.entities.push(e);
     }
 }
@@ -646,7 +657,8 @@ game.prototype.move_player=function(to,on_reached_dest) {
     var py=to.y;
     var cam=this.world.screen_transform(new truffle.vec3(px,py,0));
     this.world.move_world_to(cam.x,cam.y);
-    
+    this.avatar.needs_update=true;
+
     if (sx!=px) {
         if (sx<px) that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-east.png');
         else that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-west.png');
@@ -663,6 +675,7 @@ game.prototype.move_player=function(to,on_reached_dest) {
         
         that.avatar.on_reached_dest=function() {
             that.world.redraw();
+            that.avatar.needs_update=false;
 
             on_reached_dest();
 
@@ -756,9 +769,11 @@ game.prototype.update_zizim=function() {
     var zizim=[];
 
     this.entities.forEach(function(entity) {
-        if (entity.game_type=="ushahidi" &&
-            entity.power_state!="high") {
-            zizim.push(entity);
+        if (entity.game_type=="ushahidi") {
+            // add to flickering group if not high energy
+            if (entity.power_state!="high") {
+                zizim.push(entity);
+            }
         }
     });
 
@@ -770,6 +785,9 @@ game.prototype.update_zizim=function() {
         z.every_frame=function() {
             
             if (z.power_state=="low") {
+                // mutate title
+                z.text.set_text(that.mutate_text(z.text.original_text,0.4));
+
                 if (Math.random()>0.5) {
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
                                         Math.floor(Math.random()*3+1)+".png");
@@ -778,6 +796,10 @@ game.prototype.update_zizim=function() {
                 }
             } else { 
                 if (z.power_state="med") {
+                    // mutate title & desc
+                    z.text.set_text(that.mutate_text(z.text.original_text,0.1));
+                    z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.1));
+
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
                                         Math.floor(Math.random()*3+1)+".png");
                 }
@@ -879,8 +901,26 @@ game.prototype.server_to_client_coords=function(tx,ty,px,py) {
 
 ////////////////////////////////////////////////////////////////////////////
 
+function setCharAt(str,index,chr) {
+    if(index > str.length-1) return str;
+    return str.substr(0,index) + chr + str.substr(index+1);
+}
+
+game.prototype.mutate_text=function(txt,mutation_rate) {
+    var ret=txt;
+    for (i=0; i<ret.length; i++) {
+        if (Math.random()<mutation_rate) {
+            ret=setCharAt(ret,i,ret[Math.floor(Math.random()*ret.length)]);
+        }
+    }
+    return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////
+
 
 game.prototype.update=function(time,delta) {
+    var that=this;
 
     // render some frame to make sure! :(
     if (this.map_update_frame_count>5) {
@@ -900,6 +940,22 @@ game.prototype.update=function(time,delta) {
     if (this.next_pull_time<time)
     {
         this.update_tile();
+
+        this.entities.forEach(function(entity) {
+            if (entity.game_type=="ushahidi") {
+                // display text when player is near
+                if (entity.logical_pos.manhattan(that.avatar.logical_pos)<5) {
+                    entity.text.hide(false);
+                    if (entity.power_state!="low") {
+                        entity.desc_text.hide(false);
+                    }
+                } else {
+                    entity.text.hide(true);
+                    entity.desc_text.hide(true);
+                }
+            }
+        });
+
         this.next_pull_time=time+1;
     }
 
@@ -969,17 +1025,19 @@ var game_html='\
 </centre>';
 
 var reading_html='\
+<center>\
 <h1>Contacting patabotanists in your local parallel reality</h1>\
 please be patient<br/>\
-<progress value="0%" max="200">progress bar</progress>';
+<progress value="0%" max="200">progress bar</progress></center>';
 
 var reading_ready_html='\
+<center>\
 <h1>Success! Patabotanist invoked</h1>\
 <input\
      type="button"\
      style="font-size:50"\
      value="See who..."\
-     onclick="reading_done();" /><br/>';
+     onclick="reading_done();" /><br/></center>';
 
 var characters={"magician":"Trismegisto Herbert Taraxi",
                 "high-priestess":"Alchemilla Lily Umiliata",
@@ -993,6 +1051,7 @@ var tarot={"Trismegisto Herbert Taraxi":"organo-linguistic engineer Transdiscipl
 
 function reading_done_html(type) {
     return '\
+<center>\
 <h1>Patabotanist invoked...</h1>\
 <div class="tarot">\
 Your avatar is: '+characters[type]+'<br/>\
@@ -1002,7 +1061,7 @@ Your avatar is: '+characters[type]+'<br/>\
      type="button"\
      style="font-size:50"\
      value="Start game"\
-     onclick="enter_game();" /><br/>';
+     onclick="enter_game();" /><br/></center>';
 }
 
 var g;

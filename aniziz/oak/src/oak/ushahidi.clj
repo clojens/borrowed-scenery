@@ -27,7 +27,7 @@
 (def url "http://borrowed-scenery.org/zizim/api")
 (def centre (list 51.04751 3.72739))
 ;;(def centre (list 51.04672 3.73121))
-(def zoom 17)
+(def zoom 18)
 (def map-tile-div 5) ; num of splits in map.js
 (def game-tile-div 5) ; num of divisions in game tile world
 
