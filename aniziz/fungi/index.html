@@ -60,31 +60,22 @@
         max-width: 600px; 
     }
 
-    #readme {
+    #readme,#help,#chatbox {
         display: none;
         position: absolute;
-        top: 140px;
+        top: 75px;
         left: 0px;
         background:url(images/transparent.png);
-        height:120px;
-        width: 715px;
+        height:55px;
+        width: 700px;
         margin: 0px 0px 0px -655px;
         z-index: 999;
     }
 
-    #help {
-        display: none;
-        position: absolute;
-        top: 10px;
-        left: 0px;
-        background:url(images/transparent.png);
-        height:120px;
-        width: 715px;
-        margin: 0px 0px 0px -655px;
-        z-index: 999;
-    }
+    #help { top: 150px; }
+    #chatbox { top: 0px; }
 
-    #readme-content,#help-content {
+    #readme-content,#help-content,#chatbox-content {
         width: 615px;
         color: #000;
         background:url(images/transparent.png);
@@ -96,28 +87,22 @@
         padding: 0px 25px 20px 0px;
     }
 
-    #readme-inner,#help-inner {
+    #readme-inner,#help-inner,#chatbox-inner {
         margin-left: 5em;
     }
 
-#readme-content:before, #help-content:before {
-    float: left;
-    padding: 40px 30px 110px 0px;
-}
+    #readme-content:before, #help-content:before, #chatbox-content:before {
+       float: left;
+       padding: 40px 30px 110px 0px;
+    }
 
-#readme img.button {
-    position: absolute;
-    top: 0px; 
-    right: 0px;
-}
+    img.button {
+        position: absolute;
+        top: 0px; 
+        right: 0px;
+    }
 
-#help img.button {
-    position: absolute;
-    top: 0px; 
-    right: 0px;
-}
-
-helptext {
+    helptext {
         padding: 1em 1em 1em 1em; 
         color: #000;
     }
