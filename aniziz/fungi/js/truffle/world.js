@@ -145,6 +145,8 @@ truffle.world.prototype.sort_scene=function() {
 truffle.world.prototype.add_sprite=function(s) {
     s.set_depth(this.current_depth++); // hack to emulate flash draw order
     s.set_id(this.current_id++);
+    s.recalc_bbox();
+    s.recalc_bbox(); // do twice to init last_bbox
     this.sprites.push(s);
 }
 

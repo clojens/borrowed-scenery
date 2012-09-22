@@ -123,7 +123,6 @@ truffle.canvas_state.prototype.clear_rects=function(bboxes) {
 truffle.canvas_state.prototype.set_clip=function(bboxes) {
     this.ctx.save();
 /*
-    this.ctx.strokeStyle = "#ff0000";
     var that=this;
     bboxes.forEach(function(box) {
         that.ctx.rect(~~(box[0]+2),~~(box[1]+2),
@@ -132,6 +131,8 @@ truffle.canvas_state.prototype.set_clip=function(bboxes) {
     });
     that.ctx.stroke();
 */
+
+//    this.ctx.save();
 
     // Set the clipping area
     this.ctx.beginPath();
@@ -142,6 +143,8 @@ truffle.canvas_state.prototype.set_clip=function(bboxes) {
                       ~~(0.5+(box[3]-box[1])));
     });
     this.ctx.clip();
+//    this.ctx.restore();
+
 }
 
 truffle.canvas_state.prototype.unclip=function() {

@@ -17,6 +17,7 @@ truffle.drawable=function()
 {
     this.ready_to_draw=true;
     this.hidden=false;
+    this.hide_next=false;
     this.draw_me=true;
     this.disable_bg_redraw=false;
     this.id=-1;
@@ -110,7 +111,15 @@ truffle.drawable.prototype.transformed_pos=function() {
 
 truffle.drawable.prototype.hide=function(s) {
     this.draw_me=true;
-    this.hidden=s;
+
+//    this.hidden=s;
+
+    if (s==true && !this.hidden) {
+        // defer so we can repaint the bg
+        this.hide_next=true;
+    } else {
+        this.hidden=s;
+    }
 }
 
 // bounding boxes ///////////////////////////////////////////////////
@@ -146,6 +155,11 @@ truffle.drawable.prototype.get_delta_bbox=function() {
     var r=this.bbox[2];
     var b=this.bbox[3];
 
+/*    if (this.last_bbox[0]<l) l=this.last_bbox[0];
+    if (this.last_bbox[1]<t) t=this.last_bbox[1];
+    if (this.last_bbox[2]>r) r=this.last_bbox[2];
+    if (this.last_bbox[3]>b) b=this.last_bbox[3];*/
+
     if (l>this.last_bbox[0]) l=this.last_bbox[0];
     if (t>this.last_bbox[1]) t=this.last_bbox[1];
     if (r<this.last_bbox[2]) r=this.last_bbox[2];
@@ -178,8 +192,11 @@ truffle.drawable.prototype.intersect=function(ob) {
              ob[1] > tb[3] || ob[3] < tb[1]);
 }
 
-
-truffle.drawable.prototype.draw=function(){
+truffle.drawable.prototype.draw = function(ctx) {
+    if (this.hide_next) {
+        this.hidden=true;
+        this.hide_next=false;
+    }
 }
 
 // mouse events //////////////////////////////////////////////////
@@ -249,4 +266,5 @@ truffle.drawable.prototype.update_mouse=function(canvas_state) {
 
     return false;
 }
+
 

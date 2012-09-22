@@ -49,6 +49,11 @@ truffle.vec3.prototype.normalise=function() {
     return this.div(this.mag());
 }
 
+truffle.vec3.prototype.manhattan=function(other) {
+    var d=this.sub(other);
+    return d.x*d.x+d.y*d.y+d.z*d.z;
+}
+
 truffle.vec3.prototype.lerp=function(other,t) {
 	return new truffle.vec3(this.x*(1-t) + other.x*t,
 					        this.y*(1-t) + other.y*t,
