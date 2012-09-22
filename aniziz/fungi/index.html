@@ -106,6 +106,25 @@
         padding: 1em 1em 1em 1em; 
         color: #000;
     }
+    
+
+#progressbar
+{
+  width:250px;
+  padding:1px;
+  background-color:white;
+  border:1px solid black;
+  height:28px;
+}
+#indicator
+{
+  width:0px;
+  background-color:black;  
+  height:28px;
+  margin:0;
+}
+
+
   </style>
 </head>
 
@@ -116,7 +135,7 @@
     <input 
        id='player_name' 
        type="text" 
-       style="font-size: 500%"
+       style="font-size: 300%"
        value="What are you called?" 
        onfocus="if(!this._haschanged){this.value=''};this._haschanged=true;"
        autocomplete="off"

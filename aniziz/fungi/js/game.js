@@ -1030,7 +1030,7 @@ var reading_html='\
 <center>\
 <h1>Contacting patabotanists in your local parallel reality</h1>\
 please be patient<br/>\
-<progress value="0%" max="200">progress bar</progress></center>';
+<div id="progressbar"><div id="indicator"></div></div></center>';
 
 var reading_ready_html='\
 <center>\
@@ -1097,13 +1097,25 @@ function connect_and_login(name) {
     });
 }
 
+var p=0;
+
 function do_reading(status) {
     // if we are a new player
     if (status=="registered") {
         document.getElementById('game-goes-here').innerHTML = reading_html;
-        setTimeout(reading_ready,5000);
+        prog_bar();
     } else {
         enter_game();
+    }
+}
+
+function prog_bar() {
+    if (p>250) reading_ready();
+    else {
+        p=p+3;
+        var x = document.getElementById("indicator");
+        x.style.width=p;
+        setTimeout(prog_bar,50);
     }
 }
 
