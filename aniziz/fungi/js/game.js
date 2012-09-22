@@ -842,11 +842,10 @@ game.prototype.do_update_tile=function() {
         var d=that.map.distance_from_centre(dist["tile-pos"]);
         d=Math.round(d*100)/100;
         document.getElementById('game-stats').innerHTML = 
-            "Fungi has reached "+d+" km from Vooruit, created by "+dist.player+"</br>"+
             "You have grown "+data.player["plant-count"]+" helpful fungi, helping "+data.player["has-picked"].length+" earth plants";
 
         // update the leaderboard
-        var leaderboard="";
+        var leaderboard="Fungi has reached "+d+" km from Vooruit, created by "+dist.player+"<p/>";;
         data.leaderboard.forEach(function (score) {
             leaderboard+=score.player+" has grown "+score.score+" fungi to help "+score.helped+" earth plants<br/>";
         });
@@ -946,6 +945,7 @@ var game_html='\
 <div id="readme-inner">\
 <h1>Patabotanists of note</h1>\
 <div id="leaderboard"/></div>\
+<p/>\
 <div id="game-stats"></div>\
 </div>\
 <img class="button" src="images/info.png" alt="help label" />\
