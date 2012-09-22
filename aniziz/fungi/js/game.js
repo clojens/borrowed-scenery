@@ -476,12 +476,12 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         if (e.neighbours==0) {
             e.power_state="low";
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
-            e.text.set_text(that.mutate_text(e.text.original_text,0.4,0));
-            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.4,20));
+            e.text.set_text(that.mutate_text(e.text.original_text,0.4,0.8));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.4,0.8));
         } else if (entity.neighbours>0 && entity.neighbours<=4) {
             e.power_state="med"; 
-            e.text.set_text(that.mutate_text(e.text.original_text,0.2,0));
-            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.2,0));
+            e.text.set_text(that.mutate_text(e.text.original_text,0.2,0.3));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.2,0.3));
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {
             e.spr.change_bitmap("images/boskoi-"+e.layer+".png");
@@ -787,8 +787,8 @@ game.prototype.update_zizim=function() {
             
             if (z.power_state=="low") {
                 // mutate title
-                z.text.set_text(that.mutate_text(z.text.original_text,0.4,0));
-                z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.4,20));
+                z.text.set_text(that.mutate_text(z.text.original_text,0.4,0.8));
+                z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.4,0.8));
 
                 if (Math.random()>0.5) {
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
@@ -799,8 +799,8 @@ game.prototype.update_zizim=function() {
             } else { 
                 if (z.power_state="med") {
                     // mutate title & desc
-                    z.text.set_text(that.mutate_text(z.text.original_text,0.2));
-                    z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.2));
+                    z.text.set_text(that.mutate_text(z.text.original_text,0.2,0.3));
+                    z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.2,0.3));
 
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
                                         Math.floor(Math.random()*3+1)+".png");
@@ -908,11 +908,14 @@ function setCharAt(str,index,chr) {
     return str.substr(0,index) + chr + str.substr(index+1);
 }
 
-game.prototype.mutate_text=function(txt,mutation_rate,length) {
+game.prototype.mutate_text=function(txt,mutation_rate,space_rate) {
     var ret=txt;
     for (i=0; i<ret.length; i++) {
         if (Math.random()<mutation_rate) {
             ret=setCharAt(ret,i,ret[Math.floor(Math.random()*ret.length)]);
+        }
+        if (Math.random()<space_rate) {
+            ret=setCharAt(ret,i," ");
         }
     }
     if (length==0) return ret;
