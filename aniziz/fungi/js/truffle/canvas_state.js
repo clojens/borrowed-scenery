@@ -102,7 +102,7 @@ truffle.canvas_state.prototype.begin_scene=function() {
                        this.world_y+this.world_offset_y);
 
     // debug bbox mode
-//    this.ctx.globalCompositeOperation = 'xor';
+    //this.ctx.globalCompositeOperation = 'xor';
 }
 
 truffle.canvas_state.prototype.end_scene=function(delta) {

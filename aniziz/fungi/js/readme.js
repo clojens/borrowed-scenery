@@ -73,3 +73,32 @@ function help_setup() {
         }
     });
 };
+
+function chatbox_setup() {
+    var popup = $("#chatbox");
+    var content = popup.children("#chatbox-content");
+    var img = content.children("img");
+    
+    popup.css("display", "block").data("showing", false);
+    
+    // slide in and out...
+    img.click(function ()
+    {
+        if (popup.data("showing") === true)
+        {
+            popup.data("showing", false).animate(
+            {
+                marginLeft: "-655px"
+            }, 500);
+            $(this).attr("src", "images/chat.png").css("top", "0px");
+        } 
+        else
+        {     
+            popup.data("showing", true).animate(
+            {
+                marginLeft: "0"
+            }, 500);
+            $(this).attr("src", "images/close.png").css("top", "0px");
+        }
+    });
+};

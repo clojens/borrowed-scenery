@@ -62,7 +62,7 @@ truffle.main.loop=function(timestamp) {
     if (ctx.canvas.width!=window.innerWidth) {
         truffle.main.world.canvas_state.resize(
             window.innerWidth,
-            window.innerHeight-60);
+            window.innerHeight);
         truffle.main.world.redraw();
     }
 

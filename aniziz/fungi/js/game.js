@@ -34,7 +34,7 @@ function game(world) {
     this.arrow_indicator=new truffle.sprite_entity(
         this.world,
         new truffle.vec3(-999,5,-1),
-        "");
+        "images/compass-east.png");
     this.arrow_indicator.needs_update=true;
     this.arrow_indicator.depth_offset=-100;
 
@@ -86,8 +86,8 @@ function game(world) {
     this.updating_text.height=60;
     this.updating_text.text_height=100;
     this.updating_text.text_colour="#000";
+    this.updating_text.hide(false);
     this.world.add_sprite(this.updating_text);
-    this.updating_text.hide(true);
     this.world.pre_sort_scene=function(depth) {
         that.updating_text.set_depth(depth++);
         return depth;
@@ -116,11 +116,11 @@ game.prototype.create_empty_tile=function(x,y) {
                 if (y>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-south.png");
             if (y<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-north.png");
             
+            that.arrow_indicator.hide(false);
             that.arrow_indicator.move_to(that.world,new truffle.vec3(x,y,0));
         });
         s.spr.mouse_out(function() {
-            // hack
-            that.arrow_indicator.move_to(that.world,new truffle.vec3(-999,0,0));
+            that.arrow_indicator.hide(true);
         });
     }
     
@@ -345,6 +345,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             this.avatar.speed=1;
             this.avatar.chat_time=0;
             this.avatar.chat_last="";
+            this.avatar.needs_update=true;
 
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
                                       "",
@@ -456,7 +457,6 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.game_type=entity["entity-type"];
         e.layer=entity.layer;
         e.neighbours=entity.power;
-        e.needs_update=true;
         e.text=new truffle.textbox(new truffle.vec2(0,-200),
                                    entity.incident.incidenttitle,
                                    2000,300,"25pt MaidenOrange");
@@ -476,11 +476,12 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         if (e.neighbours==0) {
             e.power_state="low";
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
-            e.text.set_text(that.mutate_text(e.text.original_text,0.4));
+            e.text.set_text(that.mutate_text(e.text.original_text,0.4,0));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.4,20));
         } else if (entity.neighbours>0 && entity.neighbours<=4) {
             e.power_state="med"; 
-            e.text.set_text(that.mutate_text(e.text.original_text,0.1));
-            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.1));
+            e.text.set_text(that.mutate_text(e.text.original_text,0.2,0));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.2,0));
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {
             e.spr.change_bitmap("images/boskoi-"+e.layer+".png");
@@ -643,6 +644,8 @@ game.prototype.update_entity=function(entity,from_server,tile) {
             entity.power_state="med"; 
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {
+            entity.text.set_text(entity.text.original_text);
+            entity.desc_text.set_text(entity.desc_text.original_text);
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+".png");
             entity.power_state="high";
         }    
@@ -657,7 +660,6 @@ game.prototype.move_player=function(to,on_reached_dest) {
     var py=to.y;
     var cam=this.world.screen_transform(new truffle.vec3(px,py,0));
     this.world.move_world_to(cam.x,cam.y);
-    this.avatar.needs_update=true;
 
     if (sx!=px) {
         if (sx<px) that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-east.png');
@@ -675,7 +677,6 @@ game.prototype.move_player=function(to,on_reached_dest) {
         
         that.avatar.on_reached_dest=function() {
             that.world.redraw();
-            that.avatar.needs_update=false;
 
             on_reached_dest();
 
@@ -786,7 +787,8 @@ game.prototype.update_zizim=function() {
             
             if (z.power_state=="low") {
                 // mutate title
-                z.text.set_text(that.mutate_text(z.text.original_text,0.4));
+                z.text.set_text(that.mutate_text(z.text.original_text,0.4,0));
+                z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.4,20));
 
                 if (Math.random()>0.5) {
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
@@ -797,8 +799,8 @@ game.prototype.update_zizim=function() {
             } else { 
                 if (z.power_state="med") {
                     // mutate title & desc
-                    z.text.set_text(that.mutate_text(z.text.original_text,0.1));
-                    z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.1));
+                    z.text.set_text(that.mutate_text(z.text.original_text,0.2));
+                    z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.2));
 
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
                                         Math.floor(Math.random()*3+1)+".png");
@@ -906,14 +908,15 @@ function setCharAt(str,index,chr) {
     return str.substr(0,index) + chr + str.substr(index+1);
 }
 
-game.prototype.mutate_text=function(txt,mutation_rate) {
+game.prototype.mutate_text=function(txt,mutation_rate,length) {
     var ret=txt;
     for (i=0; i<ret.length; i++) {
         if (Math.random()<mutation_rate) {
             ret=setCharAt(ret,i,ret[Math.floor(Math.random()*ret.length)]);
         }
     }
-    return ret;
+    if (length==0) return ret;
+    return ret.substr(0,length);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -946,9 +949,7 @@ game.prototype.update=function(time,delta) {
                 // display text when player is near
                 if (entity.logical_pos.manhattan(that.avatar.logical_pos)<5) {
                     entity.text.hide(false);
-                    if (entity.power_state!="low") {
-                        entity.desc_text.hide(false);
-                    }
+                    entity.desc_text.hide(false);
                 } else {
                     entity.text.hide(true);
                     entity.desc_text.hide(true);
@@ -976,22 +977,13 @@ var game_html='\
 <div id="help">\
 <div id="help-content">\
 <div id="help-inner">\
-  <p>\
-    Your job is to feed the plants people have tagged using <a href="../zizim">Zizim</a>.\
-    They look like this, protected from the unfamiliar forces of this world \
-    by their glass cloches.\
-  </p>\
-  <center><img src="images/boskoi-herbs.png"></center>\
-  <p>\
-    Feed the zizim plants by growing fungi near them. Click on the fungi to grow them. \
-    When they have grown to full size the spores released will grow new fungi nearby.\
-  </p>\
-  <center><img src="images/knobbly-b.png"></center>\
-  <p>\
-    Fungi will light up when they are connected to a Zizim plant, this \
-    will increase your score. Click on the edges of the map to explore the world.\
-  </p>\
-  <center><img src="images/bobbly-power-d.png"></center>\
+  <h2>What do I have to do?</h2>\
+    Your role is to strengthen the connection between the world of Aniziz and the plants of Ghent.\
+    The plants are broadcasting messages which can be correctly tuned by energising them with fungi, the more plants you energise, the higher your score will be.\
+    The plants of Ghent are protected from the unfamiliar forces of this world by their glass cloches.\
+  <h2>How do I play?</h2>\
+    Click on the map to move your patabotanist. Hover over fungi to find one that shivers and is ready to grow. Click it to grow it one stage. \
+    When fungi have grown to full size, spores may be released that will grow new fungi nearby. Chat with other players and work together to reach all the plants by gradually enlarging the fungi ecosystem to spread throughout the city (and beyond).\
 </div>\
 <img class="button" src="images/help.png" alt="help label" />\
 </div></div>\
@@ -999,7 +991,7 @@ var game_html='\
 <div id="readme">\
 <div id="readme-content">\
 <div id="readme-inner">\
-<h1>Patabotanists of note</h1>\
+<h1>High scores</h1>\
 <div id="leaderboard"/></div>\
 <p/>\
 <div id="game-stats"></div>\
@@ -1007,8 +999,9 @@ var game_html='\
 <img class="button" src="images/info.png" alt="help label" />\
 </div></div>\
 \
-<canvas id="canvas" width="880" height="500"></canvas>\
-<center>\
+<div id="chatbox">\
+<div id="chatbox-content">\
+<div id="chatbox-inner">\
 <input \
      id="chat"\
      type="text"\
@@ -1021,6 +1014,12 @@ var game_html='\
      style="font-size:25"\
      value="Say something"\
      onclick="chat();" />\
+</div>\
+<img class="button" src="images/chat.png" alt="help label" />\
+</div></div>\
+\
+<canvas id="canvas" width="880" height="500"></canvas>\
+<center>\
 <div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>\
 </centre>';
 
@@ -1117,6 +1116,7 @@ function enter_game() {
     document.getElementById('game-goes-here').innerHTML = game_html;
     readme_setup();
     help_setup();
+    chatbox_setup();
     truffle.main.init(game_create,game_update);
 }
 

@@ -258,6 +258,7 @@ truffle.world.prototype.build_draw_list=function() {
             !sprite.hidden &&
             sprite.ready_to_draw &&
             sprite.draw_me) {
+            sprite.recalc_bbox();
             var bbox=sprite.get_delta_bbox();
             draw_list=that.bbox_to_draw_list(draw_list,bbox,sprite);
         }
