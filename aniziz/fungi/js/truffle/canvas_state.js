@@ -213,16 +213,16 @@ truffle.canvas_state.prototype.update_world_pos=function(delta) {
 // If you wanna be super-correct this can be tricky,
 // we have to worry about padding and borders
 truffle.canvas_state.prototype.update_mouse = function(e) {
-    var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
+    var element = this.canvas, offsetX = 0, offsetY = 0;
  
     // Compute the total offset
-    if (element.offsetParent !== undefined) {
+/*    if (element.offsetParent !== undefined) {
         do {
             offsetX += element.offsetLeft;
             offsetY += element.offsetTop;
         } while ((element = element.offsetParent));
     }
-    
+  */  
     // Add padding and border style widths to offset
     // Also add the <html> offsets in case there's a position:fixed bar
     //offsetX += this.stylePaddingLeft + this.styleBorderLeft + this.htmlLeft;
