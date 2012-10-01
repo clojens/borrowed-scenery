@@ -472,7 +472,6 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.desc_text.hide(false);
         e.add_child(this.world,e.desc_text);
         
-
         if (e.neighbours==0) {
             e.power_state="low";
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
@@ -640,9 +639,13 @@ game.prototype.update_entity=function(entity,from_server,tile) {
         if (entity.neighbours==0) {
             entity.power_state="low";
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c4"+".png");
+            entity.text.set_text(that.mutate_text(entity.text.original_text,0.4,0.8));
+            entity.desc_text.set_text(that.mutate_text(entity.desc_text.original_text,0.4,0.8));
         } else if (entity.neighbours>0 && entity.neighbours<=4) {
             entity.power_state="med"; 
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c1"+".png");
+            entity.text.set_text(that.mutate_text(entity.text.original_text,0.2,0.3));
+            entity.desc_text.set_text(that.mutate_text(entity.desc_text.original_text,0.2,0.3));
         } else if (entity.neighbours>4) {
             entity.text.set_text(entity.text.original_text);
             entity.desc_text.set_text(entity.desc_text.original_text);
