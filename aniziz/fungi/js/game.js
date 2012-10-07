@@ -984,7 +984,7 @@ var game_html='\
 <div id="help-content">\
 <div id="help-inner">\
   <h2>What do I have to do?</h2>\
-    Your role is to strengthen the connection between the world of Aniziz and the plants of Ghent. The plants are broadcasting messages which can only be correctly tuned into by energising them with fungi, the more plants you energise the higher your score will be.\
+    Your role is to strengthen the connection between the world of Aniziz and the <a href="http://borrowed-scenery.com/zizim/">plants of Ghent</a>. The plants are broadcasting messages which can only be correctly tuned into by energising them with fungi, the more plants you energise the higher your score will be.\
   <h2>How do I play?</h2>\
     Click on the map to move your patabotanist. Hover over fungi to find one that shivers and is ready to grow. Click to grow it one stage. When fungi have grown to full size, spores may be released that will grow new fungi nearby. Chat with other players and work together to reach all the plants by gradually enlarging the fungi ecosystem to spread throughout the city (and beyond).\
 </div>\

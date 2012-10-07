@@ -116,11 +116,11 @@ ET amount on the Vantage Console.;
 2.3 (02/09/2009) Davis Intruments Part Number: 7395.8;
 #X text 93 23 2012 (GPL) nik gaffney <nik@fo.am>;
 #X restore 359 326 pd credits;
-#N canvas 63 28 848 450 parse-LOOP 1;
+#N canvas 340 283 848 450 parse-LOOP 1;
 #X obj 185 -44 inlet;
 #X obj 186 164 list append;
 #X floatatom 248 16 5 0 0 0 - - -;
-#X msg 249 92 214;
+#X msg 249 92 71;
 #X obj 249 39 prepend set;
 #X obj 361 93 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
@@ -145,18 +145,20 @@ of the current data values shown on the vantage console.;
 #X obj 411 258 print p0;
 #X obj 411 203 packel 1;
 #X obj 101 -10 == 99;
-#X msg 433 67 list 6 76 79 79 236 58 148 115 35 3 41 23 3 106 255 255
-255 255 255 255 255 255 255 255 255 255 255 255 255 43 255 255 255
-255 255 255 255 255 255 255 25 2 2 255 255 255 255 255 255 255 106
-3 163 132 2 233 7 10 13 149 214;
 #X text 427 7 reply to "LOOP" starts with 0x06 <ACK>;
 #X obj 108 87 print ACK;
 #X obj 205 214 s loopl;
 #X obj 491 179 s loopl;
+#X msg 575 163 -:---::-..;
+#X obj 573 192 print ---------:.---:------:::---;
+#X msg 433 67 list 6 76 79 79 236 198 250 116 4 3 44 247 2 53 255 255
+255 255 255 255 255 255 255 255 255 255 255 255 255 47 255 255 255
+255 255 255 255 255 255 255 24 12 12 255 255 255 255 255 255 255 91
+3 189 136 2 227 7 10 13 230 233;
 #X connect 0 0 18 0;
 #X connect 0 0 2 0;
 #X connect 1 0 11 0;
-#X connect 1 0 29 0;
+#X connect 1 0 28 0;
 #X connect 2 0 4 0;
 #X connect 3 0 7 0;
 #X connect 4 0 8 0;
@@ -169,7 +171,7 @@ of the current data values shown on the vantage console.;
 #X connect 8 1 3 0;
 #X connect 9 0 1 1;
 #X connect 9 1 7 1;
-#X connect 9 2 28 0;
+#X connect 9 2 27 0;
 #X connect 11 0 12 0;
 #X connect 11 0 25 0;
 #X connect 14 0 13 0;
@@ -178,8 +180,9 @@ of the current data values shown on the vantage console.;
 #X connect 22 0 23 0;
 #X connect 24 0 22 0;
 #X connect 25 0 9 0;
-#X connect 26 0 20 0;
-#X connect 26 0 30 0;
+#X connect 30 0 31 0;
+#X connect 32 0 20 0;
+#X connect 32 0 29 0;
 #X coords 0 450 1 449 460 60 0;
 #X restore 228 289 pd parse-LOOP;
 #X obj 163 235 select 0;
