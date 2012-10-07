@@ -9,5 +9,7 @@ Your contributions will be of utmost value to observation and experience
 of human-plant interactions in the city.</p><br/>
 
 <p>You can report your find and affix your field-note on these pages, or
-using our mobile notebook for Android based tracking devices.</p><br/>
+using our mobile notebook for Android based tracking devices.</p>
+
+<p>We also need your help nurturing these plants in the <a href="aniziz">world of Aniziz</a>.</p><br/>
 </div>
