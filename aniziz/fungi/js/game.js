@@ -729,11 +729,8 @@ game.prototype.move_player=function(to,on_reached_dest) {
             // check for wormholes!
             var wh=that.world.get_by_game_type("wormhole",new truffle.vec2(px,py));
             if (wh) {
-                log("jumping into wormhole");
                 that.server.call("get-wormhole-exit",[wh.id]);
                 that.server.listen("get-wormhole-exit", function(data) {
-                    log("got new wormhole coords");
-                    log(JSON.stringify(data));
 
                     that.player.tile.x=data["tile-pos"].x;
                     that.player.tile.y=data["tile-pos"].y;
@@ -741,7 +738,6 @@ game.prototype.move_player=function(to,on_reached_dest) {
                                                        data["tile-pos"].y,
                                                        data.pos.x,
                                                        data.pos.y);
-                    log(JSON.stringify(p));
 
                     that.tile_change=true;
                     that.avatar.speed=0;
@@ -1041,6 +1037,7 @@ var game_html='\
     Your role is to strengthen the connection between the world of Aniziz and the <a href="http://borrowed-scenery.com/zizim/">plants of Ghent</a>. The plants are broadcasting messages which can only be correctly tuned into by energising them with fungi, the more plants you energise the higher your score will be.\
   <h2>How do I play?</h2>\
     Click on the map to move your patabotanist. Hover over fungi to find one that shivers and is ready to grow. Click to grow it one stage. When fungi have grown to full size, spores may be released that will grow new fungi nearby. Chat with other players and work together to reach all the plants by gradually enlarging the fungi ecosystem to spread throughout the city (and beyond).\
+<br/>See <a href="http://dilzio.borrowed-scenery.org/viewforum.php?f=4&start=0">the forum</a> for more information or to ask questions.\
 </div>\
 <img class="button" src="images/help.png" alt="help label" />\
 </div></div>\
