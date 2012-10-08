@@ -1215,7 +1215,7 @@ class Api_Controller extends Controller {
 		$retJsonOrXml = ''; //will hold the json/xml string to return
 
 		//find incidents
-		$query = "SELECT id, parent_i category_title, category_title_nl, category_title_la, category_description,
+		$query = "SELECT id, parent_id, category_title, category_title_nl, category_title_la, category_description,
 				category_color FROM `".$this->table_prefix."category` WHERE category_visible = 1
 				AND id=$id ORDER BY id DESC";
 
