@@ -109,7 +109,10 @@
    (:payload
     (read-json
      (:body
-      (client/get (str url "?task=incidents&by=sinceid&id=" id)))))))
+      (client/get (str url "?task=incidents&by=sinceid&id=" id "&limit=5000")))))))
+
+(defn ushahidi-get-categories [id]
+  (read-json (:body (client/get (str url "?task=category&id=" id)))))
 
 ;;(println (latlon-to-tile (nth centre 0) (nth centre 1) zoom))
 

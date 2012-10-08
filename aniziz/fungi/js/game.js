@@ -489,6 +489,24 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
 
         this.entities.push(e);
     }
+    else if (entity["entity-type"]=="wormhole") {
+        var e=new truffle.sprite_entity(
+            this.world,
+            new truffle.vec3(gamepos.x,gamepos.y,0),
+            "images/wormhole-1.png")
+
+        e.id=entity.id;
+        e.game_type=entity["entity-type"];
+        e.needs_update=true;
+        e.update_freq=100;
+        var frame=1;
+        e.every_frame=function() {
+            frame++;
+            frame=frame%2;
+            e.spr.change_bitmap("images/wormhole-"+(frame+1)+".png");
+        };
+        this.entities.push(e);
+    }
 }
 
 game.prototype.spawn_particles=function(img,x,y,z) {
@@ -707,7 +725,43 @@ game.prototype.move_player=function(to,on_reached_dest) {
                 that.tile_change=true;
                 tcy=5;
             }  
-            
+
+            // check for wormholes!
+            var wh=that.world.get_by_game_type("wormhole",new truffle.vec2(px,py));
+            if (wh) {
+                log("jumping into wormhole");
+                that.server.call("get-wormhole-exit",[wh.id]);
+                that.server.listen("get-wormhole-exit", function(data) {
+                    log("got new wormhole coords");
+                    log(JSON.stringify(data));
+
+                    that.player.tile.x=data["tile-pos"].x;
+                    that.player.tile.y=data["tile-pos"].y;
+                    var p=that.server_to_client_coords(data["tile-pos"].x,
+                                                       data["tile-pos"].y,
+                                                       data.pos.x,
+                                                       data.pos.y);
+                    log(JSON.stringify(p));
+
+                    that.tile_change=true;
+                    that.avatar.speed=0;
+                    that.avatar.move_to(that.world,new truffle.vec3(p.x,p.y,0));
+                    that.avatar.hide(true);
+
+                    // need to figure out server tile by looking at current
+                    // client tile (0->14)
+                    var server_tile_x=that.player.tile.x+(Math.floor(p.x/5)-1);
+                    var server_tile_y=that.player.tile.y+(Math.floor(p.y/5)-1);
+                    
+                    that.server.call("move-player",[that.player.id,
+                                                    server_tile_x,
+                                                    server_tile_y,
+                                                    p.x%5,
+                                                    p.y%5,0]);  
+
+                });
+            }
+
             if (that.tile_change) {
                 that.avatar.speed=0;
                 that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));

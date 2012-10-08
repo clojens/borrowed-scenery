@@ -51,6 +51,21 @@
 (def min-neighbours 0)
 (def leaderboard-max 5)
 
+(defn db-cat->layer [cat]
+     (cond
+      (= cat "herbaceous") "herbs"
+      (= cat "soil cover") "soilsurface"
+      (= cat "rhizome") "rhyzome"
+      (= cat "shrub") "shrub"
+      (= cat "dwarf tree") "tree"
+      (= cat "canopy tree") "canopy"
+      (= cat "climber") "climber"
+      (= cat "pataportal") "wormhole"
+      (= cat "uncategorised") (rand-nth (list "herbs" "soilsurface"
+                                              "rhyzome" "tree" "canopy"
+                                              "climber"))
+      :else "none"))
+      
 (def avatar-types '("hermit" "hierophant" "high-priestess" "magician"))
 
 (defn plant-type->layer [type]

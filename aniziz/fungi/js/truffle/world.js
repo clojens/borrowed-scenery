@@ -25,6 +25,7 @@ truffle.world.prototype.clear=function() {
     this.time=0;
     this.delta=0;
     this.do_render=true;
+    this.frame=0;
 
     this.canvas_state=new truffle.canvas_state();
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
@@ -98,14 +99,27 @@ truffle.world.prototype.remove=function(e) {
 }
 
 truffle.world.prototype.get=function(type, pos) {
+    var ret=null;
     this.scene.forEach(function(e) {
         if (pos.x==e.logical_pos.x &&
             pos.y==e.logical_pos.y &&
             e.type==type) {
-            return e;
+            ret=e;
         }
     });
-    return null;
+    return ret;
+}
+
+truffle.world.prototype.get_by_game_type=function(type, pos) {
+    var ret=null;
+    this.scene.forEach(function(e) {
+        if (pos.x==e.logical_pos.x &&
+            pos.y==e.logical_pos.y && 
+            e.game_type==type) {
+            ret=e;
+        }
+    });
+    return ret;
 }
 
 truffle.world.prototype.get_other=function(me, type, pos) {
@@ -192,7 +206,7 @@ truffle.world.prototype.update_entities=function() {
 
         if (e.needs_update && !e.hidden &&
             (e.update_freq==0 ||
-             (time % e.update_freq)==0))
+             (that.frame % e.update_freq)==0))
         {   
             e.update(that.time,that.delta,that);
         }
@@ -340,6 +354,7 @@ truffle.world.prototype.update=function(time,delta) {
     this.sort_sprites();
     if (this.do_render) this.draw_scene(this.build_draw_list());    
     this.update_input();
+    this.frame++;
 }
 
 truffle.world.prototype.clear_screen=function() {
