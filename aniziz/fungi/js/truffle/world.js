@@ -25,6 +25,7 @@ truffle.world.prototype.clear=function() {
     this.time=0;
     this.delta=0;
     this.do_render=true;
+    this.frame=0;
 
     this.canvas_state=new truffle.canvas_state();
     this.current_tile_pos=new truffle.vec2(0,0); // perhaps
@@ -98,14 +99,27 @@ truffle.world.prototype.remove=function(e) {
 }
 
 truffle.world.prototype.get=function(type, pos) {
+    var ret=null;
     this.scene.forEach(function(e) {
         if (pos.x==e.logical_pos.x &&
             pos.y==e.logical_pos.y &&
             e.type==type) {
-            return e;
+            ret=e;
         }
     });
-    return null;
+    return ret;
+}
+
+truffle.world.prototype.get_by_game_type=function(type, pos) {
+    var ret=null;
+    this.scene.forEach(function(e) {
+        if (pos.x==e.logical_pos.x &&
+            pos.y==e.logical_pos.y && 
+            e.game_type==type) {
+            ret=e;
+        }
+    });
+    return ret;
 }
 
 truffle.world.prototype.get_other=function(me, type, pos) {
@@ -145,6 +159,8 @@ truffle.world.prototype.sort_scene=function() {
 truffle.world.prototype.add_sprite=function(s) {
     s.set_depth(this.current_depth++); // hack to emulate flash draw order
     s.set_id(this.current_id++);
+    s.recalc_bbox();
+    s.recalc_bbox(); // do twice to init last_bbox
     this.sprites.push(s);
 }
 
@@ -190,7 +206,7 @@ truffle.world.prototype.update_entities=function() {
 
         if (e.needs_update && !e.hidden &&
             (e.update_freq==0 ||
-             (time % e.update_freq)==0))
+             (that.frame % e.update_freq)==0))
         {   
             e.update(that.time,that.delta,that);
         }
@@ -256,7 +272,8 @@ truffle.world.prototype.build_draw_list=function() {
             !sprite.hidden &&
             sprite.ready_to_draw &&
             sprite.draw_me) {
-            var bbox=sprite.get_last_bbox();
+            sprite.recalc_bbox();
+            var bbox=sprite.get_delta_bbox();
             draw_list=that.bbox_to_draw_list(draw_list,bbox,sprite);
         }
     });
@@ -267,20 +284,24 @@ truffle.world.prototype.build_draw_list=function() {
     var r=l+this.canvas_state.canvas.width;
     var b=t+this.canvas_state.canvas.height;
 
-    if (this.canvas_state.refresh_left) {
-        draw_list=this.bbox_to_draw_list(draw_list,[l,t,l+10,b]);
+    if (this.canvas_state.refresh_left>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[l,t,l+(this.canvas_state.refresh_left+5),b]);
     }
 
-    if (this.canvas_state.refresh_top) {
-        draw_list=this.bbox_to_draw_list(draw_list,[l,t,r,t+10]);
+    if (this.canvas_state.refresh_top>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[l,t,r,t+(this.canvas_state.refresh_top+5)]);
     }
 
-    if (this.canvas_state.refresh_right) {
-        draw_list=this.bbox_to_draw_list(draw_list,[r-10,t,r,b]);
+    if (this.canvas_state.refresh_right>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[r-(this.canvas_state.refresh_right+5),t,r,b]);
     }
 
-    if (this.canvas_state.refresh_bottom) {
-        draw_list=this.bbox_to_draw_list(draw_list,[l,b-10,r,b]);
+    if (this.canvas_state.refresh_bottom>0) {
+        draw_list=this.bbox_to_draw_list
+        (draw_list,[l,b-(this.canvas_state.refresh_bottom+5),r,b]);
     }
 
     return draw_list;
@@ -333,6 +354,7 @@ truffle.world.prototype.update=function(time,delta) {
     this.sort_sprites();
     if (this.do_render) this.draw_scene(this.build_draw_list());    
     this.update_input();
+    this.frame++;
 }
 
 truffle.world.prototype.clear_screen=function() {

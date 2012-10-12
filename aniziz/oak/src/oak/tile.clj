@@ -113,12 +113,20 @@
    (:entities tile)))
 
 (defn tile-contains-type
-  "search for entity using id"
   [tile type]
   (reduce
    (fn [r e]
      (if (and (not r) (= type (:entity-type e)))
        true r))
+   false
+   (:entities tile)))
+
+(defn tile-get-type
+  [tile type]
+  (reduce
+   (fn [r e]
+     (if (and (not r) (= type (:entity-type e)))
+       e r))
    false
    (:entities tile)))
 

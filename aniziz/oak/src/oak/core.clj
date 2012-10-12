@@ -45,8 +45,8 @@
 ; ****************************************************************
 ; Uncomment the two lines below and run once to create a new world
 ; ****************************************************************
-;(def my-game-world (ref (make-game-world 200 2)))
-;(game-world-db-build! (sym-replace2 (deref my-game-world)))
+(def my-game-world (ref (make-game-world 200 2)))
+(game-world-db-build! (sym-replace2 (deref my-game-world)))
 
 (def my-game-world (ref (make-empty-game-world)))
 ;(game-world-populate-oaks (deref my-game-world) 100 10 0 1)
@@ -397,6 +397,9 @@
            (json '("ok")))
          (json '("fail")))))))
 
+(defn s-get-wormhole-exit [id]
+  (json (game-world-get-random-wormhole-coords (deref my-game-world) id)))
+
 (def func-map
      (hash-map
       "login" s-login
@@ -412,7 +415,8 @@
       "gift" s-gift
       "answer" s-answer
       "offering" s-offering
-      "chat" s-chat))
+      "chat" s-chat
+      "get-wormhole-exit" s-get-wormhole-exit))
 
 (defn dispatch [msg]
   (let [parsed (clojure.data.json/read-json msg)

@@ -42,6 +42,14 @@ truffle.main.init=function(game_create,game_update) {
     requestAnimationFrame(truffle.main.loop);
 }
 
+function ipad_emulator(millis)
+{
+    var date = new Date();
+    var curDate = null;
+    do { curDate = new Date(); }
+    while(curDate-date < millis);
+}
+
 truffle.main.loop=function(timestamp) {
     var canvas=document.getElementById('canvas')
     var ctx=canvas.getContext('2d');
@@ -54,7 +62,7 @@ truffle.main.loop=function(timestamp) {
     if (ctx.canvas.width!=window.innerWidth) {
         truffle.main.world.canvas_state.resize(
             window.innerWidth,
-            ctx.canvas.height);
+            window.innerHeight);
         truffle.main.world.redraw();
     }
 
@@ -75,6 +83,7 @@ truffle.main.loop=function(timestamp) {
         update_frames =0;
     }
 
+//    ipad_emulator(50);
     requestAnimationFrame(truffle.main.loop);
 }
 

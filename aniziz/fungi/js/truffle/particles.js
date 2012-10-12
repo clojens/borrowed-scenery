@@ -125,6 +125,8 @@ truffle.particles.prototype.inner_draw=function(ctx,x,y) {
 
 truffle.particles.prototype.draw=function(ctx) {
     if (!this.ready_to_draw) return;
+    truffle.drawable.prototype.draw.call(this,ctx);
+    if (this.hidden) return;
 
     // two render paths
     if (this.complex_transform || this.parent_transform) {
@@ -156,6 +158,7 @@ truffle.particles.prototype.draw=function(ctx) {
 
     if (this.draw_bb) {
         // draw bbox
+        ctx.beginPath();
         ctx.strokeStyle = "#00ffff";
         var bb=this.get_bbox();
         ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 
@@ -166,7 +169,6 @@ truffle.particles.prototype.draw=function(ctx) {
     this.last_pos.y=this.pos.y;
 
     this.recalc_bbox();
-    
     this.draw_me=false;
 }
 

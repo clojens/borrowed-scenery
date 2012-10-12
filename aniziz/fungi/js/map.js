@@ -88,11 +88,15 @@ map.prototype.split_image=function(image,nx,ny) {
 	        var pix = imgd.data;
 	        for (var i = 0, n = pix.length; i < n; i += 4) {
 	            var grayscale = pix[i]*.3+pix[i+1]*.59+pix[i+2]*.11;
-                grayscale-=100;
+                grayscale-=150;
                 if (grayscale<0) grayscale=0;
-	            pix[i  ] = grayscale;   // red
-	            pix[i+1] = grayscale;   // green
-	            pix[i+2] = grayscale;   // blue
+                var r=pix[i];
+                var g=pix[i+1];
+                var b=pix[i+2]; 
+
+	            pix[i  ] = grayscale+g/2;   // red
+	            pix[i+1] = grayscale+b/2;   // green
+	            pix[i+2] = grayscale+r/2;   // blue
                 // alpha
 	        }
 	        ctx.putImageData(imgd, 0, 0);

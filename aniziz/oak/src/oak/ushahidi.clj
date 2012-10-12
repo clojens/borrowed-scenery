@@ -27,7 +27,7 @@
 (def url "http://borrowed-scenery.org/zizim/api")
 (def centre (list 51.04751 3.72739))
 ;;(def centre (list 51.04672 3.73121))
-(def zoom 17)
+(def zoom 18)
 (def map-tile-div 5) ; num of splits in map.js
 (def game-tile-div 5) ; num of divisions in game tile world
 
@@ -109,7 +109,10 @@
    (:payload
     (read-json
      (:body
-      (client/get (str url "?task=incidents&by=sinceid&id=" id)))))))
+      (client/get (str url "?task=incidents&by=sinceid&id=" id "&limit=5000")))))))
+
+(defn ushahidi-get-categories [id]
+  (read-json (:body (client/get (str url "?task=category&id=" id)))))
 
 ;;(println (latlon-to-tile (nth centre 0) (nth centre 1) zoom))
 
@@ -143,7 +146,7 @@
 
 (defn ushahidi-add-incident-comment [id name text]
   (let [time (current-sql-time)]
-  (comment with-connection db
+  (with-connection db
     (insert-comment id name text time))))
 
 

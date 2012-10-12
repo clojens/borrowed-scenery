@@ -2,6 +2,7 @@
 <head>
   <meta charset="utf-8">
   <title>aniziz</title>
+
   <script type="text/javascript" src="js/truffle/common.js"></script>   
   <script type="text/javascript" src="js/truffle/vec2.js"></script>   
   <script type="text/javascript" src="js/truffle/vec3.js"></script>   
@@ -20,6 +21,8 @@
   <script type="text/javascript" src="js/truffle.js"></script>   
   <script type="text/javascript" src="js/map.js"></script>   
   <script type="text/javascript" src="js/game.js"></script>   
+  <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="js/readme.js"></script>   
 
   <style type="text/css">
     @font-face {
@@ -56,47 +59,101 @@
         color: #000;
         max-width: 600px; 
     }
+
+    #readme,#help,#chatbox {
+        display: none;
+        position: absolute;
+        top: 75px;
+        left: 0px;
+        background:url(images/transparent.png);
+        height:55px;
+        width: 700px;
+        margin: 0px 0px 0px -655px;
+        z-index: 999;
+    }
+
+    #help { top: 150px; }
+    #chatbox { top: 0px; }
+
+    #readme-content,#help-content,#chatbox-content {
+        width: 615px;
+        color: #000;
+        background:url(images/transparent.png);
+        border-style:solid;
+        border-left-width: 0px;
+        border-top-width: 0px;
+        border-right-width: 0px;
+        border-bottom-width: 0px;
+        padding: 0px 25px 20px 0px;
+    }
+
+    #readme-inner,#help-inner,#chatbox-inner {
+        margin-left: 5em;
+    }
+
+    #readme-content:before, #help-content:before, #chatbox-content:before {
+       float: left;
+       padding: 40px 30px 110px 0px;
+    }
+
+    img.button {
+        position: absolute;
+        top: 0px; 
+        right: 0px;
+    }
+
+    helptext {
+        padding: 1em 1em 1em 1em; 
+        color: #000;
+    }
+    
+
+#progressbar
+{
+  width:250px;
+  padding:1px;
+  background-color:white;
+  border:1px solid black;
+  height:28px;
+}
+#indicator
+{
+  width:0px;
+  background-color:black;  
+  height:28px;
+  margin:0;
+}
+
+
   </style>
 </head>
 
 <body>
   <center>
-  <div class="top">
-    <div style="float: left; width: 30%;"><img src="images/logo-s.png"></div>
-    <div style="float: left; width: 30%;">    
-      <b>Information</b>
-      <div id="game-stats"></div>
-    </div>
-    <div style="float: left; width: 30%;">
-      <b>Patabotanists of note</b>
-      <div id="leaderboard"/>
-    </div>
+  <div id="input_form">
+    <img src="images/logo-s.png"><p/>
+    <input 
+       id='player_name' 
+       type="text" 
+       style="font-size: 500%"
+       value="What are you called?" 
+       onfocus="if(!this._haschanged){this.value=''};this._haschanged=true;"
+       autocomplete="off"
+       size="16"
+       onkeydown="if (event.keyCode==13) login_form();"/><br/>
+    <input 
+       style="font-size:50"
+       type="button" 
+       value="Login/Register" 
+       onclick="login_form();" /><br/>
+    or<br/>
+    <input 
+       style="font-size:50"
+       type="button" 
+       value="Login with FaceBook" 
+       onclick="alert('not yet!');" />
   </div>
   </center>
-  <center>
-    <div id="input_form">
-      <input 
-         id='player_name' 
-         type="text" 
-         style="font-size: 500%"
-         value="What are you called?" 
-         onfocus="if(!this._haschanged){this.value=''};this._haschanged=true;"
-         autocomplete="off"
-         size="12"
-         onkeydown="if (event.keyCode==13) login_form();"/><br/>
-      <input 
-         style="font-size:50"
-         type="button" 
-         value="Login/Register" 
-         onclick="login_form();" /><br/>
-      or<br/>
-      <input 
-         style="font-size:50"
-         type="button" 
-         value="Login with FaceBook" 
-         onclick="alert('not yet!');" />
-    </div>
-    <div id="game-goes-here"/>
-  </center>
+  <div id="game-goes-here"/>
 </body>
 </html>

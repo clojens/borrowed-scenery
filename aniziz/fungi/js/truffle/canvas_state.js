@@ -31,10 +31,10 @@ truffle.canvas_state=function() {
     this.world_offset_y=300;
 
     // for world to refresh areas needed by scrolling screen
-    this.refresh_top=false;
-    this.refresh_bottom=false;
-    this.refresh_left=false;
-    this.refresh_right=false;
+    this.refresh_top=0;
+    this.refresh_bottom=0;
+    this.refresh_left=0;
+    this.refresh_right=0;
 
 /*    var that=this;
     this.bgimage=new Image();
@@ -47,6 +47,22 @@ truffle.canvas_state=function() {
     this.bgimage.src = "images/bg.jpg";  */
 
     var _this=this;
+
+    this.canvas.addEventListener('touchstart',function(e) {
+        _this.mouse_changed=true;
+        _this.mouse_down=true;
+    }, false);
+
+    this.canvas.addEventListener('touchmove',function(e) {
+        _this.update_mouse(e);
+    }, false);
+
+    this.canvas.addEventListener('touchend',function(e) {
+        _this.mouse_changed=true;
+        _this.mouse_down=false;
+    }, false);
+
+//---------------
 
     this.canvas.addEventListener('mousedown', function(e) {
         _this.mouse_changed=true;
@@ -86,7 +102,7 @@ truffle.canvas_state.prototype.begin_scene=function() {
                        this.world_y+this.world_offset_y);
 
     // debug bbox mode
-//    this.ctx.globalCompositeOperation = 'xor';
+    //this.ctx.globalCompositeOperation = 'xor';
 }
 
 truffle.canvas_state.prototype.end_scene=function(delta) {
@@ -107,7 +123,6 @@ truffle.canvas_state.prototype.clear_rects=function(bboxes) {
 truffle.canvas_state.prototype.set_clip=function(bboxes) {
     this.ctx.save();
 /*
-    this.ctx.strokeStyle = "#ff0000";
     var that=this;
     bboxes.forEach(function(box) {
         that.ctx.rect(~~(box[0]+2),~~(box[1]+2),
@@ -116,6 +131,8 @@ truffle.canvas_state.prototype.set_clip=function(bboxes) {
     });
     that.ctx.stroke();
 */
+
+//    this.ctx.save();
 
     // Set the clipping area
     this.ctx.beginPath();
@@ -126,6 +143,8 @@ truffle.canvas_state.prototype.set_clip=function(bboxes) {
                       ~~(0.5+(box[3]-box[1])));
     });
     this.ctx.clip();
+//    this.ctx.restore();
+
 }
 
 truffle.canvas_state.prototype.unclip=function() {
@@ -146,10 +165,10 @@ truffle.canvas_state.prototype.update_world_pos=function(delta) {
     var d=new truffle.vec2(this.world_x+this.world_desired_x,
                            this.world_y+this.world_desired_y);
     
-    this.refresh_left=false;
-    this.refresh_right=false;
-    this.refresh_top=false;
-    this.refresh_bottom=false;
+    this.refresh_left=0;
+    this.refresh_right=0;
+    this.refresh_top=0;
+    this.refresh_bottom=0;
 
     var speed=200*delta;
 
@@ -157,10 +176,10 @@ truffle.canvas_state.prototype.update_world_pos=function(delta) {
     {
         d=d.normalise().mul(-speed);
 
-        if (d.x<0) this.refresh_right=true;
-        else this.refresh_left=true;
-        if (d.y<0) this.refresh_bottom=true;
-        else this.refresh_top=true;
+        if (d.x<0) this.refresh_right=-d.x;
+        else this.refresh_left=d.x;
+        if (d.y<0) this.refresh_bottom=-d.y;
+        else this.refresh_top=d.y;
 
         var sx=0;
         var dx=d.x;
@@ -194,16 +213,16 @@ truffle.canvas_state.prototype.update_world_pos=function(delta) {
 // If you wanna be super-correct this can be tricky,
 // we have to worry about padding and borders
 truffle.canvas_state.prototype.update_mouse = function(e) {
-    var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
+    var element = this.canvas, offsetX = 0, offsetY = 0;
  
     // Compute the total offset
-    if (element.offsetParent !== undefined) {
+/*    if (element.offsetParent !== undefined) {
         do {
             offsetX += element.offsetLeft;
             offsetY += element.offsetTop;
         } while ((element = element.offsetParent));
     }
-    
+  */  
     // Add padding and border style widths to offset
     // Also add the <html> offsets in case there's a position:fixed bar
     //offsetX += this.stylePaddingLeft + this.styleBorderLeft + this.htmlLeft;

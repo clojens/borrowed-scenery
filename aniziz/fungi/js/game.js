@@ -27,20 +27,20 @@ function game(world) {
     this.time_since_last_ps=0;
     this.map_update_frame_count=0;
     this.update_next_frame=false;
-    this.border_min=1;
-    this.border_max=13;
+    this.border_min=0;
+    this.border_max=14;
     this.world.canvas_state.bg_colour = "#000000";
 
     this.arrow_indicator=new truffle.sprite_entity(
         this.world,
         new truffle.vec3(-999,5,-1),
-        "");
+        "images/compass-east.png");
     this.arrow_indicator.needs_update=true;
     this.arrow_indicator.depth_offset=-100;
 
     centre=new truffle.vec2(51.04751,3.72739); // becomes 0,0 in world tile space
     //centre=new truffle.vec2(51.04672,3.73121); // becomes 0,0 in world tile space
-    zoom=17;
+    zoom=18;
     var that=this;
 
     for (var x=-10; x<25; x++) {
@@ -62,11 +62,8 @@ function game(world) {
             new truffle.vec3(x,y,0),
             "images/empty_map.png");
 
-        //s.spr.draw_bb=true;
         s.spr.set_bitmap(sub_image[2]); 
- 
         that.setup_tile(s);
-
         s.spr.mouse_down(function() {
             
             that.move_player(s.logical_pos,function(){});
@@ -86,11 +83,11 @@ function game(world) {
                                            "loading map...",
                                            500,300,"50pt MaidenOrange");
     
-    this.updating_text.height=70;
+    this.updating_text.height=60;
     this.updating_text.text_height=100;
-    this.updating_text.text_colour="#ffffff";
+    this.updating_text.text_colour="#000";
+    this.updating_text.hide(false);
     this.world.add_sprite(this.updating_text);
-    this.updating_text.hide(true);
     this.world.pre_sort_scene=function(depth) {
         that.updating_text.set_depth(depth++);
         return depth;
@@ -119,11 +116,11 @@ game.prototype.create_empty_tile=function(x,y) {
                 if (y>that.border_max) that.arrow_indicator.spr.change_bitmap("images/compass-south.png");
             if (y<that.border_min) that.arrow_indicator.spr.change_bitmap("images/compass-north.png");
             
+            that.arrow_indicator.hide(false);
             that.arrow_indicator.move_to(that.world,new truffle.vec3(x,y,0));
         });
         s.spr.mouse_out(function() {
-            // hack
-            that.arrow_indicator.move_to(that.world,new truffle.vec3(-999,0,0));
+            that.arrow_indicator.hide(true);
         });
     }
     
@@ -345,14 +342,15 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
                 that.world,
                 new truffle.vec3(gamepos.x,gamepos.y,0),
                 'images/'+this.player["avatar-type"]+'-south.png');
-            this.avatar.needs_update=true;
             this.avatar.speed=1;
             this.avatar.chat_time=0;
             this.avatar.chat_last="";
+            this.avatar.needs_update=true;
+
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
                                       "",
                                       300,300,"15pt patafont");
-            ct.text_height=55;
+            ct.text_height=35;
             ct.text_colour="#5555ff";
             this.avatar.chat_text=ct;
             this.avatar.chat_active=false;
@@ -360,15 +358,13 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
                                       300,300,"15pt MaidenOrange");
-            t.text_height=25;
+            t.text_height=20;
             this.avatar.add_child(this.world,t);
 
             // move the camera to focus on the player
             var cam=g.world.screen_transform(new truffle.vec3(gamepos.x,gamepos.y,0));
             this.world.move_world_to(cam.x,cam.y);
-        }
-        else
-        {
+        } else {
             var e=new truffle.sprite_entity(
                 this.world,
                 new truffle.vec3(gamepos.x,gamepos.y,0),
@@ -383,7 +379,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var ct=new truffle.textbox(new truffle.vec2(0,-200),
                                       "",
                                       300,300,"15pt patafont");
-            ct.text_height=50;
+            ct.text_height=20;
             ct.text_colour="#55ff55";
             e.chat_text=ct;
             e.add_child(this.world,ct);
@@ -391,7 +387,7 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
             var t=new truffle.textbox(new truffle.vec2(0,-150),
                                       entity.owner,
                                       300,300,"15pt MaidenOrange");
-            t.text_height=25;
+            t.text_height=20;
             e.add_child(this.world,t);
             this.entities.push(e);        
         }
@@ -461,25 +457,54 @@ game.prototype.make_new_entity=function(gamepos,tilepos,entity) {
         e.game_type=entity["entity-type"];
         e.layer=entity.layer;
         e.neighbours=entity.power;
+        e.text=new truffle.textbox(new truffle.vec2(0,-200),
+                                   entity.incident.incidenttitle,
+                                   2000,300,"25pt MaidenOrange");
+        e.text.text_height=25;
+        e.text.mouse_over(function() { log("hello"); });
+        e.text.hide(true);
+        e.add_child(this.world,e.text);
 
+        e.desc_text=new truffle.textbox(new truffle.vec2(0,-150),
+                                   entity.incident.incidentdescription,
+                                   200,30,"12pt MaidenOrange");
+        e.desc_text.text_height=15;
+        e.desc_text.hide(false);
+        e.add_child(this.world,e.desc_text);
+        
         if (e.neighbours==0) {
             e.power_state="low";
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c4"+".png");
+            e.text.set_text(that.mutate_text(e.text.original_text,0.4,0.8));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.4,0.8));
         } else if (entity.neighbours>0 && entity.neighbours<=4) {
             e.power_state="med"; 
+            e.text.set_text(that.mutate_text(e.text.original_text,0.2,0.3));
+            e.desc_text.set_text(that.mutate_text(e.desc_text.original_text,0.2,0.3));
             e.spr.change_bitmap("images/boskoi-"+e.layer+"-c1"+".png");
         } else if (entity.neighbours>4) {
             e.spr.change_bitmap("images/boskoi-"+e.layer+".png");
             e.power_state="high";
         }    
 
-        var t=new truffle.textbox(new truffle.vec2(0,-200),
-                                  entity.incident.incidentdescription,//+" "+
-                                  //entity.incident.locationname+" "+
-                                  //entity.incident.incidentdate,
-                                  200,300,"25pt MaidenOrange");
-        t.text_height=25;
-        e.add_child(this.world,t);
+        this.entities.push(e);
+    }
+    else if (entity["entity-type"]=="wormhole") {
+        var e=new truffle.sprite_entity(
+            this.world,
+            new truffle.vec3(gamepos.x,gamepos.y,0),
+            "images/wormhole-1.png")
+
+        e.id=entity.id;
+        e.game_type=entity["entity-type"];
+        e.needs_update=true;
+        e.update_freq=100;
+        var frame=1;
+        e.every_frame=function() {
+            frame++;
+            frame=frame%2;
+            e.spr.change_bitmap("images/wormhole-"+(frame+1)+".png");
+        };
         this.entities.push(e);
     }
 }
@@ -632,10 +657,16 @@ game.prototype.update_entity=function(entity,from_server,tile) {
         if (entity.neighbours==0) {
             entity.power_state="low";
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c4"+".png");
+            entity.text.set_text(that.mutate_text(entity.text.original_text,0.4,0.8));
+            entity.desc_text.set_text(that.mutate_text(entity.desc_text.original_text,0.4,0.8));
         } else if (entity.neighbours>0 && entity.neighbours<=4) {
             entity.power_state="med"; 
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+"-c1"+".png");
+            entity.text.set_text(that.mutate_text(entity.text.original_text,0.2,0.3));
+            entity.desc_text.set_text(that.mutate_text(entity.desc_text.original_text,0.2,0.3));
         } else if (entity.neighbours>4) {
+            entity.text.set_text(entity.text.original_text);
+            entity.desc_text.set_text(entity.desc_text.original_text);
             entity.spr.change_bitmap("images/boskoi-"+entity.layer+".png");
             entity.power_state="high";
         }    
@@ -650,7 +681,7 @@ game.prototype.move_player=function(to,on_reached_dest) {
     var py=to.y;
     var cam=this.world.screen_transform(new truffle.vec3(px,py,0));
     this.world.move_world_to(cam.x,cam.y);
-    
+
     if (sx!=px) {
         if (sx<px) that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-east.png');
         else that.avatar.spr.change_bitmap('images/'+that.player["avatar-type"]+'-west.png');
@@ -694,7 +725,39 @@ game.prototype.move_player=function(to,on_reached_dest) {
                 that.tile_change=true;
                 tcy=5;
             }  
-            
+
+            // check for wormholes!
+            var wh=that.world.get_by_game_type("wormhole",new truffle.vec2(px,py));
+            if (wh) {
+                that.server.call("get-wormhole-exit",[wh.id]);
+                that.server.listen("get-wormhole-exit", function(data) {
+
+                    that.player.tile.x=data["tile-pos"].x;
+                    that.player.tile.y=data["tile-pos"].y;
+                    var p=that.server_to_client_coords(data["tile-pos"].x,
+                                                       data["tile-pos"].y,
+                                                       data.pos.x,
+                                                       data.pos.y);
+
+                    that.tile_change=true;
+                    that.avatar.speed=0;
+                    that.avatar.move_to(that.world,new truffle.vec3(p.x,p.y,0));
+                    that.avatar.hide(true);
+
+                    // need to figure out server tile by looking at current
+                    // client tile (0->14)
+                    var server_tile_x=that.player.tile.x+(Math.floor(p.x/5)-1);
+                    var server_tile_y=that.player.tile.y+(Math.floor(p.y/5)-1);
+                    
+                    that.server.call("move-player",[that.player.id,
+                                                    server_tile_x,
+                                                    server_tile_y,
+                                                    p.x%5,
+                                                    p.y%5,0]);  
+
+                });
+            }
+
             if (that.tile_change) {
                 that.avatar.speed=0;
                 that.avatar.move_to(that.world,new truffle.vec3(px+tcx,py+tcy,0));
@@ -760,9 +823,11 @@ game.prototype.update_zizim=function() {
     var zizim=[];
 
     this.entities.forEach(function(entity) {
-        if (entity.game_type=="ushahidi" &&
-            entity.power_state!="high") {
-            zizim.push(entity);
+        if (entity.game_type=="ushahidi") {
+            // add to flickering group if not high energy
+            if (entity.power_state!="high") {
+                zizim.push(entity);
+            }
         }
     });
 
@@ -774,6 +839,10 @@ game.prototype.update_zizim=function() {
         z.every_frame=function() {
             
             if (z.power_state=="low") {
+                // mutate title
+                z.text.set_text(that.mutate_text(z.text.original_text,0.4,0.8));
+                z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.4,0.8));
+
                 if (Math.random()>0.5) {
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
                                         Math.floor(Math.random()*3+1)+".png");
@@ -782,6 +851,10 @@ game.prototype.update_zizim=function() {
                 }
             } else { 
                 if (z.power_state="med") {
+                    // mutate title & desc
+                    z.text.set_text(that.mutate_text(z.text.original_text,0.2,0.3));
+                    z.desc_text.set_text(that.mutate_text(z.desc_text.original_text,0.2,0.3));
+
                     z.spr.change_bitmap("images/boskoi-"+z.layer+"-c"+
                                         Math.floor(Math.random()*3+1)+".png");
                 }
@@ -846,11 +919,10 @@ game.prototype.do_update_tile=function() {
         var d=that.map.distance_from_centre(dist["tile-pos"]);
         d=Math.round(d*100)/100;
         document.getElementById('game-stats').innerHTML = 
-            "Fungi has reached "+d+" km from Vooruit, created by "+dist.player+"</br>"+
             "You have grown "+data.player["plant-count"]+" helpful fungi, helping "+data.player["has-picked"].length+" earth plants";
 
         // update the leaderboard
-        var leaderboard="";
+        var leaderboard="Fungi has reached "+d+" km from Vooruit, created by "+dist.player+"<p/>";;
         data.leaderboard.forEach(function (score) {
             leaderboard+=score.player+" has grown "+score.score+" fungi to help "+score.helped+" earth plants<br/>";
         });
@@ -884,8 +956,30 @@ game.prototype.server_to_client_coords=function(tx,ty,px,py) {
 
 ////////////////////////////////////////////////////////////////////////////
 
+function setCharAt(str,index,chr) {
+    if(index > str.length-1) return str;
+    return str.substr(0,index) + chr + str.substr(index+1);
+}
+
+game.prototype.mutate_text=function(txt,mutation_rate,space_rate) {
+    var ret=txt;
+    for (i=0; i<ret.length; i++) {
+        if (Math.random()<mutation_rate) {
+            ret=setCharAt(ret,i,ret[Math.floor(Math.random()*ret.length)]);
+        }
+        if (Math.random()<space_rate) {
+            ret=setCharAt(ret,i," ");
+        }
+    }
+    if (length==0) return ret;
+    return ret.substr(0,length);
+}
+
+////////////////////////////////////////////////////////////////////////////
+
 
 game.prototype.update=function(time,delta) {
+    var that=this;
 
     // render some frame to make sure! :(
     if (this.map_update_frame_count>5) {
@@ -905,6 +999,20 @@ game.prototype.update=function(time,delta) {
     if (this.next_pull_time<time)
     {
         this.update_tile();
+
+        this.entities.forEach(function(entity) {
+            if (entity.game_type=="ushahidi") {
+                // display text when player is near
+                if (entity.logical_pos.manhattan(that.avatar.logical_pos)<5) {
+                    entity.text.hide(false);
+                    entity.desc_text.hide(false);
+                } else {
+                    entity.text.hide(true);
+                    entity.desc_text.hide(true);
+                }
+            }
+        });
+
         this.next_pull_time=time+1;
     }
 
@@ -921,7 +1029,33 @@ game.prototype.update=function(time,delta) {
 
 // state machine please...
 
-var game_html='<canvas id="canvas" width="880" height="500"></canvas>\
+var game_html='\
+<div id="help">\
+<div id="help-content">\
+<div id="help-inner">\
+  <h2>What do I have to do?</h2>\
+    Your role is to strengthen the connection between the world of Aniziz and the <a href="http://borrowed-scenery.com/zizim/">plants of Ghent</a>. The plants are broadcasting messages which can only be correctly tuned into by energising them with fungi, the more plants you energise the higher your score will be.\
+  <h2>How do I play?</h2>\
+    Click on the map to move your patabotanist. Hover over fungi to find one that shivers and is ready to grow. Click to grow it one stage. When fungi have grown to full size, spores may be released that will grow new fungi nearby. Chat with other players and work together to reach all the plants by gradually enlarging the fungi ecosystem to spread throughout the city (and beyond).\
+<br/>See <a href="http://dilzio.borrowed-scenery.org/viewforum.php?f=4&start=0">the forum</a> for more information or to ask questions.\
+</div>\
+<img class="button" src="images/help.png" alt="help label" />\
+</div></div>\
+\
+<div id="readme">\
+<div id="readme-content">\
+<div id="readme-inner">\
+<h1>High scores</h1>\
+<div id="leaderboard"/></div>\
+<p/>\
+<div id="game-stats"></div>\
+</div>\
+<img class="button" src="images/info.png" alt="help label" />\
+</div></div>\
+\
+<div id="chatbox">\
+<div id="chatbox-content">\
+<div id="chatbox-inner">\
 <input \
      id="chat"\
      type="text"\
@@ -934,25 +1068,29 @@ var game_html='<canvas id="canvas" width="880" height="500"></canvas>\
      style="font-size:25"\
      value="Say something"\
      onclick="chat();" />\
-<input\
-     type="button"\
-     style="font-size:25"\
-     value="Help me"\
-     onclick="help();"/><br/>\
-<div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>';
+</div>\
+<img class="button" src="images/chat.png" alt="help label" />\
+</div></div>\
+\
+<canvas id="canvas" width="880" height="500"></canvas>\
+<center>\
+<div id="fps"></div> <a href="http://git.fo.am/?p=borrowed-scenery;a=summary">source</a>\
+</centre>';
 
 var reading_html='\
+<center>\
 <h1>Contacting patabotanists in your local parallel reality</h1>\
 please be patient<br/>\
-<progress value="0%" max="200">progress bar</progress>';
+<div id="progressbar"><div id="indicator"></div></div></center>';
 
 var reading_ready_html='\
+<center>\
 <h1>Success! Patabotanist invoked</h1>\
 <input\
      type="button"\
      style="font-size:50"\
      value="See who..."\
-     onclick="reading_done();" /><br/>';
+     onclick="reading_done();" /><br/></center>';
 
 var characters={"magician":"Trismegisto Herbert Taraxi",
                 "high-priestess":"Alchemilla Lily Umiliata",
@@ -966,6 +1104,7 @@ var tarot={"Trismegisto Herbert Taraxi":"organo-linguistic engineer Transdiscipl
 
 function reading_done_html(type) {
     return '\
+<center>\
 <h1>Patabotanist invoked...</h1>\
 <div class="tarot">\
 Your avatar is: '+characters[type]+'<br/>\
@@ -975,17 +1114,12 @@ Your avatar is: '+characters[type]+'<br/>\
      type="button"\
      style="font-size:50"\
      value="Start game"\
-     onclick="enter_game();" /><br/>';
+     onclick="enter_game();" /><br/></center>';
 }
 
 var g;
 var player;
 var server;
-
-function help() {
-    window.open("help.html", "Aniziz Help",
-                "status = 1, height = 550, width = 475, resizable = 0" );
-}
 
 function login_form() {
     var name=document.getElementById('player_name').value;
@@ -1003,7 +1137,7 @@ function login_form() {
 }
 
 function connect_and_login(name) {
-    server=new truffle.server('ws://localhost:8002/borrowed-scenery',
+    server=new truffle.server('ws://borrowed-scenery.org:8002/borrowed-scenery',
                               function () {
                                   server.call("login",[name,0,0]);
                               });
@@ -1014,13 +1148,25 @@ function connect_and_login(name) {
     });
 }
 
+var p=0;
+
 function do_reading(status) {
     // if we are a new player
     if (status=="registered") {
         document.getElementById('game-goes-here').innerHTML = reading_html;
-        setTimeout(reading_ready,5000);
+        prog_bar();
     } else {
         enter_game();
+    }
+}
+
+function prog_bar() {
+    if (p>250) reading_ready();
+    else {
+        p=p+3;
+        var x = document.getElementById("indicator");
+        x.style.width=p;
+        setTimeout(prog_bar,50);
     }
 }
 
@@ -1034,6 +1180,9 @@ function reading_done() {
 
 function enter_game() {
     document.getElementById('game-goes-here').innerHTML = game_html;
+    readme_setup();
+    help_setup();
+    chatbox_setup();
     truffle.main.init(game_create,game_update);
 }
 

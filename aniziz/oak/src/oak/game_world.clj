@@ -30,7 +30,8 @@
    oak.id-gen
    oak.avatar
    oak.ushahidi-plant
-   oak.ushahidi)
+   oak.ushahidi
+   oak.wormhole)
   (:require
    clojure.math.numeric-tower))
 
@@ -150,6 +151,27 @@
      entity
      player-summons-expire)))
 
+(defn game-world-add-entity-overwrite
+  "add a new entity into the world, and summon the right
+   spirit to come and look at it"
+  [game-world tile-pos entity time delta]
+   (let [tile (game-world-get-tile game-world tile-pos)]
+    (game-world-summon-spirit
+     (if (not tile)
+       (game-world-add-tile game-world (make-tile tile-pos (list entity)) time delta)
+       (game-world-modify-tile ; run update on the tile to init the plant
+        game-world
+        tile-pos
+        (fn [tile]
+          (tile-update (tile-add-entity-no-check tile entity)
+                       time delta (:rules game-world)
+                       (game-world-get-tile-with-neighbours
+                         game-world (:pos tile))))))
+     tile-pos
+     entity
+     player-summons-expire)))
+
+
 (defn make-game-world
   "make a world in the old-fashioned way for building a new
    database with"
@@ -166,6 +188,7 @@
       :log (make-log 100)
       :id-gen id-gen
       :spirits ()
+      :wormholes ()
       :next-ushahidi 0
       :players (list (make-player 97 "Charlie" -1 (rand-nth avatar-types))
                      (make-player 98 "Percy" -1 (rand-nth avatar-types))
@@ -342,6 +365,7 @@
                :spirits ()
                :leaderboard ()
                :summons {}
+               :wormholes ()
                :rules (load-companion-rules "rules.txt")
                :most-distant-info {:distance 0
                                    :player ""
@@ -940,13 +964,40 @@
    time
    server-db-items))
 
+(defn game-world-type-in-tile [game-world tile-pos type]
+  (let [tile (game-world-get-tile game-world tile-pos)]
+    (if tile
+      (tile-get-type tile type)
+      false)))
+
+
 ;; wont differentiate against avatars...
 (defn game-world-other-plant-here [game-world tile-pos pos]
   (let [tile (game-world-get-tile game-world tile-pos)]
     (if tile
       (tile-position-taken? tile pos)
       false)))
-  
+
+(defn get-layer-from-categories [cats]
+  (reduce
+   (fn [r cat]
+     (let [layer (db-cat->layer (:category_title (:category cat)))]
+       (if (and (= r "none") (not (= layer "none")))
+         layer r)))
+   "none"
+   cats))
+
+(defn game-world-add-wormhole [game-world id p]
+  (modify
+   :wormholes
+   (fn [wh] (set-cons (merge p {:id id}) wh))
+   game-world))
+
+(defn game-world-get-random-wormhole-coords [game-world id]
+  (rand-nth (filter
+             (fn [wh] (not (= (:id wh) id)))
+             (:wormholes game-world))))
+                                                     
 (defn game-world-update-ushahidi [game-world time delta]
   (if (> time (:next-ushahidi game-world))
     (do
@@ -954,29 +1005,60 @@
        (fn [gw incident]
          (let [in (:incident incident)
                p (ushahidi-incident->pos incident)
-               ush-id (:incidentid in)]
-           (if (not (game-world-other-plant-here gw (:tile-pos p) (:pos p)))
-             (do
-               (println "adding boskoi plant!" (:tile-pos p) (:pos p) (:locationlatitude in) (:locationlongitude in))
-               (println in)
-               (game-world-add-entity
-                gw
-                (:tile-pos p)
-              (make-ushahidi-plant
-               ((:id-gen gw))
-               (:tile-pos p)
-               "ushahidi"
-               (:pos p)
-               (rand-nth (list "canopy" "shrub" "rhyzome")) ;; todo, add to boskoi interface
-               ush-id
-               (:incidentdate in)
-               (Float/parseFloat (:locationlatitude in))
-               (Float/parseFloat (:locationlongitude in))
-               (:fract p)
-               in)
-              time
-              delta))
-             gw)))
+               ush-id (:incidentid in)
+               cats (:categories (:payload (ushahidi-get-categories ush-id)))
+               layer (get-layer-from-categories cats)]
+           ;(println cats)
+           ; TODO split this thing up
+           (if (= layer "wormhole")
+             (let [wh (game-world-type-in-tile gw (:tile-pos p) "wormhole")]
+               (if (not wh)
+                 (let [id ((:id-gen gw))]
+                   (println "adding wormhole!"
+                            (:tile-pos p) (:pos p)
+                            (:locationlatitude in)
+                            (:locationlongitude in))
+                                        ;                (println in)
+                   (game-world-add-entity-overwrite
+                    (game-world-add-wormhole gw id p)
+                    (:tile-pos p)
+                    (make-wormhole
+                     id
+                     (:tile-pos p)
+                     (:pos p)
+                     (:fract p))
+                    time
+                    delta))
+                 (game-world-add-wormhole gw (:id wh) p)))
+             (if (and
+                  (not (= layer "none"))
+                  (not (game-world-other-plant-here
+                        gw
+                        (:tile-pos p) (:pos p))))
+               (do
+                 (println "adding boskoi plant!"
+                          (:tile-pos p) (:pos p)
+                          (:locationlatitude in)
+                          (:locationlongitude in))
+                                        ;                   (println in)
+                 (game-world-add-entity
+                  gw
+                  (:tile-pos p)
+                  (make-ushahidi-plant
+                   ((:id-gen gw))
+                   (:tile-pos p)
+                   "ushahidi"
+                   (:pos p)
+                   layer
+                   ush-id
+                   (:incidentdate in)
+                   (Float/parseFloat (:locationlatitude in))
+                   (Float/parseFloat (:locationlongitude in))
+                   (:fract p)
+                   in)
+                  time
+                  delta))
+               gw))))
        (modify :next-ushahidi (fn [n] (+ time 30)) game-world)
        (ushahidi-get-incidents-since 0)))
     game-world))

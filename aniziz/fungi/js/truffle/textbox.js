@@ -16,15 +16,20 @@
 truffle.textbox=function(pos, text, w, h, font) {	
     truffle.drawable.call(this);
 
+    this.original_text=text;
     this.its_a_tb=true;
     this.font = font;
     this.pos = pos;
+    this.original_width=w;
     this.width = w;
     this.height = h;
     this.draw_bb = false;
     this.text_height = 20;
     this.text_colour="#000000";
     this.ready_to_draw=true;
+    // add some to the bottom of bbox for lower part of letters like 'g'
+    this.bottom_add=1.5;
+
     this.set_pos(pos);
     this.set_text(text);
 }
@@ -70,7 +75,7 @@ truffle.textbox.prototype.set_text=function(text) {
     var canvas=document.getElementById('canvas')
     var ctx=canvas.getContext('2d');
     ctx.font = this.font;
-    this.text=this.wrap_text(ctx,text,this.width);
+    this.text=this.wrap_text(ctx,text,this.original_width);
     this.width=0;
     this.text.forEach(function(str) {
         var w=ctx.measureText(str).width;
@@ -79,28 +84,31 @@ truffle.textbox.prototype.set_text=function(text) {
         }
     });
     this.draw_me=true;
-    this.height=this.text.length*this.text_height;
+    // number of lines * height
+    this.height=this.text.length*this.text_height; 
+    this.height*=this.bottom_add;
     this.centre.x=this.width/2;
 }
 
 truffle.textbox.prototype.recalc_bbox=function() {
     this.last_bbox=[this.bbox[0],this.bbox[1],this.bbox[2],this.bbox[3]];
-    var l=this.pos.x;
-    var t=this.pos.y;
+    var safe=5;
+    var l=this.pos.x-safe;
+    var t=this.pos.y-safe;
     if (this.parent_transform) {
         l+=this.parent_transform.m[4];
         t+=this.parent_transform.m[5];
     }
     l+=-this.centre.x;
-    t+=-this.centre.y-this.text_height/1.7;
+    t-=this.text_height;
     this.bbox=[~~(l+0.5),~~(t+0.5),
-               ~~(l+this.width+0.5),
-               ~~(t+this.height+0.5)]; 
+               ~~(l+this.width+safe*2+0.5),
+               ~~(t+this.height+safe*2+0.5)]; 
 }
 
 truffle.textbox.prototype.draw=function(ctx) {
-
-//    if (this.id=999) log("rendering text");
+    truffle.drawable.prototype.draw.call(this,ctx);
+    if (this.hidden) return;
 
     if (this.text.length==0) {
         this.draw_me=false;
@@ -134,11 +142,13 @@ truffle.textbox.prototype.draw=function(ctx) {
                       this.parent_transform.m[5]+this.pos.y);
 
 
-        ctx.fillStyle = "#777777";
+        ctx.fillStyle = "#fff";
         ctx.globalAlpha=0.75;
+
         ctx.fillRect(~~(-this.centre.x+0.5), 
-                     ~~(-this.centre.y-this.text_height/1.8+0.5), 
+                     ~~(-this.text_height), 
                      ~~(this.width+0.5),~~(this.height+0.5)); 
+
         ctx.globalAlpha=1;
 
         ctx.fillStyle = this.text_colour;
@@ -158,11 +168,12 @@ truffle.textbox.prototype.draw=function(ctx) {
         var y=0;
         var that=this;
 
-        ctx.fillStyle = "#777777";
+        ctx.fillStyle = "#fff";
         ctx.globalAlpha=0.75;
+
         ctx.fillRect(~~(this.pos.x-this.centre.x+0.5), 
-                     ~~(this.pos.y-this.centre.y-this.text_height/1.8+0.5), 
-                     ~~(this.width+0.5),~~(this.height+0.5)); 
+                     ~~(this.pos.y-this.height+0.5), 
+                     ~~(this.width+0.5),~~(this.height*this.bottom_add+0.5));
         ctx.globalAlpha=1;
 
         ctx.fillStyle = this.text_colour;
@@ -179,6 +190,7 @@ truffle.textbox.prototype.draw=function(ctx) {
     if (this.draw_bb) 
     {
         // draw bbox
+        ctx.beginPath();
         ctx.strokeStyle = "#00ffff";
         var bb=this.get_bbox();
         ctx.rect(bb[0], bb[1], bb[2]-bb[0], bb[3]-bb[1]); 
